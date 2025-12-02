@@ -70,6 +70,8 @@ private:
     
     bool m_showPreview = false;
     bool m_toroidal = false; // Toroidal wrapping
+    bool m_dynamicIntensity = false; // Soft brush / Dynamic mixing
+    float m_opacityNonLinearity = 1.0f; // 0.0 = Linear, 1.0 = Strong Non-Linear
     int m_dropMaxSize = 25;
     int m_genConcentric = 1; // Max nested circles (1-7)
     int m_genDensity = 600; // Number of drops
@@ -87,12 +89,14 @@ public:
     void setGenPasses(int passes) { m_genPasses = passes; }
     void setGenSteps(int steps) { m_genSteps = steps; }
     
-    void setShowPreview(bool show) { m_showPreview = show; regenerate(); }
-    void setToroidal(bool toroidal) { m_toroidal = toroidal; regenerate(); }
-    void setDropMaxSize(int size) { m_dropMaxSize = size; regenerate(); }
-    void setGenConcentric(int count) { m_genConcentric = count; regenerate(); }
-    void setGenDensity(int density) { m_genDensity = density; regenerate(); }
-    void setPalette(int index) { m_currentPaletteIdx = index; regenerate(); }
+    void setShowPreview(bool show) { m_showPreview = show; }
+    void setToroidal(bool toroidal) { m_toroidal = toroidal; }
+    void setDynamicIntensity(bool dynamic) { m_dynamicIntensity = dynamic; }
+    void setOpacityNonLinearity(float val) { m_opacityNonLinearity = val; update(); } // Only update render, not regen
+    void setDropMaxSize(int size) { m_dropMaxSize = size; }
+    void setGenConcentric(int count) { m_genConcentric = count; }
+    void setGenDensity(int density) { m_genDensity = density; }
+    void setPalette(int index) { m_currentPaletteIdx = index; }
     
     void regenerate() { generateComposition(); update(); }
 };

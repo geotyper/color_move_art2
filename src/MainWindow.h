@@ -28,8 +28,10 @@ private slots:
     void onDensityChanged(int value);
     void onSizeChanged(int value);
     void onConcentricChanged(int value);
+    void onOpacityChanged(int value);
     void onPreviewToggled(bool checked);
     void onToroidalToggled(bool checked);
+    void onDynamicToggled(bool checked);
     void onPaletteChanged(int index);
     void onRegenerate();
 
@@ -44,9 +46,11 @@ private:
     QSlider *m_densitySlider; // Number of drops
     QSlider *m_sizeSlider; // Drop Max Size
     QSlider *m_concentricSlider; // Nested Circles
+    QSlider *m_opacitySlider; // Opacity Non-Linearity
     
     QCheckBox *m_previewCheckBox;
     QCheckBox *m_toroidalCheckBox;
+    QCheckBox *m_dynamicCheckBox;
     QComboBox *m_paletteCombo;
     
     QLabel *m_angleLabel;
@@ -56,4 +60,5 @@ private:
     QLabel *m_densityLabel;
     QLabel *m_sizeLabel;
     QLabel *m_concentricLabel;
+    QLabel *m_opacityLabel;
 };

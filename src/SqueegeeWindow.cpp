@@ -130,6 +130,7 @@ void SqueegeeWindow::initShaders()
         out vec4 fragColor;
         
         layout(binding = 0, rgba32f) uniform image3D imgInput;
+        uniform float opacityFactor; // 0.0 = Linear, 1.0 = Non-Linear
         
         void main() {
             ivec3 size = imageSize(imgInput);
@@ -138,12 +139,25 @@ void SqueegeeWindow::initShaders()
             vec4 finalColor = vec4(1.0); // Background white
             
             // Raymarch from Bottom (layer 0) to Top (layer 15)
-            // Standard Over operator: Dest = Mix(Dest, Src, Src.a)
             for (int z = 0; z < 16; ++z) {
                 vec4 voxel = imageLoad(imgInput, ivec3(pixelPos, z));
                 if (voxel.a > 0.01) {
+                    // Linear Opacity
+                    float alphaLinear = voxel.a;
+                    
+                    // Non-Linear Opacity (Beer's Law-like)
+                    float density = voxel.a * 3.0;
+                    float alphaNonLinear = 1.0 - exp(-density);
+                    
+                    // Mix based on slider
+                    float alpha = mix(alphaLinear, alphaNonLinear, opacityFactor);
+                    
+                    // Depth Shading: Lower layers are slightly darker (Ambient Occlusion)
+                    float depthFactor = 1.0 - (1.0 - float(z)/15.0) * 0.15;
+                    vec3 shadedColor = voxel.rgb * depthFactor;
+                    
                     // Mix voxel ON TOP of current finalColor
-                    finalColor = mix(finalColor, voxel, voxel.a);
+                    finalColor = mix(finalColor, vec4(shadedColor, 1.0), alpha);
                 }
             }
             
@@ -222,6 +236,7 @@ void SqueegeeWindow::initShaders()
         uniform float brushSize;
         uniform bool isMouseDown;
         uniform bool toroidal;
+        uniform bool dynamicIntensity;
         
         // Pseudo-random function
         float rand(vec2 co){
@@ -291,9 +306,19 @@ void SqueegeeWindow::initShaders()
                     // Mixing Logic:
                     // If the current voxel has paint (we hit a drop), mix it into the smear.
                     if (current.a > 0.01) {
-                        // Mix a bit of the static drop into the moving paint
-                        // 0.2 means we pick up 20% of the new color per step, gradually changing the streak.
-                        result = mix(result, current, 0.2);
+                        float mixFactor = 0.2;
+                        
+                        // Dynamic Intensity: Smooth growth and decay based on distance from brush center
+                        if (dynamicIntensity) {
+                            // Normalized distance (0.0 at center, 1.0 at edge)
+                            float normDist = dist / brushSize;
+                            // Smooth Hermite interpolation: 1.0 at center, 0.0 at edge
+                            float intensity = 1.0 - smoothstep(0.0, 1.0, normDist);
+                            // Boost base mix factor at center (up to 0.5), fade to 0 at edge
+                            mixFactor = 0.5 * intensity;
+                        }
+                        
+                        result = mix(result, current, mixFactor);
                     }
                     
                     // Friction/Decay:
@@ -428,6 +453,7 @@ void SqueegeeWindow::paintGL()
         m_computeSqueegee->setUniformValue("brushSize", m_brushSize);
         m_computeSqueegee->setUniformValue("isMouseDown", m_isMouseDown);
         m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
+        m_computeSqueegee->setUniformValue("dynamicIntensity", m_dynamicIntensity);
         
         glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16); // 16 layers
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -457,6 +483,7 @@ void SqueegeeWindow::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     m_program->bind();
+    m_program->setUniformValue("opacityFactor", m_opacityNonLinearity);
     glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
     
     m_vao.bind();
@@ -607,6 +634,7 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
     m_computeSqueegee->setUniformValue("brushSize", size);
     m_computeSqueegee->setUniformValue("isMouseDown", true);
     m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
+    m_computeSqueegee->setUniformValue("dynamicIntensity", m_dynamicIntensity);
     
     for (int i = 0; i < steps; ++i) {
         float t = (float)i / (float)steps;
@@ -647,6 +675,7 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
         m_computeSqueegee->setUniformValue("brushSize", size);
         m_computeSqueegee->setUniformValue("isMouseDown", true);
         m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
+        m_computeSqueegee->setUniformValue("dynamicIntensity", m_dynamicIntensity);
         
         last = current;
     }

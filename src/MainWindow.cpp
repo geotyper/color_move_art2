@@ -82,6 +82,15 @@ MainWindow::MainWindow()
     formLayout->addRow("Nested Circles:", m_concentricLabel);
     formLayout->addRow(m_concentricSlider);
     
+    // Opacity Non-Linearity Slider (0 - 100)
+    m_opacitySlider = new QSlider(Qt::Horizontal);
+    m_opacitySlider->setRange(0, 100);
+    m_opacitySlider->setValue(100); // Default to Strong (1.0)
+    m_opacityLabel = new QLabel("1.0 (Strong)");
+    connect(m_opacitySlider, &QSlider::valueChanged, this, &MainWindow::onOpacityChanged);
+    formLayout->addRow("Opacity Curve:", m_opacityLabel);
+    formLayout->addRow(m_opacitySlider);
+    
     // Palette Combo
     m_paletteCombo = new QComboBox;
     m_paletteCombo->addItem("Modern Art");
@@ -103,6 +112,11 @@ MainWindow::MainWindow()
     m_toroidalCheckBox = new QCheckBox("Toroidal Movement");
     connect(m_toroidalCheckBox, &QCheckBox::toggled, this, &MainWindow::onToroidalToggled);
     formLayout->addRow(m_toroidalCheckBox);
+    
+    // Dynamic Intensity Checkbox
+    m_dynamicCheckBox = new QCheckBox("Dynamic Intensity (Soft Brush)");
+    connect(m_dynamicCheckBox, &QCheckBox::toggled, this, &MainWindow::onDynamicToggled);
+    formLayout->addRow(m_dynamicCheckBox);
     
     controlLayout->addLayout(formLayout);
     
@@ -178,6 +192,13 @@ void MainWindow::onConcentricChanged(int value)
     m_squeegeeWindow->setGenConcentric(value);
 }
 
+void MainWindow::onOpacityChanged(int value)
+{
+    float val = value / 100.0f;
+    m_opacityLabel->setText(QString::number(val, 'f', 2));
+    m_squeegeeWindow->setOpacityNonLinearity(val);
+}
+
 void MainWindow::onPreviewToggled(bool checked)
 {
     m_squeegeeWindow->setShowPreview(checked);
@@ -186,6 +207,11 @@ void MainWindow::onPreviewToggled(bool checked)
 void MainWindow::onToroidalToggled(bool checked)
 {
     m_squeegeeWindow->setToroidal(checked);
+}
+
+void MainWindow::onDynamicToggled(bool checked)
+{
+    m_squeegeeWindow->setDynamicIntensity(checked);
 }
 
 void MainWindow::onPaletteChanged(int index)
