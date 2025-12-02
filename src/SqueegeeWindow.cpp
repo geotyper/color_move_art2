@@ -1,0 +1,545 @@
+#include "SqueegeeWindow.h"
+#include <QDebug>
+#include <QCoreApplication>
+#include <QRandomGenerator>
+
+SqueegeeWindow::SqueegeeWindow()
+{
+}
+
+SqueegeeWindow::~SqueegeeWindow()
+{
+    makeCurrent();
+    delete m_program;
+    delete m_computeGravity;
+    delete m_computeSqueegee;
+    
+    if (m_texture3DA) glDeleteTextures(1, &m_texture3DA);
+    if (m_texture3DB) glDeleteTextures(1, &m_texture3DB);
+    
+    m_vbo.destroy();
+    m_vao.destroy();
+    doneCurrent();
+}
+
+void SqueegeeWindow::initializeGL()
+{
+    initializeOpenGLFunctions();
+    
+    // Set clear color to White
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    
+    initShaders();
+    initSimulation();
+    initGeometry();
+    
+    qDebug() << "OpenGL 4.3 Compute Initialized";
+    
+    generateComposition();
+}
+
+void SqueegeeWindow::initShaders()
+{
+    // Render Program (Raymarch/Stack)
+    m_program = new QOpenGLShaderProgram;
+    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, R"(
+        #version 430 core
+        layout(location = 0) in vec3 vertexPosition;
+        layout(location = 1) in vec2 vertexTexCoord;
+        out vec2 texCoord;
+        void main() {
+            gl_Position = vec4(vertexPosition, 1.0);
+            texCoord = vertexTexCoord;
+        }
+    )");
+    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, R"(
+        #version 430 core
+        in vec2 texCoord;
+        out vec4 fragColor;
+        
+        layout(binding = 0, rgba32f) uniform image3D imgInput;
+        
+        void main() {
+            ivec3 size = imageSize(imgInput);
+            ivec2 pixelPos = ivec2(texCoord * vec2(size.xy));
+            
+            vec4 finalColor = vec4(1.0); // Background white
+            
+            // Raymarch from Bottom (layer 0) to Top (layer 15)
+            // Standard Over operator: Dest = Mix(Dest, Src, Src.a)
+            for (int z = 0; z < 16; ++z) {
+                vec4 voxel = imageLoad(imgInput, ivec3(pixelPos, z));
+                if (voxel.a > 0.01) {
+                    // Mix voxel ON TOP of current finalColor
+                    finalColor = mix(finalColor, voxel, voxel.a);
+                }
+            }
+            
+            fragColor = finalColor;
+        }
+    )");
+    m_program->link();
+
+    // Compute Shader: Gravity
+    m_computeGravity = new QOpenGLShaderProgram;
+    m_computeGravity->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
+        #version 430 core
+        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+        
+        layout(binding = 0, rgba32f) uniform image3D imgIn;
+        layout(binding = 1, rgba32f) uniform image3D imgOut;
+        
+        void main() {
+            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
+            ivec3 size = imageSize(imgIn);
+            
+            if (pos.x >= size.x || pos.y >= size.y) return;
+            
+            // Column processing: Bottom to Top
+            // We read the entire column first to avoid read/write hazards within the same pass if possible,
+            // but for a simple simulation, we can just iterate.
+            
+            // We need to write to imgOut.
+            // Let's copy imgIn to imgOut first (or assume it's done).
+            // Actually, we can just do the logic and write the result.
+            
+            // To simulate falling, we scan from bottom (z=0) up to top.
+            // If we find a gap, we pull the pixel above down.
+            
+            // Load entire column into local array (16 layers is small)
+            vec4 column[16];
+            for (int z = 0; z < 16; ++z) {
+                column[z] = imageLoad(imgIn, ivec3(pos.xy, z));
+            }
+            
+            // Apply Gravity (Bubble sort style or just shift down)
+            // Simple approach: For each empty slot, find the nearest non-empty above and move it there.
+            for (int z = 0; z < 16; ++z) {
+                if (column[z].a < 0.1) { // Empty
+                    // Find nearest above
+                    for (int above = z + 1; above < 16; ++above) {
+                        if (column[above].a > 0.1) {
+                            // Move it down
+                            column[z] = column[above];
+                            column[above] = vec4(0.0); // Clear source
+                            break; // Filled this slot, move to next
+                        }
+                    }
+                }
+            }
+            
+            // Store back
+            for (int z = 0; z < 16; ++z) {
+                imageStore(imgOut, ivec3(pos.xy, z), column[z]);
+            }
+        }
+    )");
+    m_computeGravity->link();
+
+    // Compute Shader: Squeegee (Smear)
+    m_computeSqueegee = new QOpenGLShaderProgram;
+    m_computeSqueegee->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
+        #version 430 core
+        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+        
+        layout(binding = 0, rgba32f) uniform image3D imgIn;
+        layout(binding = 1, rgba32f) uniform image3D imgOut;
+        
+        uniform vec2 mousePos;
+        uniform vec2 lastMousePos;
+        uniform float brushSize;
+        uniform bool isMouseDown;
+        
+        // Pseudo-random function
+        float rand(vec2 co){
+            return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+        }
+        
+        float segmentDistance(vec2 p, vec2 a, vec2 b) {
+            vec2 pa = p - a;
+            vec2 ba = b - a;
+            float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+            return length(pa - ba * h);
+        }
+        
+        void main() {
+            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
+            ivec3 size = imageSize(imgIn);
+            
+            if (pos.x >= size.x || pos.y >= size.y) return;
+            
+            vec4 current = imageLoad(imgIn, pos);
+            
+            if (!isMouseDown) {
+                imageStore(imgOut, pos, current);
+                return;
+            }
+            
+            // 2D Distance check
+            float dist = segmentDistance(vec2(pos.xy), lastMousePos, mousePos);
+            
+            if (dist < brushSize) {
+                // Squeegee Logic:
+                // Shift paint in direction of movement.
+                vec2 dir = normalize(mousePos - lastMousePos);
+                if (length(mousePos - lastMousePos) < 0.1) dir = vec2(0.0);
+                
+                // Sample from "behind"
+                ivec3 samplePos = ivec3(vec2(pos.xy) - dir * 2.0, pos.z);
+                
+                // Clamp
+                samplePos.x = clamp(samplePos.x, 0, size.x - 1);
+                samplePos.y = clamp(samplePos.y, 0, size.y - 1);
+                
+                vec4 smearColor = imageLoad(imgIn, samplePos);
+                
+                // If sampling from paint, pull it.
+                if (smearColor.a > 0.01) {
+                    vec4 result = smearColor;
+                    
+                    // Mixing Logic:
+                    // If the current voxel has paint (we hit a drop), mix it into the smear.
+                    if (current.a > 0.01) {
+                        // Mix a bit of the static drop into the moving paint
+                        // 0.2 means we pick up 20% of the new color per step, gradually changing the streak.
+                        result = mix(result, current, 0.2);
+                    }
+                    
+                    // Friction/Decay:
+                    // Slight alpha decay to simulate paint thinning, but less aggressive than before
+                    // because Gravity will handle the "disappearance" into lower layers.
+                    result.a *= 0.995;
+                    
+                    imageStore(imgOut, pos, result);
+                } else {
+                    // Infinite Smear: Don't erase if we are dragging nothing.
+                    imageStore(imgOut, pos, current);
+                }
+            } else {
+                imageStore(imgOut, pos, current);
+            }
+        }
+    )");
+    m_computeSqueegee->link();
+
+    // Compute Shader: Blur (Box Blur)
+    m_computeBlur = new QOpenGLShaderProgram;
+    m_computeBlur->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
+        #version 430 core
+        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+        
+        layout(binding = 0, rgba32f) uniform image3D imgIn;
+        layout(binding = 1, rgba32f) uniform image3D imgOut;
+        
+        void main() {
+            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
+            ivec3 size = imageSize(imgIn);
+            
+            if (pos.x >= size.x || pos.y >= size.y) return;
+            
+            vec4 sum = vec4(0.0);
+            float count = 0.0;
+            
+            // 3x3 Box Blur (XY plane only, don't blur across layers)
+            for (int dy = -1; dy <= 1; ++dy) {
+                for (int dx = -1; dx <= 1; ++dx) {
+                    ivec3 samplePos = pos + ivec3(dx, dy, 0);
+                    
+                    // Clamp
+                    samplePos.x = clamp(samplePos.x, 0, size.x - 1);
+                    samplePos.y = clamp(samplePos.y, 0, size.y - 1);
+                    
+                    vec4 val = imageLoad(imgIn, samplePos);
+                    sum += val;
+                    count += 1.0;
+                }
+            }
+            
+            imageStore(imgOut, pos, sum / count);
+        }
+    )");
+    m_computeBlur->link();
+}
+
+void SqueegeeWindow::initSimulation()
+{
+    int w = width();
+    int h = height();
+    int d = 16; // 16 Layers
+    
+    glGenTextures(1, &m_texture3DA);
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, w, h, d);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    glGenTextures(1, &m_texture3DB);
+    glBindTexture(GL_TEXTURE_3D, m_texture3DB);
+    glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, w, h, d);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    // Clear textures
+    std::vector<float> clearData(w * h * d * 4, 0.0f);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, clearData.data());
+    
+    glBindTexture(GL_TEXTURE_3D, m_texture3DB);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, clearData.data());
+}
+
+void SqueegeeWindow::initGeometry()
+{
+    float vertices[] = {
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+    };
+    
+    m_vao.create();
+    m_vao.bind();
+    m_vbo.create();
+    m_vbo.bind();
+    m_vbo.allocate(vertices, sizeof(vertices));
+    
+    m_program->enableAttributeArray(0);
+    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 5 * sizeof(float));
+    m_program->enableAttributeArray(1);
+    m_program->setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(float), 2, 5 * sizeof(float));
+    
+    m_vao.release();
+    m_vbo.release();
+}
+
+void SqueegeeWindow::resizeGL(int w, int h)
+{
+    glViewport(0, 0, w, h);
+    // Re-init textures if size changes
+    if (m_texture3DA) {
+        glDeleteTextures(1, &m_texture3DA);
+        glDeleteTextures(1, &m_texture3DB);
+        initSimulation();
+        generateComposition();
+    }
+}
+
+void SqueegeeWindow::paintGL()
+{
+    // Compute Pass: Squeegee
+    if (m_isMouseDown) {
+        m_computeSqueegee->bind();
+        
+        glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        
+        m_computeSqueegee->setUniformValue("mousePos", QVector2D(m_currentMousePos.x(), height() - m_currentMousePos.y()));
+        m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(m_lastMousePos.x(), height() - m_lastMousePos.y()));
+        m_computeSqueegee->setUniformValue("brushSize", m_brushSize);
+        m_computeSqueegee->setUniformValue("isMouseDown", m_isMouseDown);
+        
+        glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16); // 16 layers
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        
+        std::swap(m_texture3DA, m_texture3DB); // Swap
+        m_lastMousePos = m_currentMousePos;
+        
+        m_computeSqueegee->release();
+    }
+    
+    // Compute Pass: Gravity (Run every frame or every N frames)
+    {
+        m_computeGravity->bind();
+        glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        
+        // Dispatch 2D grid, Z is handled inside
+        glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 1); 
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        
+        std::swap(m_texture3DA, m_texture3DB);
+        m_computeGravity->release();
+    }
+    
+    // Render Pass
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    m_program->bind();
+    glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
+    
+    m_vao.bind();
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    m_vao.release();
+    m_program->release();
+    
+    update();
+}
+
+void SqueegeeWindow::mousePressEvent(QMouseEvent *event)
+{
+    m_isMouseDown = true;
+    m_lastMousePos = QVector2D(event->position().x(), event->position().y());
+    m_currentMousePos = m_lastMousePos;
+}
+
+void SqueegeeWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    m_currentMousePos = QVector2D(event->position().x(), event->position().y());
+}
+
+void SqueegeeWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+    m_isMouseDown = false;
+}
+
+void SqueegeeWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_R) {
+        generateComposition();
+    } else if (event->key() == Qt::Key_B) {
+        applyBlur();
+        qDebug() << "Blur Applied";
+    }
+}
+
+void SqueegeeWindow::wheelEvent(QWheelEvent *event)
+{
+    float delta = event->angleDelta().y() / 120.0f;
+    m_brushSize += delta * 5.0f;
+    if (m_brushSize < 5.0f) m_brushSize = 5.0f;
+}
+
+void SqueegeeWindow::generateComposition()
+{
+    qDebug() << "Generating 3D composition...";
+    
+    // Clear
+    int w = width();
+    int h = height();
+    int d = 16;
+    std::vector<float> clearData(w * h * d * 4, 0.0f);
+    
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, clearData.data());
+    
+    std::vector<float> data(w * h * d * 4, 0.0f);
+    
+    QVector3D colors[] = {
+        QVector3D(0.1f, 0.1f, 0.1f), // Charcoal
+        QVector3D(0.9f, 0.9f, 0.85f), // Off-White
+        QVector3D(0.8f, 0.2f, 0.2f), // Muted Red
+        QVector3D(0.2f, 0.4f, 0.6f), // Slate Blue
+        QVector3D(0.9f, 0.7f, 0.1f), // Mustard Yellow
+        QVector3D(0.3f, 0.6f, 0.4f), // Sage Green
+        QVector3D(0.6f, 0.3f, 0.5f), // Plum
+        QVector3D(0.2f, 0.2f, 0.3f)  // Dark Navy
+    };
+    
+    for (int i = 0; i < 400; ++i) {
+        int cx = QRandomGenerator::global()->bounded(w);
+        int cy = QRandomGenerator::global()->bounded(h);
+        int cz = QRandomGenerator::global()->bounded(d); // Random layer
+        int r = QRandomGenerator::global()->bounded(5, 25);
+        int colorIdx = QRandomGenerator::global()->bounded(8);
+        QVector3D col = colors[colorIdx];
+        
+        // Draw circle in CPU buffer
+        for (int y = cy - r; y <= cy + r; ++y) {
+            for (int x = cx - r; x <= cx + r; ++x) {
+                if (x >= 0 && x < w && y >= 0 && y < h) {
+                    float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
+                    if (dist <= r) {
+                        int idx = (cz * w * h + y * w + x) * 4;
+                        data[idx + 0] = col.x();
+                        data[idx + 1] = col.y();
+                        data[idx + 2] = col.z();
+                        data[idx + 3] = 0.8f; // Semi-transparent for mixing
+                    }
+                }
+            }
+        }
+    }
+    
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());
+    
+    // Simulate squeegee stroke (Wide Diagonal)
+    // We need to run the compute shader loop here.
+    // Since we are in a valid GL context, we can just dispatch.
+    
+    // Make squeegee wider than screen to cover corners (200% width)
+    float squeegeeWidth = width() * 2.0f;
+    simulateStroke(QVector2D(0.0f, 0.0f), QVector2D(width(), height()), squeegeeWidth);
+}
+
+void SqueegeeWindow::drawDrop(QVector2D, float, QVector3D) {}
+
+void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
+{
+    int steps = 300; // More steps for smoother 3D smear
+    QVector2D dir = end - start;
+    float len = dir.length();
+    dir.normalize();
+    
+    QVector2D current = start;
+    QVector2D last = start;
+    
+    m_computeSqueegee->bind();
+    m_computeSqueegee->setUniformValue("brushSize", size);
+    m_computeSqueegee->setUniformValue("isMouseDown", true);
+    
+    for (int i = 0; i < steps; ++i) {
+        float t = (float)i / (float)steps;
+        current = start + dir * (len * t);
+        
+        glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        
+        m_computeSqueegee->setUniformValue("mousePos", QVector2D(current.x(), height() - current.y()));
+        m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(last.x(), height() - last.y()));
+        
+        glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        
+        std::swap(m_texture3DA, m_texture3DB);
+        
+        // Apply Gravity immediately after Squeegee step
+        // This allows paint to "fall" into lower layers as it moves, creating non-linear decay.
+        m_computeGravity->bind();
+        glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        
+        glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 1);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        
+        std::swap(m_texture3DA, m_texture3DB);
+        m_computeGravity->release();
+        
+        // Re-bind Squeegee for next iteration
+        m_computeSqueegee->bind();
+        m_computeSqueegee->setUniformValue("brushSize", size);
+        m_computeSqueegee->setUniformValue("isMouseDown", true);
+        
+        // Re-bind Squeegee for next iteration
+        m_computeSqueegee->bind();
+        m_computeSqueegee->setUniformValue("brushSize", size);
+        m_computeSqueegee->setUniformValue("isMouseDown", true);
+        
+        last = current;
+    }
+    m_computeSqueegee->release();
+}
+
+void SqueegeeWindow::applyBlur()
+{
+    m_computeBlur->bind();
+    glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
+    glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    
+    glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    
+    std::swap(m_texture3DA, m_texture3DB);
+    m_computeBlur->release();
+    update();
+}
