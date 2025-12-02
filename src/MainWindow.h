@@ -1,0 +1,51 @@
+#pragma once
+
+#include <QMainWindow>
+#include <QWidget>
+#include <QSlider>
+#include <QLabel>
+#include <QPushButton>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFormLayout>
+#include "SqueegeeWindow.h"
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    MainWindow();
+    ~MainWindow();
+
+private slots:
+    void onAngleChanged(int value);
+    void onWidthChanged(int value);
+    void onPassesChanged(int value);
+    void onStepsChanged(int value);
+    void onSizeChanged(int value);
+    void onPreviewToggled(bool checked);
+    void onPaletteChanged(int index);
+    void onRegenerate();
+
+private:
+    SqueegeeWindow *m_squeegeeWindow;
+    QWidget *m_container;
+    
+    QSlider *m_angleSlider;
+    QSlider *m_widthSlider;
+    QSlider *m_passesSlider;
+    QSlider *m_stepsSlider;
+    QSlider *m_sizeSlider; // Drop Max Size
+    
+    QCheckBox *m_previewCheckBox;
+    QComboBox *m_paletteCombo;
+    
+    QLabel *m_angleLabel;
+    QLabel *m_widthLabel;
+    QLabel *m_passesLabel;
+    QLabel *m_stepsLabel;
+    QLabel *m_sizeLabel;
+};

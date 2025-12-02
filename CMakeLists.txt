@@ -13,8 +13,10 @@ set(CMAKE_AUTOUIC ON)
 
 set(PROJECT_SOURCES
     src/main.cpp
-    src/SqueegeeWindow.h
     src/SqueegeeWindow.cpp
+    src/SqueegeeWindow.h
+    src/MainWindow.cpp
+    src/MainWindow.h
 )
 
 add_executable(ColorMoveArt2 ${PROJECT_SOURCES})

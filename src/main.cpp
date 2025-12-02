@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <QSurfaceFormat>
-#include "SqueegeeWindow.h"
+#include "MainWindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,9 +12,7 @@ int main(int argc, char *argv[])
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
 
-    SqueegeeWindow window;
-    window.resize(1280, 720);
-    window.setTitle("Digital Squeegee Art");
+    MainWindow window;
     window.show();
 
     return app.exec();

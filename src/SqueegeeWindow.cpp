@@ -2,9 +2,57 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <QRandomGenerator>
+#include <QtMath>
 
 SqueegeeWindow::SqueegeeWindow()
 {
+    // Palette 1: Modern Art (Original Calm)
+    m_palettes.append({
+        QVector3D(0.1f, 0.1f, 0.1f), QVector3D(0.9f, 0.9f, 0.85f), QVector3D(0.8f, 0.2f, 0.2f), QVector3D(0.2f, 0.4f, 0.6f),
+        QVector3D(0.9f, 0.7f, 0.1f), QVector3D(0.3f, 0.6f, 0.4f), QVector3D(0.6f, 0.3f, 0.5f), QVector3D(0.2f, 0.2f, 0.3f)
+    });
+    
+    // Palette 2: Modern Earth (High Contrast Interior)
+    m_palettes.append({
+        QVector3D(0.15f, 0.15f, 0.18f), // Deep Charcoal
+        QVector3D(0.85f, 0.35f, 0.15f), // Burnt Rust
+        QVector3D(0.92f, 0.88f, 0.82f), // Warm Beige
+        QVector3D(0.35f, 0.40f, 0.30f), // Olive Green
+        QVector3D(0.30f, 0.35f, 0.40f), // Slate Grey
+        QVector3D(0.85f, 0.65f, 0.25f), // Ochre Gold
+        QVector3D(0.25f, 0.15f, 0.10f), // Espresso
+        QVector3D(0.75f, 0.75f, 0.78f)  // Soft Grey
+    });
+    
+    // Palette 3: Deep Ocean (Vibrant Blues)
+    m_palettes.append({
+        QVector3D(0.0f, 0.0f, 0.4f), // Midnight Blue
+        QVector3D(0.0f, 0.4f, 0.8f), // Royal Blue
+        QVector3D(0.0f, 0.8f, 1.0f), // Cyan
+        QVector3D(0.0f, 0.6f, 0.6f), // Teal
+        QVector3D(1.0f, 1.0f, 1.0f), // White (Contrast)
+        QVector3D(0.2f, 0.0f, 0.5f), // Indigo
+        QVector3D(0.4f, 0.7f, 0.9f), // Sky Blue
+        QVector3D(0.0f, 0.1f, 0.2f)  // Deep Navy
+    });
+    
+    // Palette 4: Vibrant Sunset (Replaces Pastel)
+    m_palettes.append({
+        QVector3D(1.0f, 0.0f, 0.4f), // Hot Pink
+        QVector3D(1.0f, 0.5f, 0.0f), // Bright Orange
+        QVector3D(0.5f, 0.0f, 0.5f), // Deep Purple
+        QVector3D(1.0f, 0.9f, 0.0f), // Sunshine Yellow
+        QVector3D(1.0f, 0.2f, 0.2f), // Red-Orange
+        QVector3D(0.8f, 0.0f, 0.8f), // Magenta
+        QVector3D(0.2f, 0.0f, 0.4f), // Dark Violet
+        QVector3D(1.0f, 0.8f, 0.6f)  // Peach
+    });
+    
+    // Palette 5: Forest & Berry
+    m_palettes.append({
+        QVector3D(0.1f, 0.3f, 0.2f), QVector3D(0.2f, 0.4f, 0.2f), QVector3D(0.4f, 0.1f, 0.2f), QVector3D(0.6f, 0.2f, 0.3f),
+        QVector3D(0.8f, 0.8f, 0.9f), QVector3D(0.3f, 0.3f, 0.4f), QVector3D(0.5f, 0.6f, 0.5f), QVector3D(0.2f, 0.1f, 0.2f)
+    });
 }
 
 SqueegeeWindow::~SqueegeeWindow()
@@ -424,24 +472,20 @@ void SqueegeeWindow::generateComposition()
     
     std::vector<float> data(w * h * d * 4, 0.0f);
     
-    QVector3D colors[] = {
-        QVector3D(0.1f, 0.1f, 0.1f), // Charcoal
-        QVector3D(0.9f, 0.9f, 0.85f), // Off-White
-        QVector3D(0.8f, 0.2f, 0.2f), // Muted Red
-        QVector3D(0.2f, 0.4f, 0.6f), // Slate Blue
-        QVector3D(0.9f, 0.7f, 0.1f), // Mustard Yellow
-        QVector3D(0.3f, 0.6f, 0.4f), // Sage Green
-        QVector3D(0.6f, 0.3f, 0.5f), // Plum
-        QVector3D(0.2f, 0.2f, 0.3f)  // Dark Navy
-    };
+    // Use selected palette
+    const QVector<QVector3D>& currentPalette = m_palettes[m_currentPaletteIdx];
+    int colorCount = currentPalette.size();
     
-    for (int i = 0; i < 400; ++i) {
+    for (int i = 0; i < 600; ++i) {
         int cx = QRandomGenerator::global()->bounded(w);
         int cy = QRandomGenerator::global()->bounded(h);
         int cz = QRandomGenerator::global()->bounded(d); // Random layer
-        int r = QRandomGenerator::global()->bounded(5, 25);
-        int colorIdx = QRandomGenerator::global()->bounded(8);
-        QVector3D col = colors[colorIdx];
+        
+        // Random size based on slider (5 to Max)
+        int r = QRandomGenerator::global()->bounded(5, m_dropMaxSize + 1);
+        
+        int colorIdx = QRandomGenerator::global()->bounded(colorCount);
+        QVector3D col = currentPalette[colorIdx];
         
         // Draw circle in CPU buffer
         for (int y = cy - r; y <= cy + r; ++y) {
@@ -463,20 +507,38 @@ void SqueegeeWindow::generateComposition()
     glBindTexture(GL_TEXTURE_3D, m_texture3DA);
     glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());
     
-    // Simulate squeegee stroke (Wide Diagonal)
-    // We need to run the compute shader loop here.
-    // Since we are in a valid GL context, we can just dispatch.
+    // If Preview Mode is ON, skip the squeegee stroke
+    if (m_showPreview) {
+        return;
+    }
     
-    // Make squeegee wider than screen to cover corners (200% width)
-    float squeegeeWidth = width() * 2.0f;
-    simulateStroke(QVector2D(0.0f, 0.0f), QVector2D(width(), height()), squeegeeWidth);
+    // Simulate squeegee stroke (Configurable)
+    // We need to run the compute shader loop here.
+    
+    float rad = qDegreesToRadians(m_genAngle);
+    QVector2D dir(std::cos(rad), std::sin(rad));
+    
+    // Calculate start and end points to cover the screen
+    // Center of screen
+    QVector2D center(w * 0.5f, h * 0.5f);
+    // Diagonal length ensures we go off-screen
+    float diag = std::sqrt(float(w*w + h*h));
+    
+    QVector2D start = center - dir * diag;
+    QVector2D end = center + dir * diag;
+    
+    float squeegeeWidth = width() * m_genWidth;
+    
+    for (int i = 0; i < m_genPasses; ++i) {
+        simulateStroke(start, end, squeegeeWidth);
+    }
 }
 
 void SqueegeeWindow::drawDrop(QVector2D, float, QVector3D) {}
 
 void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
 {
-    int steps = 300; // More steps for smoother 3D smear
+    int steps = m_genSteps; // Use configurable steps (Speed)
     QVector2D dir = end - start;
     float len = dir.length();
     dir.normalize();

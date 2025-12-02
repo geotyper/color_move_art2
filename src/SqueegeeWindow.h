@@ -62,8 +62,31 @@ private:
     float m_brushSize = 50.0f;
     QVector3D m_brushColor = QVector3D(1.0f, 0.0f, 0.0f);
     
+    // Generation Parameters
+    float m_genAngle = 45.0f; // Degrees
+    float m_genWidth = 2.0f; // Multiplier of screen width
+    int m_genPasses = 1;
+    int m_genSteps = 600; // Speed (Higher = Slower/More Physics)
+    
+    bool m_showPreview = false;
+    int m_dropMaxSize = 25;
+    int m_currentPaletteIdx = 0;
+    QVector<QVector<QVector3D>> m_palettes;
+    
     QVector2D m_lastMousePos;
     QVector2D m_currentMousePos;
     bool m_isMouseDown = false;
     int m_frameCount = 0;
+
+public:
+    void setGenAngle(float angle) { m_genAngle = angle; }
+    void setGenWidth(float width) { m_genWidth = width; }
+    void setGenPasses(int passes) { m_genPasses = passes; }
+    void setGenSteps(int steps) { m_genSteps = steps; }
+    
+    void setShowPreview(bool show) { m_showPreview = show; regenerate(); }
+    void setDropMaxSize(int size) { m_dropMaxSize = size; regenerate(); }
+    void setPalette(int index) { m_currentPaletteIdx = index; regenerate(); }
+    
+    void regenerate() { generateComposition(); update(); }
 };
