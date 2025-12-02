@@ -55,6 +55,15 @@ MainWindow::MainWindow()
     formLayout->addRow("Simulation Steps:", m_stepsLabel);
     formLayout->addRow(m_stepsSlider);
     
+    // Density Slider (100 - 2000)
+    m_densitySlider = new QSlider(Qt::Horizontal);
+    m_densitySlider->setRange(100, 2000);
+    m_densitySlider->setValue(600);
+    m_densityLabel = new QLabel("600 drops");
+    connect(m_densitySlider, &QSlider::valueChanged, this, &MainWindow::onDensityChanged);
+    formLayout->addRow("Drop Density:", m_densityLabel);
+    formLayout->addRow(m_densitySlider);
+    
     // Drop Max Size Slider (10 - 100)
     m_sizeSlider = new QSlider(Qt::Horizontal);
     m_sizeSlider->setRange(10, 100);
@@ -64,6 +73,15 @@ MainWindow::MainWindow()
     formLayout->addRow("Drop Max Size:", m_sizeLabel);
     formLayout->addRow(m_sizeSlider);
     
+    // Concentric Circles Slider (1 - 7)
+    m_concentricSlider = new QSlider(Qt::Horizontal);
+    m_concentricSlider->setRange(1, 7);
+    m_concentricSlider->setValue(1);
+    m_concentricLabel = new QLabel("1");
+    connect(m_concentricSlider, &QSlider::valueChanged, this, &MainWindow::onConcentricChanged);
+    formLayout->addRow("Nested Circles:", m_concentricLabel);
+    formLayout->addRow(m_concentricSlider);
+    
     // Palette Combo
     m_paletteCombo = new QComboBox;
     m_paletteCombo->addItem("Modern Art");
@@ -71,6 +89,8 @@ MainWindow::MainWindow()
     m_paletteCombo->addItem("Deep Ocean");
     m_paletteCombo->addItem("Vibrant Sunset");
     m_paletteCombo->addItem("Forest & Berry");
+    m_paletteCombo->addItem("Modern Pop Art");
+    m_paletteCombo->addItem("Cyberpunk");
     connect(m_paletteCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPaletteChanged);
     formLayout->addRow("Palette:", m_paletteCombo);
     
@@ -78,6 +98,11 @@ MainWindow::MainWindow()
     m_previewCheckBox = new QCheckBox("Show Preview Only");
     connect(m_previewCheckBox, &QCheckBox::toggled, this, &MainWindow::onPreviewToggled);
     formLayout->addRow(m_previewCheckBox);
+    
+    // Toroidal Checkbox
+    m_toroidalCheckBox = new QCheckBox("Toroidal Movement");
+    connect(m_toroidalCheckBox, &QCheckBox::toggled, this, &MainWindow::onToroidalToggled);
+    formLayout->addRow(m_toroidalCheckBox);
     
     controlLayout->addLayout(formLayout);
     
@@ -135,15 +160,32 @@ void MainWindow::onStepsChanged(int value)
     m_squeegeeWindow->setGenSteps(value);
 }
 
+void MainWindow::onDensityChanged(int value)
+{
+    m_densityLabel->setText(QString::number(value) + " drops");
+    m_squeegeeWindow->setGenDensity(value);
+}
+
 void MainWindow::onSizeChanged(int value)
 {
     m_sizeLabel->setText(QString::number(value) + " px");
     m_squeegeeWindow->setDropMaxSize(value);
 }
 
+void MainWindow::onConcentricChanged(int value)
+{
+    m_concentricLabel->setText(QString::number(value));
+    m_squeegeeWindow->setGenConcentric(value);
+}
+
 void MainWindow::onPreviewToggled(bool checked)
 {
     m_squeegeeWindow->setShowPreview(checked);
+}
+
+void MainWindow::onToroidalToggled(bool checked)
+{
+    m_squeegeeWindow->setToroidal(checked);
 }
 
 void MainWindow::onPaletteChanged(int index)

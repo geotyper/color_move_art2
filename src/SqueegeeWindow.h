@@ -69,7 +69,10 @@ private:
     int m_genSteps = 600; // Speed (Higher = Slower/More Physics)
     
     bool m_showPreview = false;
+    bool m_toroidal = false; // Toroidal wrapping
     int m_dropMaxSize = 25;
+    int m_genConcentric = 1; // Max nested circles (1-7)
+    int m_genDensity = 600; // Number of drops
     int m_currentPaletteIdx = 0;
     QVector<QVector<QVector3D>> m_palettes;
     
@@ -85,7 +88,10 @@ public:
     void setGenSteps(int steps) { m_genSteps = steps; }
     
     void setShowPreview(bool show) { m_showPreview = show; regenerate(); }
+    void setToroidal(bool toroidal) { m_toroidal = toroidal; regenerate(); }
     void setDropMaxSize(int size) { m_dropMaxSize = size; regenerate(); }
+    void setGenConcentric(int count) { m_genConcentric = count; regenerate(); }
+    void setGenDensity(int density) { m_genDensity = density; regenerate(); }
     void setPalette(int index) { m_currentPaletteIdx = index; regenerate(); }
     
     void regenerate() { generateComposition(); update(); }

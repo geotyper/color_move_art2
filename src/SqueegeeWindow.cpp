@@ -53,6 +53,30 @@ SqueegeeWindow::SqueegeeWindow()
         QVector3D(0.1f, 0.3f, 0.2f), QVector3D(0.2f, 0.4f, 0.2f), QVector3D(0.4f, 0.1f, 0.2f), QVector3D(0.6f, 0.2f, 0.3f),
         QVector3D(0.8f, 0.8f, 0.9f), QVector3D(0.3f, 0.3f, 0.4f), QVector3D(0.5f, 0.6f, 0.5f), QVector3D(0.2f, 0.1f, 0.2f)
     });
+    
+    // Palette 6: Modern Pop Art
+    m_palettes.append({
+        QVector3D(1.0f, 0.0f, 0.0f), // Red
+        QVector3D(0.0f, 0.0f, 1.0f), // Blue
+        QVector3D(1.0f, 1.0f, 0.0f), // Yellow
+        QVector3D(1.0f, 1.0f, 1.0f), // White
+        QVector3D(0.0f, 0.0f, 0.0f), // Black
+        QVector3D(1.0f, 0.5f, 0.0f), // Orange
+        QVector3D(0.0f, 1.0f, 0.0f), // Green
+        QVector3D(1.0f, 0.0f, 1.0f)  // Magenta
+    });
+    
+    // Palette 7: Cyberpunk
+    m_palettes.append({
+        QVector3D(0.0f, 1.0f, 0.8f), // Neon Cyan
+        QVector3D(1.0f, 0.0f, 0.5f), // Neon Pink
+        QVector3D(0.5f, 0.0f, 1.0f), // Electric Purple
+        QVector3D(0.9f, 1.0f, 0.0f), // Acid Yellow
+        QVector3D(0.05f, 0.05f, 0.1f), // Dark Void
+        QVector3D(0.0f, 0.0f, 0.2f), // Deep Blue
+        QVector3D(1.0f, 0.2f, 0.2f), // Laser Red
+        QVector3D(0.8f, 0.8f, 0.9f)  // Chrome
+    });
 }
 
 SqueegeeWindow::~SqueegeeWindow()
@@ -197,6 +221,7 @@ void SqueegeeWindow::initShaders()
         uniform vec2 lastMousePos;
         uniform float brushSize;
         uniform bool isMouseDown;
+        uniform bool toroidal;
         
         // Pseudo-random function
         float rand(vec2 co){
@@ -223,8 +248,20 @@ void SqueegeeWindow::initShaders()
                 return;
             }
             
-            // 2D Distance check
+            // 2D Distance check with Toroidal Wrapping
             float dist = segmentDistance(vec2(pos.xy), lastMousePos, mousePos);
+            
+            if (toroidal) {
+                vec2 fSize = vec2(size.xy);
+                // Check 8 neighbors
+                for (float dy = -1.0; dy <= 1.0; dy += 1.0) {
+                    for (float dx = -1.0; dx <= 1.0; dx += 1.0) {
+                        if (dx == 0.0 && dy == 0.0) continue;
+                        vec2 offset = vec2(dx, dy) * fSize;
+                        dist = min(dist, segmentDistance(vec2(pos.xy), lastMousePos + offset, mousePos + offset));
+                    }
+                }
+            }
             
             if (dist < brushSize) {
                 // Squeegee Logic:
@@ -235,9 +272,15 @@ void SqueegeeWindow::initShaders()
                 // Sample from "behind"
                 ivec3 samplePos = ivec3(vec2(pos.xy) - dir * 2.0, pos.z);
                 
-                // Clamp
-                samplePos.x = clamp(samplePos.x, 0, size.x - 1);
-                samplePos.y = clamp(samplePos.y, 0, size.y - 1);
+                if (toroidal) {
+                    // Wrap
+                    samplePos.x = int(mod(float(samplePos.x), float(size.x)));
+                    samplePos.y = int(mod(float(samplePos.y), float(size.y)));
+                } else {
+                    // Clamp
+                    samplePos.x = clamp(samplePos.x, 0, size.x - 1);
+                    samplePos.y = clamp(samplePos.y, 0, size.y - 1);
+                }
                 
                 vec4 smearColor = imageLoad(imgIn, samplePos);
                 
@@ -384,6 +427,7 @@ void SqueegeeWindow::paintGL()
         m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(m_lastMousePos.x(), height() - m_lastMousePos.y()));
         m_computeSqueegee->setUniformValue("brushSize", m_brushSize);
         m_computeSqueegee->setUniformValue("isMouseDown", m_isMouseDown);
+        m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
         
         glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16); // 16 layers
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -476,7 +520,7 @@ void SqueegeeWindow::generateComposition()
     const QVector<QVector3D>& currentPalette = m_palettes[m_currentPaletteIdx];
     int colorCount = currentPalette.size();
     
-    for (int i = 0; i < 600; ++i) {
+    for (int i = 0; i < m_genDensity; ++i) {
         int cx = QRandomGenerator::global()->bounded(w);
         int cy = QRandomGenerator::global()->bounded(h);
         int cz = QRandomGenerator::global()->bounded(d); // Random layer
@@ -484,20 +528,33 @@ void SqueegeeWindow::generateComposition()
         // Random size based on slider (5 to Max)
         int r = QRandomGenerator::global()->bounded(5, m_dropMaxSize + 1);
         
-        int colorIdx = QRandomGenerator::global()->bounded(colorCount);
-        QVector3D col = currentPalette[colorIdx];
+        // Concentric Circles Logic
+        // Determine how many rings for this drop (1 to Max Slider)
+        int rings = 1;
+        if (m_genConcentric > 1) {
+            rings = QRandomGenerator::global()->bounded(1, m_genConcentric + 1);
+        }
         
-        // Draw circle in CPU buffer
-        for (int y = cy - r; y <= cy + r; ++y) {
-            for (int x = cx - r; x <= cx + r; ++x) {
-                if (x >= 0 && x < w && y >= 0 && y < h) {
-                    float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
-                    if (dist <= r) {
-                        int idx = (cz * w * h + y * w + x) * 4;
-                        data[idx + 0] = col.x();
-                        data[idx + 1] = col.y();
-                        data[idx + 2] = col.z();
-                        data[idx + 3] = 0.8f; // Semi-transparent for mixing
+        // Draw rings from largest to smallest (Painter's Algorithm)
+        for (int ring = 0; ring < rings; ++ring) {
+            int currentR = r * (rings - ring) / rings; // Scale down
+            if (currentR < 2) break;
+            
+            int colorIdx = QRandomGenerator::global()->bounded(colorCount);
+            QVector3D col = currentPalette[colorIdx];
+            
+            // Draw circle in CPU buffer
+            for (int y = cy - currentR; y <= cy + currentR; ++y) {
+                for (int x = cx - currentR; x <= cx + currentR; ++x) {
+                    if (x >= 0 && x < w && y >= 0 && y < h) {
+                        float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
+                        if (dist <= currentR) {
+                            int idx = (cz * w * h + y * w + x) * 4;
+                            data[idx + 0] = col.x();
+                            data[idx + 1] = col.y();
+                            data[idx + 2] = col.z();
+                            data[idx + 3] = 0.8f; // Semi-transparent for mixing
+                        }
                     }
                 }
             }
@@ -549,6 +606,7 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
     m_computeSqueegee->bind();
     m_computeSqueegee->setUniformValue("brushSize", size);
     m_computeSqueegee->setUniformValue("isMouseDown", true);
+    m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
     
     for (int i = 0; i < steps; ++i) {
         float t = (float)i / (float)steps;
@@ -559,6 +617,8 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
         
         m_computeSqueegee->setUniformValue("mousePos", QVector2D(current.x(), height() - current.y()));
         m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(last.x(), height() - last.y()));
+        // Uniforms set once above persist if shader is bound, but we re-bind inside loop?
+        // Wait, we release gravity then re-bind squeegee. So we must re-set uniforms.
         
         glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -586,6 +646,7 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
         m_computeSqueegee->bind();
         m_computeSqueegee->setUniformValue("brushSize", size);
         m_computeSqueegee->setUniformValue("isMouseDown", true);
+        m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
         
         last = current;
     }
