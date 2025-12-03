@@ -56,13 +56,8 @@ MainWindow::MainWindow()
     formLayout->addRow(m_stepsSlider);
     
     // Density Slider (100 - 2000)
-    m_densitySlider = new QSlider(Qt::Horizontal);
-    m_densitySlider->setRange(100, 2000);
-    m_densitySlider->setValue(600);
-    m_densityLabel = new QLabel("600 drops");
-    connect(m_densitySlider, &QSlider::valueChanged, this, &MainWindow::onDensityChanged);
-    formLayout->addRow("Drop Density:", m_densityLabel);
-    formLayout->addRow(m_densitySlider);
+
+
     
     // Drop Max Size Slider (10 - 100)
     m_sizeSlider = new QSlider(Qt::Horizontal);
@@ -83,16 +78,39 @@ MainWindow::MainWindow()
     formLayout->addRow(m_concentricSlider);
     
     // Palette Combo
-    m_paletteCombo = new QComboBox;
-    m_paletteCombo->addItem("Modern Art");
-    m_paletteCombo->addItem("Modern Earth");
-    m_paletteCombo->addItem("Deep Ocean");
+    m_paletteCombo = new QComboBox();
+    m_paletteCombo->addItem("Modern Art (Original Calm)");
+    m_paletteCombo->addItem("Modern Earth (High Contrast)");
+    m_paletteCombo->addItem("Deep Ocean (Vibrant Blues)");
     m_paletteCombo->addItem("Vibrant Sunset");
     m_paletteCombo->addItem("Forest & Berry");
     m_paletteCombo->addItem("Modern Pop Art");
     m_paletteCombo->addItem("Cyberpunk");
     connect(m_paletteCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPaletteChanged);
     formLayout->addRow("Palette:", m_paletteCombo);
+
+    // Shape Combo
+    m_shapeCombo = new QComboBox();
+    m_shapeCombo->addItem("Circle");
+    m_shapeCombo->addItem("Square");
+    connect(m_shapeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onShapeChanged);
+    formLayout->addRow("Drop Shape:", m_shapeCombo);
+
+    // Generation Mode Combo
+    m_genModeCombo = new QComboBox();
+    m_genModeCombo->addItem("Random");
+    m_genModeCombo->addItem("Grid");
+    connect(m_genModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onGenModeChanged);
+    formLayout->addRow("Gen Mode:", m_genModeCombo);
+
+    // Grid Step Slider (10 - 200 px)
+    m_gridStepSlider = new QSlider(Qt::Horizontal);
+    m_gridStepSlider->setRange(10, 200);
+    m_gridStepSlider->setValue(50);
+    m_gridStepLabel = new QLabel("50 px");
+    connect(m_gridStepSlider, &QSlider::valueChanged, this, &MainWindow::onGridStepChanged);
+    formLayout->addRow("Grid Step:", m_gridStepLabel);
+    formLayout->addRow(m_gridStepSlider);
     
     // Preview Checkbox
     m_previewCheckBox = new QCheckBox("Show Preview Only");
@@ -103,12 +121,17 @@ MainWindow::MainWindow()
     m_toroidalCheckBox = new QCheckBox("Toroidal Movement");
     connect(m_toroidalCheckBox, &QCheckBox::toggled, this, &MainWindow::onToroidalToggled);
     formLayout->addRow(m_toroidalCheckBox);
+
     
     controlLayout->addLayout(formLayout);
     
     QPushButton *regenBtn = new QPushButton("Regenerate (R)");
     connect(regenBtn, &QPushButton::clicked, this, &MainWindow::onRegenerate);
     controlLayout->addWidget(regenBtn);
+
+    QPushButton *regenOverlayBtn = new QPushButton("Regenerate (Overlay)");
+    connect(regenOverlayBtn, &QPushButton::clicked, this, &MainWindow::onRegenerateOverlay);
+    controlLayout->addWidget(regenOverlayBtn);
     
     controlLayout->addStretch();
     
@@ -160,12 +183,6 @@ void MainWindow::onStepsChanged(int value)
     m_squeegeeWindow->setGenSteps(value);
 }
 
-void MainWindow::onDensityChanged(int value)
-{
-    m_densityLabel->setText(QString::number(value) + " drops");
-    m_squeegeeWindow->setGenDensity(value);
-}
-
 void MainWindow::onSizeChanged(int value)
 {
     m_sizeLabel->setText(QString::number(value) + " px");
@@ -193,7 +210,30 @@ void MainWindow::onPaletteChanged(int index)
     m_squeegeeWindow->setPalette(index);
 }
 
+void MainWindow::onShapeChanged(int index)
+{
+    m_squeegeeWindow->setGenShape((SqueegeeWindow::GenShape)index);
+}
+
+void MainWindow::onGenModeChanged(int index)
+{
+    m_squeegeeWindow->setGenMode((SqueegeeWindow::GenMode)index);
+}
+
+void MainWindow::onGridStepChanged(int value)
+{
+    m_gridStepLabel->setText(QString::number(value) + " px");
+    m_squeegeeWindow->setGridStep(value);
+}
+
 void MainWindow::onRegenerate()
 {
     m_squeegeeWindow->regenerate();
+}
+
+void MainWindow::onRegenerateOverlay()
+{
+    m_squeegeeWindow->setKeepExisting(true);
+    m_squeegeeWindow->regenerate();
+    m_squeegeeWindow->setKeepExisting(false);
 }

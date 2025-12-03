@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+15c71ff8365d3ed219be103fd7175c58 CMakeFiles/ColorMoveArt2_autogen

@@ -139,7 +139,7 @@ void SqueegeeWindow::initShaders()
             
             // Raymarch from Bottom (layer 0) to Top (layer 15)
             // Standard Over operator: Dest = Mix(Dest, Src, Src.a)
-            for (int z = 0; z < 16; ++z) {
+            for (int z = 0; z < 32; ++z) {
                 vec4 voxel = imageLoad(imgInput, ivec3(pixelPos, z));
                 if (voxel.a > 0.01) {
                     // Mix voxel ON TOP of current finalColor
@@ -178,18 +178,18 @@ void SqueegeeWindow::initShaders()
             // To simulate falling, we scan from bottom (z=0) up to top.
             // If we find a gap, we pull the pixel above down.
             
-            // Load entire column into local array (16 layers is small)
-            vec4 column[16];
-            for (int z = 0; z < 16; ++z) {
+            // Load entire column into local array (32 layers is small)
+            vec4 column[32];
+            for (int z = 0; z < 32; ++z) {
                 column[z] = imageLoad(imgIn, ivec3(pos.xy, z));
             }
             
             // Apply Gravity (Bubble sort style or just shift down)
             // Simple approach: For each empty slot, find the nearest non-empty above and move it there.
-            for (int z = 0; z < 16; ++z) {
+            for (int z = 0; z < 32; ++z) {
                 if (column[z].a < 0.1) { // Empty
                     // Find nearest above
-                    for (int above = z + 1; above < 16; ++above) {
+                    for (int above = z + 1; above < 32; ++above) {
                         if (column[above].a > 0.1) {
                             // Move it down
                             column[z] = column[above];
@@ -201,7 +201,7 @@ void SqueegeeWindow::initShaders()
             }
             
             // Store back
-            for (int z = 0; z < 16; ++z) {
+            for (int z = 0; z < 32; ++z) {
                 imageStore(imgOut, ivec3(pos.xy, z), column[z]);
             }
         }
@@ -356,7 +356,7 @@ void SqueegeeWindow::initSimulation()
 {
     int w = width();
     int h = height();
-    int d = 16; // 16 Layers
+    int d = 32; // 32 Layers
     
     glGenTextures(1, &m_texture3DA);
     glBindTexture(GL_TEXTURE_3D, m_texture3DA);
@@ -429,7 +429,7 @@ void SqueegeeWindow::paintGL()
         m_computeSqueegee->setUniformValue("isMouseDown", m_isMouseDown);
         m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
         
-        glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16); // 16 layers
+        glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 32); // 32 layers
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         
         std::swap(m_texture3DA, m_texture3DB); // Swap
@@ -505,55 +505,137 @@ void SqueegeeWindow::generateComposition()
 {
     qDebug() << "Generating 3D composition...";
     
-    // Clear
+    // Clear or Keep
     int w = width();
     int h = height();
-    int d = 16;
-    std::vector<float> clearData(w * h * d * 4, 0.0f);
-    
-    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
-    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, clearData.data());
-    
+    int d = 32;
     std::vector<float> data(w * h * d * 4, 0.0f);
+
+    if (m_keepExisting) {
+        glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+        glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, data.data());
+    } else {
+        // Explicitly clear texture if not keeping (though we overwrite data anyway, 
+        // uploading 0s first ensures clean slate if we don't fill everything)
+        // Actually, we just init data to 0s above.
+        // But we should probably clear the texture on GPU too just in case?
+        // Uploading 0s is fine.
+        glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());
+    }
     
     // Use selected palette
     const QVector<QVector3D>& currentPalette = m_palettes[m_currentPaletteIdx];
     int colorCount = currentPalette.size();
     
-    for (int i = 0; i < m_genDensity; ++i) {
-        int cx = QRandomGenerator::global()->bounded(w);
-        int cy = QRandomGenerator::global()->bounded(h);
-        int cz = QRandomGenerator::global()->bounded(d); // Random layer
+    // Determine points to draw
+    struct DrawPoint {
+        int x, y, z, r;
+    };
+    QVector<DrawPoint> points;
+    
+    if (m_genMode == ModeRandom) {
+        for (int i = 0; i < m_genDensity; ++i) {
+            int cx = QRandomGenerator::global()->bounded(w);
+            int cy = QRandomGenerator::global()->bounded(h);
+            int cz = QRandomGenerator::global()->bounded(d);
+            int r = QRandomGenerator::global()->bounded(5, m_dropMaxSize + 1);
+            points.append({cx, cy, cz, r});
+        }
+    } else { // ModeGrid
+        for (int y = m_gridStep / 2; y < h; y += m_gridStep) {
+            for (int x = m_gridStep / 2; x < w; x += m_gridStep) {
+                int cz = QRandomGenerator::global()->bounded(d);
+                // For grid, size is fixed to Max Size or random?
+                // Let's make it random up to max size for variety, or fixed?
+                // User asked for "Grid with defined step and size of squares".
+                // So size should probably be related to Drop Max Size.
+                // Let's use Drop Max Size as the size.
+                int r = m_dropMaxSize; 
+                points.append({x, y, cz, r});
+            }
+        }
+    }
+    
+    for (const auto& p : points) {
+        int cx = p.x;
+        int cy = p.y;
+        int cz = p.z;
+        int r = p.r;
         
-        // Random size based on slider (5 to Max)
-        int r = QRandomGenerator::global()->bounded(5, m_dropMaxSize + 1);
-        
-        // Concentric Circles Logic
-        // Determine how many rings for this drop (1 to Max Slider)
+        // Concentric Logic
         int rings = 1;
         if (m_genConcentric > 1) {
             rings = QRandomGenerator::global()->bounded(1, m_genConcentric + 1);
         }
         
-        // Draw rings from largest to smallest (Painter's Algorithm)
         for (int ring = 0; ring < rings; ++ring) {
-            int currentR = r * (rings - ring) / rings; // Scale down
+            int currentR = r * (rings - ring) / rings;
             if (currentR < 2) break;
             
             int colorIdx = QRandomGenerator::global()->bounded(colorCount);
             QVector3D col = currentPalette[colorIdx];
             
-            // Draw circle in CPU buffer
-            for (int y = cy - currentR; y <= cy + currentR; ++y) {
-                for (int x = cx - currentR; x <= cx + currentR; ++x) {
-                    if (x >= 0 && x < w && y >= 0 && y < h) {
-                        float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
-                        if (dist <= currentR) {
+            if (m_genShape == ShapeCircle) {
+                // Circle Logic
+                if (m_drawBorders) {
+                    int borderR = currentR + 1;
+                    for (int y = cy - borderR; y <= cy + borderR; ++y) {
+                        for (int x = cx - borderR; x <= cx + borderR; ++x) {
+                            if (x >= 0 && x < w && y >= 0 && y < h) {
+                                float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
+                                if (dist <= borderR) {
+                                    int idx = (cz * w * h + y * w + x) * 4;
+                                    data[idx + 0] = 0.0f;
+                                    data[idx + 1] = 0.0f;
+                                    data[idx + 2] = 0.0f;
+                                    data[idx + 3] = 1.0f;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (int y = cy - currentR; y <= cy + currentR; ++y) {
+                    for (int x = cx - currentR; x <= cx + currentR; ++x) {
+                        if (x >= 0 && x < w && y >= 0 && y < h) {
+                            float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
+                            if (dist <= currentR) {
+                                int idx = (cz * w * h + y * w + x) * 4;
+                                data[idx + 0] = col.x();
+                                data[idx + 1] = col.y();
+                                data[idx + 2] = col.z();
+                                data[idx + 3] = 0.8f;
+                            }
+                        }
+                    }
+                }
+            } else { // ShapeSquare
+                // Square Logic
+                // currentR is half-width
+                if (m_drawBorders) {
+                    int borderR = currentR + 1;
+                    for (int y = cy - borderR; y <= cy + borderR; ++y) {
+                        for (int x = cx - borderR; x <= cx + borderR; ++x) {
+                            if (x >= 0 && x < w && y >= 0 && y < h) {
+                                int idx = (cz * w * h + y * w + x) * 4;
+                                data[idx + 0] = 0.0f;
+                                data[idx + 1] = 0.0f;
+                                data[idx + 2] = 0.0f;
+                                data[idx + 3] = 1.0f;
+                            }
+                        }
+                    }
+                }
+                
+                for (int y = cy - currentR; y <= cy + currentR; ++y) {
+                    for (int x = cx - currentR; x <= cx + currentR; ++x) {
+                        if (x >= 0 && x < w && y >= 0 && y < h) {
                             int idx = (cz * w * h + y * w + x) * 4;
                             data[idx + 0] = col.x();
                             data[idx + 1] = col.y();
                             data[idx + 2] = col.z();
-                            data[idx + 3] = 0.8f; // Semi-transparent for mixing
+                            data[idx + 3] = 0.8f;
                         }
                     }
                 }
@@ -620,7 +702,7 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
         // Uniforms set once above persist if shader is bound, but we re-bind inside loop?
         // Wait, we release gravity then re-bind squeegee. So we must re-set uniforms.
         
-        glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16);
+        glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 32);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         
         std::swap(m_texture3DA, m_texture3DB);
@@ -659,7 +741,7 @@ void SqueegeeWindow::applyBlur()
     glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
     glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
     
-    glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 16);
+    glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 32);
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     
     std::swap(m_texture3DA, m_texture3DB);

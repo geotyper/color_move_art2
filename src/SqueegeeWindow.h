@@ -21,6 +21,16 @@ public:
     SqueegeeWindow();
     ~SqueegeeWindow();
 
+    enum GenShape {
+        ShapeCircle,
+        ShapeSquare
+    };
+
+    enum GenMode {
+        ModeRandom,
+        ModeGrid
+    };
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -55,8 +65,12 @@ private:
 
     enum ToolMode {
         Squeegee,
-        Dropper
+        RandomComb
     };
+
+
+
+
 
     ToolMode m_currentMode = Squeegee;
     float m_brushSize = 50.0f;
@@ -68,8 +82,14 @@ private:
     int m_genPasses = 1;
     int m_genSteps = 600; // Speed (Higher = Slower/More Physics)
     
+    GenShape m_genShape = ShapeCircle;
+    GenMode m_genMode = ModeRandom;
+    int m_gridStep = 50;
+    
     bool m_showPreview = false;
     bool m_toroidal = false; // Toroidal wrapping
+    bool m_keepExisting = false; // Overlay mode
+    bool m_drawBorders = false; // Draw black borders
     int m_dropMaxSize = 25;
     int m_genConcentric = 1; // Max nested circles (1-7)
     int m_genDensity = 600; // Number of drops
@@ -86,9 +106,15 @@ public:
     void setGenWidth(float width) { m_genWidth = width; }
     void setGenPasses(int passes) { m_genPasses = passes; }
     void setGenSteps(int steps) { m_genSteps = steps; }
+
+    void setGenShape(GenShape shape) { m_genShape = shape; regenerate(); }
+    void setGenMode(GenMode mode) { m_genMode = mode; regenerate(); }
+    void setGridStep(int step) { m_gridStep = step; regenerate(); }
     
     void setShowPreview(bool show) { m_showPreview = show; regenerate(); }
     void setToroidal(bool toroidal) { m_toroidal = toroidal; regenerate(); }
+    void setKeepExisting(bool keep) { m_keepExisting = keep; }
+    void setDrawBorders(bool draw) { m_drawBorders = draw; regenerate(); }
     void setDropMaxSize(int size) { m_dropMaxSize = size; regenerate(); }
     void setGenConcentric(int count) { m_genConcentric = count; regenerate(); }
     void setGenDensity(int density) { m_genDensity = density; regenerate(); }
