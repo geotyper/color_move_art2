@@ -38,6 +38,7 @@ private slots:
 
     void onRegenerate();
     void onRegenerateOverlay();
+    void onSaturate();
 
 private:
     SqueegeeWindow *m_squeegeeWindow;

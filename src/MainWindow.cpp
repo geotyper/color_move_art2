@@ -132,6 +132,10 @@ MainWindow::MainWindow()
     QPushButton *regenOverlayBtn = new QPushButton("Regenerate (Overlay)");
     connect(regenOverlayBtn, &QPushButton::clicked, this, &MainWindow::onRegenerateOverlay);
     controlLayout->addWidget(regenOverlayBtn);
+
+    QPushButton *saturateBtn = new QPushButton("Saturate");
+    connect(saturateBtn, &QPushButton::clicked, this, &MainWindow::onSaturate);
+    controlLayout->addWidget(saturateBtn);
     
     controlLayout->addStretch();
     
@@ -236,4 +240,9 @@ void MainWindow::onRegenerateOverlay()
     m_squeegeeWindow->setKeepExisting(true);
     m_squeegeeWindow->regenerate();
     m_squeegeeWindow->setKeepExisting(false);
+}
+
+void MainWindow::onSaturate()
+{
+    m_squeegeeWindow->applySaturation();
 }

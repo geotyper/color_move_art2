@@ -54,6 +54,7 @@ private:
     QOpenGLShaderProgram *m_computeGravity = nullptr;
     QOpenGLShaderProgram *m_computeSqueegee = nullptr;
     QOpenGLShaderProgram *m_computeBlur = nullptr;
+    QOpenGLShaderProgram *m_computeSaturate = nullptr;
     
     // 3D Textures (Double Buffered)
     // We use raw GL texture IDs for easier binding to image units in compute shaders
@@ -121,4 +122,5 @@ public:
     void setPalette(int index) { m_currentPaletteIdx = index; regenerate(); }
     
     void regenerate() { generateComposition(); update(); }
+    void applySaturation();
 };
