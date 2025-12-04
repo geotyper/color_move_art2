@@ -25,6 +25,11 @@ MainWindow::MainWindow()
     connect(m_angleSlider, &QSlider::valueChanged, this, &MainWindow::onAngleChanged);
     formLayout->addRow("Angle:", m_angleLabel);
     formLayout->addRow(m_angleSlider);
+
+    // Angle Snap Checkbox
+    m_angleSnapCheckBox = new QCheckBox("Angle Snap (45 deg)");
+    connect(m_angleSnapCheckBox, &QCheckBox::toggled, this, &MainWindow::onAngleSnapToggled);
+    formLayout->addRow(m_angleSnapCheckBox);
     
     // Width Slider (10% - 300%)
     m_widthSlider = new QSlider(Qt::Horizontal);
@@ -165,6 +170,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::onAngleChanged(int value)
 {
+    if (m_angleSnapCheckBox->isChecked()) {
+        int snapped = qRound(value / 45.0) * 45;
+        if (snapped != value) {
+            m_angleSlider->setValue(snapped);
+            return;
+        }
+    }
     m_angleLabel->setText(QString::number(value) + " deg");
     m_squeegeeWindow->setGenAngle((float)value);
 }
@@ -207,6 +219,14 @@ void MainWindow::onPreviewToggled(bool checked)
 void MainWindow::onToroidalToggled(bool checked)
 {
     m_squeegeeWindow->setToroidal(checked);
+}
+
+void MainWindow::onAngleSnapToggled(bool checked)
+{
+    if (checked) {
+        // Trigger re-snap of current value
+        onAngleChanged(m_angleSlider->value());
+    }
 }
 
 void MainWindow::onPaletteChanged(int index)

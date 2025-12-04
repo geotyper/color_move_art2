@@ -30,6 +30,7 @@ private slots:
     void onConcentricChanged(int value);
     void onPreviewToggled(bool checked);
     void onToroidalToggled(bool checked);
+    void onAngleSnapToggled(bool checked);
     void onPaletteChanged(int index);
     void onShapeChanged(int index);
     void onGenModeChanged(int index);
@@ -55,6 +56,7 @@ private:
     
     QCheckBox *m_previewCheckBox;
     QCheckBox *m_toroidalCheckBox;
+    QCheckBox *m_angleSnapCheckBox; // New Checkbox
     QComboBox *m_brushTypeCombo;
     QComboBox *m_paletteCombo;
     QComboBox *m_shapeCombo;
