@@ -529,9 +529,7 @@ void SqueegeeWindow::mouseReleaseEvent(QMouseEvent *event)
 
 void SqueegeeWindow::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_R) {
-        generateComposition();
-    } else if (event->key() == Qt::Key_B) {
+    if (event->key() == Qt::Key_B) {
         applyBlur();
         qDebug() << "Blur Applied";
     }

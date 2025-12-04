@@ -108,18 +108,18 @@ public:
     void setGenPasses(int passes) { m_genPasses = passes; }
     void setGenSteps(int steps) { m_genSteps = steps; }
 
-    void setGenShape(GenShape shape) { m_genShape = shape; regenerate(); }
-    void setGenMode(GenMode mode) { m_genMode = mode; regenerate(); }
-    void setGridStep(int step) { m_gridStep = step; regenerate(); }
+    void setGenShape(GenShape shape) { m_genShape = shape; }
+    void setGenMode(GenMode mode) { m_genMode = mode; }
+    void setGridStep(int step) { m_gridStep = step; }
     
-    void setShowPreview(bool show) { m_showPreview = show; regenerate(); }
-    void setToroidal(bool toroidal) { m_toroidal = toroidal; regenerate(); }
+    void setShowPreview(bool show) { m_showPreview = show; }
+    void setToroidal(bool toroidal) { m_toroidal = toroidal; }
     void setKeepExisting(bool keep) { m_keepExisting = keep; }
-    void setDrawBorders(bool draw) { m_drawBorders = draw; regenerate(); }
-    void setDropMaxSize(int size) { m_dropMaxSize = size; regenerate(); }
-    void setGenConcentric(int count) { m_genConcentric = count; regenerate(); }
-    void setGenDensity(int density) { m_genDensity = density; regenerate(); }
-    void setPalette(int index) { m_currentPaletteIdx = index; regenerate(); }
+    void setDrawBorders(bool draw) { m_drawBorders = draw; }
+    void setDropMaxSize(int size) { m_dropMaxSize = size; }
+    void setGenConcentric(int count) { m_genConcentric = count; }
+    void setGenDensity(int density) { m_genDensity = density; }
+    void setPalette(int index) { m_currentPaletteIdx = index; }
     
     void regenerate() { generateComposition(); update(); }
     void regenerateSqueegeeOnly();
