@@ -102,6 +102,7 @@ private:
     int m_genDensity = 600; // Number of drops
     int m_currentPaletteIdx = 0;
     SqueegeeMode m_squeegeeMode = SqueegeeSolid;
+    bool m_depthRadiusScaling = false;
     QVector<QVector<QVector3D>> m_palettes;
     
     QVector2D m_lastMousePos;
@@ -128,6 +129,7 @@ public:
     void setGenDensity(int density) { m_genDensity = density; }
     void setPalette(int index) { m_currentPaletteIdx = index; }
     void setSqueegeeMode(SqueegeeMode mode) { m_squeegeeMode = mode; }
+    void setDepthRadiusScaling(bool enabled) { m_depthRadiusScaling = enabled; }
     
     void regenerate() { generateComposition(); update(); }
     void regenerateSqueegeeOnly();

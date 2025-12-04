@@ -37,6 +37,7 @@ private slots:
     void onGridStepChanged(int value);
     void onSqueegeeModeChanged(int index);
     void onStepsPresetChanged(int index);
+    void onDepthScalingToggled(bool checked);
 
     void onRegenerate();
     void onRegenerateOverlay();
@@ -65,6 +66,7 @@ private:
     QComboBox *m_genModeCombo;
     QComboBox *m_squeegeeModeCombo;
     QComboBox *m_stepsPresetCombo;
+    QCheckBox *m_depthScalingCheckBox;
     
     QLabel *m_angleLabel;
     QLabel *m_widthLabel;

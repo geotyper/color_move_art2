@@ -116,6 +116,10 @@ MainWindow::MainWindow()
     connect(m_genModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onGenModeChanged);
     formLayout->addRow("Gen Mode:", m_genModeCombo);
 
+    m_depthScalingCheckBox = new QCheckBox("Depth Radius Growth (exp)");
+    connect(m_depthScalingCheckBox, &QCheckBox::toggled, this, &MainWindow::onDepthScalingToggled);
+    formLayout->addRow(m_depthScalingCheckBox);
+
     // Squeegee Mode Combo
     m_squeegeeModeCombo = new QComboBox();
     m_squeegeeModeCombo->addItem("Solid");
@@ -289,6 +293,11 @@ void MainWindow::onStepsPresetChanged(int index)
 {
     int value = m_stepsPresetCombo->itemData(index).toInt();
     m_stepsSlider->setValue(value);
+}
+
+void MainWindow::onDepthScalingToggled(bool checked)
+{
+    m_squeegeeWindow->setDepthRadiusScaling(checked);
 }
 
 void MainWindow::onGridStepChanged(int value)

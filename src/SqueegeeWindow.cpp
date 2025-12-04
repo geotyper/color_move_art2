@@ -630,6 +630,12 @@ void SqueegeeWindow::generateComposition()
         for (int ring = 0; ring < rings; ++ring) {
             int currentR = r * (rings - ring) / rings;
             if (currentR < 2) break;
+
+            if (m_depthRadiusScaling) {
+                // Scale radius by depth: top layers get smaller radius, deeper layers larger.
+                float depthScale = float((d - 1) - cz) / float(d - 1); // 0 at top, 1 at bottom
+                currentR = std::max(1, int(std::round(currentR * depthScale)));
+            }
             
             int colorIdx = QRandomGenerator::global()->bounded(colorCount);
             QVector3D col = currentPalette[colorIdx];
