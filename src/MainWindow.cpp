@@ -58,7 +58,13 @@ MainWindow::MainWindow()
     m_stepsLabel = new QLabel("100 steps");
     connect(m_stepsSlider, &QSlider::valueChanged, this, &MainWindow::onStepsChanged);
     formLayout->addRow("Simulation Steps:", m_stepsLabel);
-    formLayout->addRow(m_stepsSlider);
+    formLayout->addRow("Coarse (25-250):", m_stepsSlider);
+
+    m_stepsFineSlider = new QSlider(Qt::Horizontal);
+    m_stepsFineSlider->setRange(1, 25);
+    m_stepsFineSlider->setValue(25);
+    connect(m_stepsFineSlider, &QSlider::valueChanged, this, &MainWindow::onStepsFineChanged);
+    formLayout->addRow("Fine (1-25):", m_stepsFineSlider);
 
     m_stepsPresetCombo = new QComboBox();
     for (int v = 25; v <= 250; v += 25) {
@@ -220,14 +226,22 @@ void MainWindow::onPassesChanged(int value)
 void MainWindow::onStepsChanged(int value)
 {
     int snapped = (value / 25) * 25;
-    if (snapped < 25) snapped = 25;
-    if (snapped > 250) snapped = 250;
+    snapped = std::clamp(snapped, 25, 250);
     if (snapped != value) {
         m_stepsSlider->blockSignals(true);
         m_stepsSlider->setValue(snapped);
         m_stepsSlider->blockSignals(false);
     }
     m_stepsLabel->setText(QString::number(snapped) + " steps");
+
+    // Keep fine slider roughly in sync (cap at its max)
+    int fineVal = std::clamp(snapped, 1, 25);
+    if (m_stepsFineSlider->value() != fineVal) {
+        m_stepsFineSlider->blockSignals(true);
+        m_stepsFineSlider->setValue(fineVal);
+        m_stepsFineSlider->blockSignals(false);
+    }
+
     int presetIndex = (snapped / 25) - 1;
     if (presetIndex >= 0 && presetIndex < m_stepsPresetCombo->count()) {
         if (m_stepsPresetCombo->currentIndex() != presetIndex) {
@@ -298,6 +312,33 @@ void MainWindow::onStepsPresetChanged(int index)
 void MainWindow::onDepthScalingToggled(bool checked)
 {
     m_squeegeeWindow->setDepthRadiusScaling(checked);
+}
+
+void MainWindow::onStepsFineChanged(int value)
+{
+    int clamped = std::clamp(value, 1, 25);
+    if (clamped != value) {
+        m_stepsFineSlider->blockSignals(true);
+        m_stepsFineSlider->setValue(clamped);
+        m_stepsFineSlider->blockSignals(false);
+    }
+
+    m_stepsLabel->setText(QString::number(clamped) + " steps");
+
+    if (m_stepsSlider->value() != 25) {
+        m_stepsSlider->blockSignals(true);
+        m_stepsSlider->setValue(25);
+        m_stepsSlider->blockSignals(false);
+    }
+
+    // Presets apply only to multiples of 25; clear selection
+    if (m_stepsPresetCombo->currentIndex() != -1) {
+        m_stepsPresetCombo->blockSignals(true);
+        m_stepsPresetCombo->setCurrentIndex(-1);
+        m_stepsPresetCombo->blockSignals(false);
+    }
+
+    m_squeegeeWindow->setGenSteps(clamped);
 }
 
 void MainWindow::onGridStepChanged(int value)
