@@ -253,10 +253,6 @@ void SqueegeeWindow::initShaders()
             
             // 2D Distance check with Toroidal Wrapping
             float dist = segmentDistance(vec2(pos.xy), lastMousePos, mousePos);
-            float effectiveBrush = brushSize;
-            if (squeegeeMode == 2) { // accurate, cover a bit more to avoid banding
-                effectiveBrush *= 1.1;
-            }
             
             if (toroidal) {
                 vec2 fSize = vec2(size.xy);
@@ -270,7 +266,7 @@ void SqueegeeWindow::initShaders()
                 }
             }
             
-            if (dist < effectiveBrush) {
+            if (dist < brushSize) {
                 // Squeegee Logic:
                 // Shift paint in direction of movement.
                 vec2 dir = normalize(mousePos - lastMousePos);
@@ -284,7 +280,7 @@ void SqueegeeWindow::initShaders()
                 }
                 
                 float baseShift = 2.0;
-                float shift = baseShift * falloff;
+                float shift = baseShift; // keep displacement consistent across modes
 
                 // Sample from "behind"
                 vec2 offsetDir = dir;
@@ -314,12 +310,13 @@ void SqueegeeWindow::initShaders()
                     // If the current voxel has paint (we hit a drop), mix it into the smear.
                     if (current.a > 0.01) {
                         float pickup = (squeegeeMode == 2) ? 0.35 : 0.2;
+                        if (squeegeeMode == 1) pickup *= falloff; // softer pickup toward edges
                         result = mix(result, current, pickup);
                     }
                     
                     // Friction/Decay:
                     float decay = 0.995;
-                    if (squeegeeMode == 1) decay = 0.997;       // softer keeps more paint
+                    if (squeegeeMode == 1) decay = mix(0.997, 0.999, 1.0 - falloff); // softer edges decay more
                     if (squeegeeMode == 2) decay = 0.999;       // accurate tries to keep continuity
                     result.a *= decay;
                     
@@ -770,9 +767,6 @@ void SqueegeeWindow::drawDrop(QVector2D, float, QVector3D) {}
 void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
 {
     int steps = m_genSteps; // Use configurable steps (Speed)
-    if (m_squeegeeMode == SqueegeeAccurate) {
-        steps = m_genSteps * 2; // denser sampling to reduce striping
-    }
     QVector2D dir = end - start;
     float len = dir.length();
     dir.normalize();
