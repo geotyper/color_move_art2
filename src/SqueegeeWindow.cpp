@@ -87,6 +87,7 @@ SqueegeeWindow::~SqueegeeWindow()
     delete m_computeSqueegee;
     delete m_computeBlur;
     delete m_computeSaturate;
+    delete m_computeCombFix;
     
     if (m_texture3DA) glDeleteTextures(1, &m_texture3DA);
     if (m_texture3DB) glDeleteTextures(1, &m_texture3DB);
@@ -132,24 +133,44 @@ void SqueegeeWindow::initShaders()
         out vec4 fragColor;
         
         layout(binding = 0, rgba32f) uniform image3D imgInput;
+        uniform float sharpenAmount;
+        
+        vec4 compositePixel(ivec2 pos, ivec3 size) {
+            vec4 color = vec4(1.0);
+            for (int z = 0; z < size.z; ++z) {
+                vec4 voxel = imageLoad(imgInput, ivec3(pos, z));
+                if (voxel.a > 0.01) {
+                    color = mix(color, voxel, voxel.a);
+                }
+            }
+            return color;
+        }
         
         void main() {
             ivec3 size = imageSize(imgInput);
             ivec2 pixelPos = ivec2(texCoord * vec2(size.xy));
             
-            vec4 finalColor = vec4(1.0); // Background white
-            
-            // Raymarch from Bottom (layer 0) to Top (layer 15)
-            // Standard Over operator: Dest = Mix(Dest, Src, Src.a)
-            for (int z = 0; z < 32; ++z) {
-                vec4 voxel = imageLoad(imgInput, ivec3(pixelPos, z));
-                if (voxel.a > 0.01) {
-                    // Mix voxel ON TOP of current finalColor
-                    finalColor = mix(finalColor, voxel, voxel.a);
+            vec4 base = compositePixel(pixelPos, size);
+
+            if (sharpenAmount > 0.001) {
+                vec3 blur = vec3(0.0);
+                int count = 0;
+                for (int dy = -1; dy <= 1; ++dy) {
+                    for (int dx = -1; dx <= 1; ++dx) {
+                        ivec2 nPos = pixelPos + ivec2(dx, dy);
+                        nPos.x = clamp(nPos.x, 0, size.x - 1);
+                        nPos.y = clamp(nPos.y, 0, size.y - 1);
+                        vec4 nCol = compositePixel(nPos, size);
+                        blur += nCol.rgb;
+                        count++;
+                    }
                 }
+                if (count > 0) blur /= float(count);
+                vec3 sharpened = clamp(base.rgb + sharpenAmount * (base.rgb - blur), 0.0, 1.0);
+                fragColor = vec4(sharpened, 1.0);
+            } else {
+                fragColor = base;
             }
-            
-            fragColor = finalColor;
         }
     )");
     m_program->link();
@@ -410,6 +431,56 @@ void SqueegeeWindow::initShaders()
         }
     )");
     m_computeSaturate->link();
+
+    // Compute Shader: Comb Fix (fill alternating empty lines/columns)
+    m_computeCombFix = new QOpenGLShaderProgram;
+    m_computeCombFix->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
+        #version 430 core
+        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+        layout(binding = 0, rgba32f) uniform image3D imgIn;
+        layout(binding = 1, rgba32f) uniform image3D imgOut;
+
+        bool isFilled(vec4 v) { return v.a > 0.05; }
+        float colorDist(vec3 a, vec3 b) { return length(a - b); }
+
+        void main() {
+            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
+            ivec3 size = imageSize(imgIn);
+
+            if (pos.x >= size.x || pos.y >= size.y) return;
+
+            vec4 cur = imageLoad(imgIn, pos);
+            if (isFilled(cur)) {
+                imageStore(imgOut, pos, cur);
+                return;
+            }
+
+            // Clamp neighbor fetches
+            ivec3 leftPos  = ivec3(max(pos.x - 1, 0), pos.y, pos.z);
+            ivec3 rightPos = ivec3(min(pos.x + 1, size.x - 1), pos.y, pos.z);
+            ivec3 upPos    = ivec3(pos.x, max(pos.y - 1, 0), pos.z);
+            ivec3 downPos  = ivec3(pos.x, min(pos.y + 1, size.y - 1), pos.z);
+
+            vec4 left  = imageLoad(imgIn, leftPos);
+            vec4 right = imageLoad(imgIn, rightPos);
+            vec4 up    = imageLoad(imgIn, upPos);
+            vec4 down  = imageLoad(imgIn, downPos);
+
+            bool horizGap = isFilled(left) && isFilled(right) && colorDist(left.rgb, right.rgb) < 0.3;
+            bool vertGap  = isFilled(up) && isFilled(down) && colorDist(up.rgb, down.rgb) < 0.3;
+
+            if (horizGap || vertGap) {
+                vec4 a = horizGap ? left : up;
+                vec4 b = horizGap ? right : down;
+                vec4 fill = vec4((a.rgb + b.rgb) * 0.5, min(1.0, max(a.a, b.a)));
+                imageStore(imgOut, pos, fill);
+            } else {
+                imageStore(imgOut, pos, cur);
+            }
+        }
+    )");
+    m_computeCombFix->link();
 }
 
 void SqueegeeWindow::initSimulation()
@@ -517,6 +588,7 @@ void SqueegeeWindow::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     m_program->bind();
+    m_program->setUniformValue("sharpenAmount", m_sharpenAmount);
     glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
     
     m_vao.bind();
@@ -844,6 +916,20 @@ void SqueegeeWindow::applyBlur()
     
     std::swap(m_texture3DA, m_texture3DB);
     m_computeBlur->release();
+    update();
+}
+
+void SqueegeeWindow::applyCombFix()
+{
+    m_computeCombFix->bind();
+    glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
+    glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+    glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 32);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+    std::swap(m_texture3DA, m_texture3DB);
+    m_computeCombFix->release();
     update();
 }
 

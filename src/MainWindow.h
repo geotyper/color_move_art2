@@ -39,11 +39,13 @@ private slots:
     void onStepsPresetChanged(int index);
     void onDepthScalingToggled(bool checked);
     void onStepsFineChanged(int value);
+    void onSharpenChanged(int value);
 
     void onRegenerate();
     void onRegenerateOverlay();
     void onRegenerateOverlaySqueegeeOnly();
     void onSaturate();
+    void onCombFix();
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
@@ -54,6 +56,7 @@ private:
     QSlider *m_passesSlider;
     QSlider *m_stepsSlider;
     QSlider *m_stepsFineSlider;
+    QSlider *m_sharpenSlider;
     QSlider *m_opacitySlider; // Opacity Non-Linearity
     QSlider *m_gridStepSlider; // Grid Step Size of drops
     QSlider *m_sizeSlider; // Drop Max Size

@@ -61,6 +61,7 @@ private:
     QOpenGLShaderProgram *m_computeSqueegee = nullptr;
     QOpenGLShaderProgram *m_computeBlur = nullptr;
     QOpenGLShaderProgram *m_computeSaturate = nullptr;
+    QOpenGLShaderProgram *m_computeCombFix = nullptr;
     
     // 3D Textures (Double Buffered)
     // We use raw GL texture IDs for easier binding to image units in compute shaders
@@ -103,6 +104,7 @@ private:
     int m_currentPaletteIdx = 0;
     SqueegeeMode m_squeegeeMode = SqueegeeSolid;
     bool m_depthRadiusScaling = false;
+    float m_sharpenAmount = 0.0f;
     QVector<QVector<QVector3D>> m_palettes;
     
     QVector2D m_lastMousePos;
@@ -130,8 +132,10 @@ public:
     void setPalette(int index) { m_currentPaletteIdx = index; }
     void setSqueegeeMode(SqueegeeMode mode) { m_squeegeeMode = mode; }
     void setDepthRadiusScaling(bool enabled) { m_depthRadiusScaling = enabled; }
+    void setSharpenAmount(float amount) { m_sharpenAmount = amount; update(); }
     
     void regenerate() { generateComposition(); update(); }
     void regenerateSqueegeeOnly();
     void applySaturation();
+    void applyCombFix();
 };

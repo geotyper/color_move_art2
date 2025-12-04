@@ -1,4 +1,6 @@
 #include "MainWindow.h"
+#include <algorithm>
+#include <algorithm>
 
 MainWindow::MainWindow()
 {
@@ -134,6 +136,12 @@ MainWindow::MainWindow()
     connect(m_squeegeeModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onSqueegeeModeChanged);
     formLayout->addRow("Squeegee:", m_squeegeeModeCombo);
 
+    m_sharpenSlider = new QSlider(Qt::Horizontal);
+    m_sharpenSlider->setRange(0, 200); // 0.0 - 2.0
+    m_sharpenSlider->setValue(0);
+    connect(m_sharpenSlider, &QSlider::valueChanged, this, &MainWindow::onSharpenChanged);
+    formLayout->addRow("Sharpen:", m_sharpenSlider);
+
     // Grid Step Slider (10 - 200 px)
     m_gridStepSlider = new QSlider(Qt::Horizontal);
     m_gridStepSlider->setRange(10, 200);
@@ -171,6 +179,10 @@ MainWindow::MainWindow()
     QPushButton *saturateBtn = new QPushButton("Saturate");
     connect(saturateBtn, &QPushButton::clicked, this, &MainWindow::onSaturate);
     controlLayout->addWidget(saturateBtn);
+
+    QPushButton *combFixBtn = new QPushButton("Comb Fix");
+    connect(combFixBtn, &QPushButton::clicked, this, &MainWindow::onCombFix);
+    controlLayout->addWidget(combFixBtn);
     
     controlLayout->addStretch();
     
@@ -298,6 +310,12 @@ void MainWindow::onGenModeChanged(int index)
     m_squeegeeWindow->setGenMode((SqueegeeWindow::GenMode)index);
 }
 
+void MainWindow::onSharpenChanged(int value)
+{
+    float amount = value / 100.0f; // 0.0 - 2.0
+    m_squeegeeWindow->setSharpenAmount(amount);
+}
+
 void MainWindow::onSqueegeeModeChanged(int index)
 {
     m_squeegeeWindow->setSqueegeeMode((SqueegeeWindow::SqueegeeMode)index);
@@ -367,4 +385,9 @@ void MainWindow::onRegenerateOverlaySqueegeeOnly()
 void MainWindow::onSaturate()
 {
     m_squeegeeWindow->applySaturation();
+}
+
+void MainWindow::onCombFix()
+{
+    m_squeegeeWindow->applyCombFix();
 }
