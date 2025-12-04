@@ -224,6 +224,7 @@ void SqueegeeWindow::initShaders()
         uniform float brushSize;
         uniform bool isMouseDown;
         uniform bool toroidal;
+        uniform int squeegeeMode; // 0: solid, 1: soft, 2: accurate
         
         // Pseudo-random function
         float rand(vec2 co){
@@ -252,6 +253,10 @@ void SqueegeeWindow::initShaders()
             
             // 2D Distance check with Toroidal Wrapping
             float dist = segmentDistance(vec2(pos.xy), lastMousePos, mousePos);
+            float effectiveBrush = brushSize;
+            if (squeegeeMode == 2) { // accurate, cover a bit more to avoid banding
+                effectiveBrush *= 1.1;
+            }
             
             if (toroidal) {
                 vec2 fSize = vec2(size.xy);
@@ -265,14 +270,29 @@ void SqueegeeWindow::initShaders()
                 }
             }
             
-            if (dist < brushSize) {
+            if (dist < effectiveBrush) {
                 // Squeegee Logic:
                 // Shift paint in direction of movement.
                 vec2 dir = normalize(mousePos - lastMousePos);
                 if (length(mousePos - lastMousePos) < 0.1) dir = vec2(0.0);
+                vec2 perp = vec2(-dir.y, dir.x);
+
+                float falloff = 1.0;
+                if (squeegeeMode == 1) { // soft: non-linear falloff based on distance
+                    float t = clamp(dist / max(brushSize, 0.0001), 0.0, 1.0);
+                    falloff = pow(1.0 - t, 0.5);
+                }
                 
+                float baseShift = 2.0;
+                float shift = baseShift * falloff;
+
                 // Sample from "behind"
-                ivec3 samplePos = ivec3(vec2(pos.xy) - dir * 2.0, pos.z);
+                vec2 offsetDir = dir;
+                if (squeegeeMode == 2) { // accurate: small perpendicular jitter to fill gaps
+                    float jitter = ((int(pos.x + pos.y + pos.z) & 1) == 0) ? 0.5 : -0.5;
+                    offsetDir += perp * jitter * 0.05;
+                }
+                ivec3 samplePos = ivec3(vec2(pos.xy) - offsetDir * shift, pos.z);
                 
                 if (toroidal) {
                     // Wrap
@@ -293,15 +313,15 @@ void SqueegeeWindow::initShaders()
                     // Mixing Logic:
                     // If the current voxel has paint (we hit a drop), mix it into the smear.
                     if (current.a > 0.01) {
-                        // Mix a bit of the static drop into the moving paint
-                        // 0.2 means we pick up 20% of the new color per step, gradually changing the streak.
-                        result = mix(result, current, 0.2);
+                        float pickup = (squeegeeMode == 2) ? 0.35 : 0.2;
+                        result = mix(result, current, pickup);
                     }
                     
                     // Friction/Decay:
-                    // Slight alpha decay to simulate paint thinning, but less aggressive than before
-                    // because Gravity will handle the "disappearance" into lower layers.
-                    result.a *= 0.995;
+                    float decay = 0.995;
+                    if (squeegeeMode == 1) decay = 0.997;       // softer keeps more paint
+                    if (squeegeeMode == 2) decay = 0.999;       // accurate tries to keep continuity
+                    result.a *= decay;
                     
                     imageStore(imgOut, pos, result);
                 } else {
@@ -750,6 +770,9 @@ void SqueegeeWindow::drawDrop(QVector2D, float, QVector3D) {}
 void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
 {
     int steps = m_genSteps; // Use configurable steps (Speed)
+    if (m_squeegeeMode == SqueegeeAccurate) {
+        steps = m_genSteps * 2; // denser sampling to reduce striping
+    }
     QVector2D dir = end - start;
     float len = dir.length();
     dir.normalize();
@@ -761,6 +784,7 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
     m_computeSqueegee->setUniformValue("brushSize", size);
     m_computeSqueegee->setUniformValue("isMouseDown", true);
     m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
+    m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
     
     for (int i = 0; i < steps; ++i) {
         float t = (float)i / (float)steps;
@@ -773,6 +797,7 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
         m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(last.x(), height() - last.y()));
         // Uniforms set once above persist if shader is bound, but we re-bind inside loop?
         // Wait, we release gravity then re-bind squeegee. So we must re-set uniforms.
+        m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
         
         glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 32);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -801,6 +826,7 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
         m_computeSqueegee->setUniformValue("brushSize", size);
         m_computeSqueegee->setUniformValue("isMouseDown", true);
         m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
+        m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
         
         last = current;
     }

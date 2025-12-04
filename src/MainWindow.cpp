@@ -53,12 +53,20 @@ MainWindow::MainWindow()
     // Lower steps = Faster movement (less physics per pixel)
     // Higher steps = Slower movement (more physics per pixel)
     m_stepsSlider = new QSlider(Qt::Horizontal);
-    m_stepsSlider->setRange(50, 2000); // Min 50 as requested
-    m_stepsSlider->setValue(600);
-    m_stepsLabel = new QLabel("600 steps");
+    m_stepsSlider->setRange(25, 250);
+    m_stepsSlider->setValue(100);
+    m_stepsLabel = new QLabel("100 steps");
     connect(m_stepsSlider, &QSlider::valueChanged, this, &MainWindow::onStepsChanged);
     formLayout->addRow("Simulation Steps:", m_stepsLabel);
     formLayout->addRow(m_stepsSlider);
+
+    m_stepsPresetCombo = new QComboBox();
+    for (int v = 25; v <= 250; v += 25) {
+        m_stepsPresetCombo->addItem(QString::number(v) + " steps", v);
+    }
+    m_stepsPresetCombo->setCurrentIndex(3); // 100 steps
+    connect(m_stepsPresetCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onStepsPresetChanged);
+    formLayout->addRow("Preset:", m_stepsPresetCombo);
     
     // Density Slider (100 - 2000)
 
@@ -107,6 +115,14 @@ MainWindow::MainWindow()
     m_genModeCombo->addItem("Grid");
     connect(m_genModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onGenModeChanged);
     formLayout->addRow("Gen Mode:", m_genModeCombo);
+
+    // Squeegee Mode Combo
+    m_squeegeeModeCombo = new QComboBox();
+    m_squeegeeModeCombo->addItem("Solid");
+    m_squeegeeModeCombo->addItem("Soft");
+    m_squeegeeModeCombo->addItem("Accurate");
+    connect(m_squeegeeModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onSqueegeeModeChanged);
+    formLayout->addRow("Squeegee:", m_squeegeeModeCombo);
 
     // Grid Step Slider (10 - 200 px)
     m_gridStepSlider = new QSlider(Qt::Horizontal);
@@ -199,8 +215,24 @@ void MainWindow::onPassesChanged(int value)
 
 void MainWindow::onStepsChanged(int value)
 {
-    m_stepsLabel->setText(QString::number(value) + " steps");
-    m_squeegeeWindow->setGenSteps(value);
+    int snapped = (value / 25) * 25;
+    if (snapped < 25) snapped = 25;
+    if (snapped > 250) snapped = 250;
+    if (snapped != value) {
+        m_stepsSlider->blockSignals(true);
+        m_stepsSlider->setValue(snapped);
+        m_stepsSlider->blockSignals(false);
+    }
+    m_stepsLabel->setText(QString::number(snapped) + " steps");
+    int presetIndex = (snapped / 25) - 1;
+    if (presetIndex >= 0 && presetIndex < m_stepsPresetCombo->count()) {
+        if (m_stepsPresetCombo->currentIndex() != presetIndex) {
+            m_stepsPresetCombo->blockSignals(true);
+            m_stepsPresetCombo->setCurrentIndex(presetIndex);
+            m_stepsPresetCombo->blockSignals(false);
+        }
+    }
+    m_squeegeeWindow->setGenSteps(snapped);
 }
 
 void MainWindow::onSizeChanged(int value)
@@ -246,6 +278,17 @@ void MainWindow::onShapeChanged(int index)
 void MainWindow::onGenModeChanged(int index)
 {
     m_squeegeeWindow->setGenMode((SqueegeeWindow::GenMode)index);
+}
+
+void MainWindow::onSqueegeeModeChanged(int index)
+{
+    m_squeegeeWindow->setSqueegeeMode((SqueegeeWindow::SqueegeeMode)index);
+}
+
+void MainWindow::onStepsPresetChanged(int index)
+{
+    int value = m_stepsPresetCombo->itemData(index).toInt();
+    m_stepsSlider->setValue(value);
 }
 
 void MainWindow::onGridStepChanged(int value)

@@ -35,6 +35,8 @@ private slots:
     void onShapeChanged(int index);
     void onGenModeChanged(int index);
     void onGridStepChanged(int value);
+    void onSqueegeeModeChanged(int index);
+    void onStepsPresetChanged(int index);
 
     void onRegenerate();
     void onRegenerateOverlay();
@@ -61,6 +63,8 @@ private:
     QComboBox *m_paletteCombo;
     QComboBox *m_shapeCombo;
     QComboBox *m_genModeCombo;
+    QComboBox *m_squeegeeModeCombo;
+    QComboBox *m_stepsPresetCombo;
     
     QLabel *m_angleLabel;
     QLabel *m_widthLabel;
