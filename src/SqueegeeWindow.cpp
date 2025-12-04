@@ -716,6 +716,37 @@ void SqueegeeWindow::generateComposition()
     }
 }
 
+void SqueegeeWindow::regenerateSqueegeeOnly()
+{
+    // Run only the squeegee stroke on the current texture content.
+    if (m_showPreview) {
+        return;
+    }
+
+    int w = width();
+    int h = height();
+    if (w <= 0 || h <= 0) {
+        return;
+    }
+
+    float rad = qDegreesToRadians(m_genAngle);
+    QVector2D dir(std::cos(rad), std::sin(rad));
+
+    QVector2D center(w * 0.5f, h * 0.5f);
+    float diag = std::sqrt(float(w * w + h * h));
+
+    QVector2D start = center - dir * diag;
+    QVector2D end = center + dir * diag;
+
+    float squeegeeWidth = w * m_genWidth;
+
+    for (int i = 0; i < m_genPasses; ++i) {
+        simulateStroke(start, end, squeegeeWidth);
+    }
+
+    update();
+}
+
 void SqueegeeWindow::drawDrop(QVector2D, float, QVector3D) {}
 
 void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)

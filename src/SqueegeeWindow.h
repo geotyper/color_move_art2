@@ -122,5 +122,6 @@ public:
     void setPalette(int index) { m_currentPaletteIdx = index; regenerate(); }
     
     void regenerate() { generateComposition(); update(); }
+    void regenerateSqueegeeOnly();
     void applySaturation();
 };

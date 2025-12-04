@@ -36,9 +36,9 @@ private slots:
     void onGenModeChanged(int index);
     void onGridStepChanged(int value);
 
-
     void onRegenerate();
     void onRegenerateOverlay();
+    void onRegenerateOverlaySqueegeeOnly();
     void onSaturate();
 
 private:
@@ -71,4 +71,3 @@ private:
     QLabel *m_sizeLabel;
     QLabel *m_concentricLabel;
 };
-
