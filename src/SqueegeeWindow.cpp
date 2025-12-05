@@ -8,7 +8,8 @@
 #include <QDir>
 #include <QStringList>
 
-SqueegeeWindow::SqueegeeWindow()
+SqueegeeWindow::SqueegeeWindow(QWidget *parent)
+    : QOpenGLWidget(parent)
 {
     // Palette 1: Modern Art (Original Calm)
     m_palettes.append({

@@ -284,7 +284,6 @@ MainWindow::MainWindow()
     m_mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_mdiArea->setBackground(QBrush(QColor(40, 40, 50))); // Dark background to prevent recursion artifacts
 
-    /*
     m_meshViewer = new MeshViewerWidget();
     m_meshViewer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QMdiSubWindow *meshWin = m_mdiArea->addSubWindow(m_meshViewer);
@@ -292,15 +291,15 @@ MainWindow::MainWindow()
     meshWin->setAttribute(Qt::WA_DeleteOnClose, false);
     meshWin->resize(640, 480);
     meshWin->show();
-    */
 
     // Squeegee Window
+    // Squeegee Window
     m_squeegeeWindow = new SqueegeeWindow();
-    m_container = QWidget::createWindowContainer(m_squeegeeWindow);
-    m_container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_container->setMinimumSize(480, 360);
-    m_container->setFocusPolicy(Qt::StrongFocus);
-    QMdiSubWindow *squeegeeWin = m_mdiArea->addSubWindow(m_container);
+    m_squeegeeWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_squeegeeWindow->setMinimumSize(480, 360);
+    m_squeegeeWindow->setFocusPolicy(Qt::StrongFocus);
+    
+    QMdiSubWindow *squeegeeWin = m_mdiArea->addSubWindow(m_squeegeeWindow);
     squeegeeWin->setWindowTitle("2D Brush Canvas");
     squeegeeWin->setAttribute(Qt::WA_DeleteOnClose, false);
     squeegeeWin->resize(640, 480);

@@ -12,7 +12,7 @@
 #include <QFormLayout>
 #include <QMdiArea>
 #include "SqueegeeWindow.h"
-// #include "MeshViewerWidget.h"
+#include "MeshViewerWidget.h"
 #include "Noise2D.h"
 
 class MainWindow : public QMainWindow
@@ -58,8 +58,7 @@ private slots:
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
-    /* MeshViewerWidget *m_meshViewer; */
-    QWidget *m_container;
+    MeshViewerWidget *m_meshViewer;
     QMdiArea *m_mdiArea;
     bool m_tiledOnce = false;
 

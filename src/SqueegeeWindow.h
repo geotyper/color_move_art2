@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QOpenGLWindow>
+#include <QOpenGLWidget>
 #include <QOpenGLFunctions_4_3_Core>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
@@ -17,10 +17,10 @@
 #include <QOpenGLFunctions_4_3_Core>
 #include "Noise2D.h"
 
-class SqueegeeWindow : public QOpenGLWindow, protected QOpenGLFunctions_4_3_Core
+class SqueegeeWindow : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
 public:
-    SqueegeeWindow();
+    SqueegeeWindow(QWidget *parent = nullptr);
     ~SqueegeeWindow();
 
     enum GenShape {
