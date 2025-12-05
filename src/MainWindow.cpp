@@ -271,6 +271,28 @@ MainWindow::MainWindow()
     
     controlLayout->addStretch();
     
+    // Light Controls
+    QFormLayout *lightLayout = new QFormLayout();
+    m_lightAzimuthSlider = new QSlider(Qt::Horizontal);
+    m_lightAzimuthSlider->setRange(0, 360);
+    m_lightAzimuthSlider->setValue(45);
+    connect(m_lightAzimuthSlider, &QSlider::valueChanged, this, &MainWindow::onLightChanged);
+    
+    m_lightElevationSlider = new QSlider(Qt::Horizontal);
+    m_lightElevationSlider->setRange(-90, 90);
+    m_lightElevationSlider->setValue(30);
+    connect(m_lightElevationSlider, &QSlider::valueChanged, this, &MainWindow::onLightChanged);
+    
+    m_zoomSlider = new QSlider(Qt::Horizontal);
+    m_zoomSlider->setRange(10, 100); // 1.0 to 10.0
+    m_zoomSlider->setValue(30); // 3.0
+    connect(m_zoomSlider, &QSlider::valueChanged, this, &MainWindow::onZoomChanged);
+    
+    lightLayout->addRow("Light Azimuth:", m_lightAzimuthSlider);
+    lightLayout->addRow("Light Elevation:", m_lightElevationSlider);
+    lightLayout->addRow("Zoom (Dist):", m_zoomSlider);
+    controlLayout->addLayout(lightLayout);
+    
     QLabel *info = new QLabel("Controls:\nSpace: Toggle Tool\n1-5: Colors\nWheel: Brush Size\nB: Blur");
     controlLayout->addWidget(info);
     mainLayout->addWidget(controls);
@@ -609,4 +631,28 @@ void MainWindow::onSaturate()
 void MainWindow::onCombFix()
 {
     m_squeegeeWindow->applyCombFix();
+}
+
+void MainWindow::onLightChanged()
+{
+    float azimuth = qDegreesToRadians((float)m_lightAzimuthSlider->value());
+    float elevation = qDegreesToRadians((float)m_lightElevationSlider->value());
+    
+    // Spherical to Cartesian
+    // Y is Up
+    float x = std::sin(azimuth) * std::cos(elevation);
+    float y = std::sin(elevation);
+    float z = std::cos(azimuth) * std::cos(elevation);
+    
+    if (m_meshViewer) {
+        m_meshViewer->setLightDirection(QVector3D(x, y, z));
+    }
+}
+
+void MainWindow::onZoomChanged(int value)
+{
+    float dist = value / 10.0f;
+    if (m_meshViewer) {
+        m_meshViewer->setCameraDistance(dist);
+    }
 }

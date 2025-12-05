@@ -21,6 +21,9 @@ public:
     explicit MeshViewerWidget(QWidget *parent = nullptr);
     ~MeshViewerWidget() override;
 
+    void setLightDirection(const QVector3D &dir);
+    void setCameraDistance(float dist);
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -47,4 +50,6 @@ private:
     float m_rotationY = 0.0f;
     QTimer *m_timer = nullptr;
     bool m_showWireframe = false;
+    QVector3D m_lightDir = QVector3D(0.3f, 0.7f, 0.4f).normalized();
+    float m_cameraDistance = 3.0f;
 };

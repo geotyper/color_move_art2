@@ -55,12 +55,18 @@ private slots:
     void onRegenerateOverlaySqueegeeOnly();
     void onSaturate();
     void onCombFix();
+    void onLightChanged();
+    void onZoomChanged(int value);
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
     MeshViewerWidget *m_meshViewer;
     QMdiArea *m_mdiArea;
     bool m_tiledOnce = false;
+    
+    QSlider *m_lightAzimuthSlider;
+    QSlider *m_lightElevationSlider;
+    QSlider *m_zoomSlider;
 
 protected:
     void showEvent(QShowEvent *event) override;
