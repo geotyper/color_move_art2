@@ -10,7 +10,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFormLayout>
+#include <QMdiArea>
 #include "SqueegeeWindow.h"
+// #include "MeshViewerWidget.h"
+#include "Noise2D.h"
 
 class MainWindow : public QMainWindow
 {
@@ -40,6 +43,10 @@ private slots:
     void onDepthScalingToggled(bool checked);
     void onStepsFineChanged(int value);
     void onSharpenChanged(int value);
+    void onNoiseModeChanged(int index);
+    void onNoiseScaleChanged(int value);
+    void onNoiseStrengthChanged(int value);
+    void updateNoisePreview();
 
     void onRegenerate();
     void onRegenerateOverlay();
@@ -49,7 +56,13 @@ private slots:
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
+    /* MeshViewerWidget *m_meshViewer; */
     QWidget *m_container;
+    QMdiArea *m_mdiArea;
+    bool m_tiledOnce = false;
+
+protected:
+    void showEvent(QShowEvent *event) override;
     
     QSlider *m_angleSlider;
     QSlider *m_widthSlider;
@@ -72,6 +85,7 @@ private:
     QComboBox *m_squeegeeModeCombo;
     QComboBox *m_stepsPresetCombo;
     QCheckBox *m_depthScalingCheckBox;
+    QComboBox *m_noiseModeCombo;
     
     QLabel *m_angleLabel;
     QLabel *m_widthLabel;
@@ -81,4 +95,10 @@ private:
     QLabel *m_gridStepLabel;
     QLabel *m_sizeLabel;
     QLabel *m_concentricLabel;
+    QLabel *m_noiseScaleLabel;
+    QLabel *m_noiseStrengthLabel;
+    QSlider *m_noiseScaleSlider;
+    QSlider *m_noiseStrengthSlider;
+    QLabel *m_noisePreviewLabel;
+    Noise2D m_noisePreviewGen;
 };

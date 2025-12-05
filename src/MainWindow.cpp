@@ -1,6 +1,12 @@
 #include "MainWindow.h"
 #include <algorithm>
-#include <algorithm>
+#include <QFrame>
+#include <QMdiSubWindow>
+#include <QTimer>
+#include <QShowEvent>
+#include <QImage>
+#include <QPixmap>
+#include <QColor>
 
 MainWindow::MainWindow()
 {
@@ -11,10 +17,10 @@ MainWindow::MainWindow()
     setCentralWidget(centralWidget);
     
     QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
-    
+
     // Control Panel
     QWidget *controls = new QWidget;
-    controls->setFixedWidth(300);
+    controls->setFixedWidth(320);
     QVBoxLayout *controlLayout = new QVBoxLayout(controls);
     
     QFormLayout *formLayout = new QFormLayout;
@@ -136,6 +142,36 @@ MainWindow::MainWindow()
     connect(m_squeegeeModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onSqueegeeModeChanged);
     formLayout->addRow("Squeegee:", m_squeegeeModeCombo);
 
+    m_noiseModeCombo = new QComboBox();
+    m_noiseModeCombo->addItem("Noise Off", (int)SqueegeeWindow::NoiseOff);
+    m_noiseModeCombo->addItem("Noise -> Brush Intensity", (int)SqueegeeWindow::NoiseBrushIntensity);
+    m_noiseModeCombo->addItem("Noise -> Brush Offset (wavy)", (int)SqueegeeWindow::NoiseBrushOffset);
+    connect(m_noiseModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onNoiseModeChanged);
+    formLayout->addRow("Brush Noise:", m_noiseModeCombo);
+
+    m_noiseScaleSlider = new QSlider(Qt::Horizontal);
+    m_noiseScaleSlider->setRange(10, 400);
+    m_noiseScaleSlider->setValue(120);
+    m_noiseScaleLabel = new QLabel("120 px");
+    connect(m_noiseScaleSlider, &QSlider::valueChanged, this, &MainWindow::onNoiseScaleChanged);
+    formLayout->addRow("Noise Scale:", m_noiseScaleLabel);
+    formLayout->addRow(m_noiseScaleSlider);
+
+    m_noiseStrengthSlider = new QSlider(Qt::Horizontal);
+    m_noiseStrengthSlider->setRange(0, 100);
+    m_noiseStrengthSlider->setValue(0);
+    m_noiseStrengthLabel = new QLabel("0.00");
+    connect(m_noiseStrengthSlider, &QSlider::valueChanged, this, &MainWindow::onNoiseStrengthChanged);
+    formLayout->addRow("Noise Strength:", m_noiseStrengthLabel);
+    formLayout->addRow(m_noiseStrengthSlider);
+
+    m_noisePreviewLabel = new QLabel();
+    m_noisePreviewLabel->setFixedSize(180, 90);
+    m_noisePreviewLabel->setFrameStyle(QFrame::Box | QFrame::Plain);
+    m_noisePreviewLabel->setAlignment(Qt::AlignCenter);
+    m_noisePreviewLabel->setScaledContents(true);
+    formLayout->addRow("Noise Preview:", m_noisePreviewLabel);
+
     m_sharpenSlider = new QSlider(Qt::Horizontal);
     m_sharpenSlider->setRange(0, 200); // 0.0 - 2.0
     m_sharpenSlider->setValue(0);
@@ -188,21 +224,61 @@ MainWindow::MainWindow()
     
     QLabel *info = new QLabel("Controls:\nSpace: Toggle Tool\n1-5: Colors\nWheel: Brush Size\nB: Blur");
     controlLayout->addWidget(info);
-    
     mainLayout->addWidget(controls);
-    
+
+    // Viewer area: real subwindows inside MDI (so they behave like windows, not static sections)
+    m_mdiArea = new QMdiArea;
+    m_mdiArea->setViewMode(QMdiArea::SubWindowView);
+    m_mdiArea->setDocumentMode(false);
+    m_mdiArea->setOption(QMdiArea::DontMaximizeSubWindowOnActivation, true);
+    m_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_mdiArea->setBackground(QBrush(QColor(40, 40, 50))); // Dark background to prevent recursion artifacts
+
+    /*
+    m_meshViewer = new MeshViewerWidget();
+    m_meshViewer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QMdiSubWindow *meshWin = m_mdiArea->addSubWindow(m_meshViewer);
+    meshWin->setWindowTitle("3D Mesh Viewer");
+    meshWin->setAttribute(Qt::WA_DeleteOnClose, false);
+    meshWin->resize(640, 480);
+    meshWin->show();
+    */
+
     // Squeegee Window
     m_squeegeeWindow = new SqueegeeWindow();
     m_container = QWidget::createWindowContainer(m_squeegeeWindow);
     m_container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_container->setMinimumSize(480, 360);
     m_container->setFocusPolicy(Qt::StrongFocus);
-    mainLayout->addWidget(m_container);
-    
+    QMdiSubWindow *squeegeeWin = m_mdiArea->addSubWindow(m_container);
+    squeegeeWin->setWindowTitle("2D Brush Canvas");
+    squeegeeWin->setAttribute(Qt::WA_DeleteOnClose, false);
+    squeegeeWin->resize(640, 480);
+    squeegeeWin->show();
+
+    mainLayout->addWidget(m_mdiArea, 1);
+
     // Initial values
     m_squeegeeWindow->setGenAngle(45.0f);
     m_squeegeeWindow->setGenWidth(2.0f);
     m_squeegeeWindow->setGenPasses(1);
     m_squeegeeWindow->setGenSteps(600);
+    onNoiseModeChanged(m_noiseModeCombo->currentIndex());
+    onNoiseScaleChanged(m_noiseScaleSlider->value());
+    onNoiseStrengthChanged(m_noiseStrengthSlider->value());
+    updateNoisePreview();
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    QMainWindow::showEvent(event);
+    if (m_tiledOnce) return;
+    m_tiledOnce = true;
+    // Tile after the window is actually shown so layout sizes are valid
+    QTimer::singleShot(0, this, [this]() {
+        m_mdiArea->tileSubWindows();
+    });
 }
 
 MainWindow::~MainWindow()
@@ -314,6 +390,81 @@ void MainWindow::onSharpenChanged(int value)
 {
     float amount = value / 100.0f; // 0.0 - 2.0
     m_squeegeeWindow->setSharpenAmount(amount);
+}
+
+void MainWindow::onNoiseModeChanged(int index)
+{
+    int modeVal = m_noiseModeCombo->itemData(index).toInt();
+    m_squeegeeWindow->setBrushNoiseMode(static_cast<SqueegeeWindow::BrushNoiseMode>(modeVal));
+    updateNoisePreview();
+}
+
+void MainWindow::onNoiseScaleChanged(int value)
+{
+    int clamped = std::clamp(value, 10, 400);
+    if (clamped != value) {
+        m_noiseScaleSlider->blockSignals(true);
+        m_noiseScaleSlider->setValue(clamped);
+        m_noiseScaleSlider->blockSignals(false);
+    }
+    m_noiseScaleLabel->setText(QString::number(clamped) + " px");
+    m_squeegeeWindow->setBrushNoiseScale(static_cast<float>(clamped));
+    updateNoisePreview();
+}
+
+void MainWindow::onNoiseStrengthChanged(int value)
+{
+    int clamped = std::clamp(value, 0, 100);
+    if (clamped != value) {
+        m_noiseStrengthSlider->blockSignals(true);
+        m_noiseStrengthSlider->setValue(clamped);
+        m_noiseStrengthSlider->blockSignals(false);
+    }
+    float strength = clamped / 100.0f;
+    m_noiseStrengthLabel->setText(QString::number(strength, 'f', 2));
+    m_squeegeeWindow->setBrushNoiseStrength(strength);
+    updateNoisePreview();
+}
+
+void MainWindow::updateNoisePreview()
+{
+    if (!m_noisePreviewLabel) return;
+
+    const int w = 180;
+    const int h = 90;
+    QImage img(w, h, QImage::Format_RGB32);
+    float scale = std::max(1, m_noiseScaleSlider->value());
+    float strength = m_noiseStrengthSlider->value() / 100.0f;
+    int modeVal = m_noiseModeCombo->currentData().toInt();
+    auto mode = static_cast<SqueegeeWindow::BrushNoiseMode>(modeVal);
+
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            float nx = static_cast<float>(x) / scale;
+            float ny = static_cast<float>(y) / scale;
+            float n = m_noisePreviewGen.fractal(nx, ny, 4, 2.1f, 0.55f); // [-1,1]
+            QColor c(128, 128, 128);
+
+            if (mode == SqueegeeWindow::NoiseBrushIntensity) {
+                float v = 0.5f + 0.5f * n * strength * 1.2f;
+                v = std::clamp(v, 0.0f, 1.0f);
+                int g = static_cast<int>(v * 255.0f);
+                c = QColor(g, g, g);
+            } else if (mode == SqueegeeWindow::NoiseBrushOffset) {
+                float v = 0.5f + 0.5f * n * strength;
+                v = std::clamp(v, 0.0f, 1.0f);
+                // Bipolar coloring: left half to magenta, right to cyan
+                int r = static_cast<int>((0.3f + 0.7f * v) * 255.0f);
+                int g = static_cast<int>((0.2f + 0.6f * (1.0f - std::abs(n) * strength)) * 255.0f);
+                int b = static_cast<int>((0.3f + 0.7f * (1.0f - v)) * 255.0f);
+                c = QColor(r, g, b);
+            }
+
+            img.setPixelColor(x, y, c);
+        }
+    }
+
+    m_noisePreviewLabel->setPixmap(QPixmap::fromImage(img));
 }
 
 void MainWindow::onSqueegeeModeChanged(int index)

@@ -3,6 +3,10 @@
 #include <QCoreApplication>
 #include <QRandomGenerator>
 #include <QtMath>
+#include <QFile>
+#include <QTextStream>
+#include <QDir>
+#include <QStringList>
 
 SqueegeeWindow::SqueegeeWindow()
 {
@@ -109,377 +113,62 @@ void SqueegeeWindow::initializeGL()
     initGeometry();
     
     qDebug() << "OpenGL 4.3 Compute Initialized";
-    
-    generateComposition();
+
+    // Do not auto-generate content on startup; user triggers via UI
+    m_hasGenerated = false;
 }
 
 void SqueegeeWindow::initShaders()
 {
-    // Render Program (Raymarch/Stack)
+    auto loadSource = [](const QString& name) -> QByteArray {
+        QString baseDir = QCoreApplication::applicationDirPath();
+        QStringList candidates{
+            QDir(baseDir).filePath("shaders/" + name),
+            QDir(baseDir + "/..").filePath("shaders/" + name)
+        };
+        for (const QString& path : candidates) {
+            QFile f(path);
+            if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QByteArray data = f.readAll();
+                f.close();
+                return data;
+            }
+        }
+        qWarning() << "Failed to open shader" << name << "checked" << candidates;
+        return {};
+    };
+
+    auto createProgram = [&](QOpenGLShader::ShaderType type, const QString& file) -> QOpenGLShaderProgram* {
+        QOpenGLShaderProgram* prog = new QOpenGLShaderProgram;
+        QByteArray src = loadSource(file);
+        if (!prog->addShaderFromSourceCode(type, src)) {
+            qWarning() << "Shader compile failed for" << file << prog->log();
+        }
+        return prog;
+    };
+
     m_program = new QOpenGLShaderProgram;
-    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, R"(
-        #version 430 core
-        layout(location = 0) in vec3 vertexPosition;
-        layout(location = 1) in vec2 vertexTexCoord;
-        out vec2 texCoord;
-        void main() {
-            gl_Position = vec4(vertexPosition, 1.0);
-            texCoord = vertexTexCoord;
-        }
-    )");
-    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, R"(
-        #version 430 core
-        in vec2 texCoord;
-        out vec4 fragColor;
-        
-        layout(binding = 0, rgba32f) uniform image3D imgInput;
-        uniform float sharpenAmount;
-        
-        vec4 compositePixel(ivec2 pos, ivec3 size) {
-            vec4 color = vec4(1.0);
-            for (int z = 0; z < size.z; ++z) {
-                vec4 voxel = imageLoad(imgInput, ivec3(pos, z));
-                if (voxel.a > 0.01) {
-                    color = mix(color, voxel, voxel.a);
-                }
-            }
-            return color;
-        }
-        
-        void main() {
-            ivec3 size = imageSize(imgInput);
-            ivec2 pixelPos = ivec2(texCoord * vec2(size.xy));
-            
-            vec4 base = compositePixel(pixelPos, size);
+    QByteArray vsSrc = loadSource("render.vert");
+    QByteArray fsSrc = loadSource("render.frag");
+    if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vsSrc))
+        qWarning() << m_program->log();
+    if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fsSrc))
+        qWarning() << m_program->log();
+    if (!m_program->link()) qWarning() << m_program->log();
 
-            if (sharpenAmount > 0.001) {
-                vec3 blur = vec3(0.0);
-                int count = 0;
-                for (int dy = -1; dy <= 1; ++dy) {
-                    for (int dx = -1; dx <= 1; ++dx) {
-                        ivec2 nPos = pixelPos + ivec2(dx, dy);
-                        nPos.x = clamp(nPos.x, 0, size.x - 1);
-                        nPos.y = clamp(nPos.y, 0, size.y - 1);
-                        vec4 nCol = compositePixel(nPos, size);
-                        blur += nCol.rgb;
-                        count++;
-                    }
-                }
-                if (count > 0) blur /= float(count);
-                vec3 sharpened = clamp(base.rgb + sharpenAmount * (base.rgb - blur), 0.0, 1.0);
-                fragColor = vec4(sharpened, 1.0);
-            } else {
-                fragColor = base;
-            }
-        }
-    )");
-    m_program->link();
-
-    // Compute Shader: Gravity
-    m_computeGravity = new QOpenGLShaderProgram;
-    m_computeGravity->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
-        #version 430 core
-        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
-        
-        layout(binding = 0, rgba32f) uniform image3D imgIn;
-        layout(binding = 1, rgba32f) uniform image3D imgOut;
-        
-        void main() {
-            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
-            ivec3 size = imageSize(imgIn);
-            
-            if (pos.x >= size.x || pos.y >= size.y) return;
-            
-            // Column processing: Bottom to Top
-            // We read the entire column first to avoid read/write hazards within the same pass if possible,
-            // but for a simple simulation, we can just iterate.
-            
-            // We need to write to imgOut.
-            // Let's copy imgIn to imgOut first (or assume it's done).
-            // Actually, we can just do the logic and write the result.
-            
-            // To simulate falling, we scan from bottom (z=0) up to top.
-            // If we find a gap, we pull the pixel above down.
-            
-            // Load entire column into local array (32 layers is small)
-            vec4 column[32];
-            for (int z = 0; z < 32; ++z) {
-                column[z] = imageLoad(imgIn, ivec3(pos.xy, z));
-            }
-            
-            // Apply Gravity (Bubble sort style or just shift down)
-            // Simple approach: For each empty slot, find the nearest non-empty above and move it there.
-            for (int z = 0; z < 32; ++z) {
-                if (column[z].a < 0.1) { // Empty
-                    // Find nearest above
-                    for (int above = z + 1; above < 32; ++above) {
-                        if (column[above].a > 0.1) {
-                            // Move it down
-                            column[z] = column[above];
-                            column[above] = vec4(0.0); // Clear source
-                            break; // Filled this slot, move to next
-                        }
-                    }
-                }
-            }
-            
-            // Store back
-            for (int z = 0; z < 32; ++z) {
-                imageStore(imgOut, ivec3(pos.xy, z), column[z]);
-            }
-        }
-    )");
+    m_computeGravity = createProgram(QOpenGLShader::Compute, "gravity.comp");
     m_computeGravity->link();
 
-    // Compute Shader: Squeegee (Smear)
-    m_computeSqueegee = new QOpenGLShaderProgram;
-    m_computeSqueegee->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
-        #version 430 core
-        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
-        
-        layout(binding = 0, rgba32f) uniform image3D imgIn;
-        layout(binding = 1, rgba32f) uniform image3D imgOut;
-        
-        uniform vec2 mousePos;
-        uniform vec2 lastMousePos;
-        uniform float brushSize;
-        uniform bool isMouseDown;
-        uniform bool toroidal;
-        uniform int squeegeeMode; // 0: solid, 1: soft, 2: accurate
-        
-        // Pseudo-random function
-        float rand(vec2 co){
-            return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-        }
-        
-        float segmentDistance(vec2 p, vec2 a, vec2 b) {
-            vec2 pa = p - a;
-            vec2 ba = b - a;
-            float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-            return length(pa - ba * h);
-        }
-        
-        void main() {
-            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
-            ivec3 size = imageSize(imgIn);
-            
-            if (pos.x >= size.x || pos.y >= size.y) return;
-            
-            vec4 current = imageLoad(imgIn, pos);
-            
-            if (!isMouseDown) {
-                imageStore(imgOut, pos, current);
-                return;
-            }
-            
-            // 2D Distance check with Toroidal Wrapping
-            float dist = segmentDistance(vec2(pos.xy), lastMousePos, mousePos);
-            
-            if (toroidal) {
-                vec2 fSize = vec2(size.xy);
-                // Check 8 neighbors
-                for (float dy = -1.0; dy <= 1.0; dy += 1.0) {
-                    for (float dx = -1.0; dx <= 1.0; dx += 1.0) {
-                        if (dx == 0.0 && dy == 0.0) continue;
-                        vec2 offset = vec2(dx, dy) * fSize;
-                        dist = min(dist, segmentDistance(vec2(pos.xy), lastMousePos + offset, mousePos + offset));
-                    }
-                }
-            }
-            
-            if (dist < brushSize) {
-                // Squeegee Logic:
-                // Shift paint in direction of movement.
-                vec2 dir = normalize(mousePos - lastMousePos);
-                if (length(mousePos - lastMousePos) < 0.1) dir = vec2(0.0);
-                vec2 perp = vec2(-dir.y, dir.x);
-
-                float falloff = 1.0;
-                if (squeegeeMode == 1) { // soft: non-linear falloff based on distance
-                    float t = clamp(dist / max(brushSize, 0.0001), 0.0, 1.0);
-                    falloff = pow(1.0 - t, 0.5);
-                }
-                
-                float baseShift = 2.0;
-                float shift = baseShift; // keep displacement consistent across modes
-
-                // Sample from "behind"
-                vec2 offsetDir = dir;
-                if (squeegeeMode == 2) { // accurate: small perpendicular jitter to fill gaps
-                    float jitter = ((int(pos.x + pos.y + pos.z) & 1) == 0) ? 0.5 : -0.5;
-                    offsetDir += perp * jitter * 0.05;
-                }
-                ivec3 samplePos = ivec3(vec2(pos.xy) - offsetDir * shift, pos.z);
-                
-                if (toroidal) {
-                    // Wrap
-                    samplePos.x = int(mod(float(samplePos.x), float(size.x)));
-                    samplePos.y = int(mod(float(samplePos.y), float(size.y)));
-                } else {
-                    // Clamp
-                    samplePos.x = clamp(samplePos.x, 0, size.x - 1);
-                    samplePos.y = clamp(samplePos.y, 0, size.y - 1);
-                }
-                
-                vec4 smearColor = imageLoad(imgIn, samplePos);
-                
-                // If sampling from paint, pull it.
-                if (smearColor.a > 0.01) {
-                    vec4 result = smearColor;
-                    
-                    // Mixing Logic:
-                    // If the current voxel has paint (we hit a drop), mix it into the smear.
-                    if (current.a > 0.01) {
-                        float pickup = (squeegeeMode == 2) ? 0.35 : 0.2;
-                        if (squeegeeMode == 1) pickup *= falloff; // softer pickup toward edges
-                        result = mix(result, current, pickup);
-                    }
-                    
-                    // Friction/Decay:
-                    float decay = 0.995;
-                    if (squeegeeMode == 1) decay = mix(0.997, 0.999, 1.0 - falloff); // softer edges decay more
-                    if (squeegeeMode == 2) decay = 0.999;       // accurate tries to keep continuity
-                    result.a *= decay;
-                    
-                    imageStore(imgOut, pos, result);
-                } else {
-                    // Infinite Smear: Don't erase if we are dragging nothing.
-                    imageStore(imgOut, pos, current);
-                }
-            } else {
-                imageStore(imgOut, pos, current);
-            }
-        }
-    )");
+    m_computeSqueegee = createProgram(QOpenGLShader::Compute, "squeegee.comp");
     m_computeSqueegee->link();
 
-    // Compute Shader: Blur (Box Blur)
-    m_computeBlur = new QOpenGLShaderProgram;
-    m_computeBlur->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
-        #version 430 core
-        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
-        
-        layout(binding = 0, rgba32f) uniform image3D imgIn;
-        layout(binding = 1, rgba32f) uniform image3D imgOut;
-        
-        void main() {
-            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
-            ivec3 size = imageSize(imgIn);
-            
-            if (pos.x >= size.x || pos.y >= size.y) return;
-            
-            vec4 sum = vec4(0.0);
-            float count = 0.0;
-            
-            // 3x3 Box Blur (XY plane only, don't blur across layers)
-            for (int dy = -1; dy <= 1; ++dy) {
-                for (int dx = -1; dx <= 1; ++dx) {
-                    ivec3 samplePos = pos + ivec3(dx, dy, 0);
-                    
-                    // Clamp
-                    samplePos.x = clamp(samplePos.x, 0, size.x - 1);
-                    samplePos.y = clamp(samplePos.y, 0, size.y - 1);
-                    
-                    vec4 val = imageLoad(imgIn, samplePos);
-                    sum += val;
-                    count += 1.0;
-                }
-            }
-            
-            imageStore(imgOut, pos, sum / count);
-        }
-    )");
+    m_computeBlur = createProgram(QOpenGLShader::Compute, "blur.comp");
     m_computeBlur->link();
 
-    // Compute Shader: Saturate
-    m_computeSaturate = new QOpenGLShaderProgram;
-    m_computeSaturate->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
-        #version 430 core
-        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
-        
-        layout(binding = 0, rgba32f) uniform image3D imgIn;
-        layout(binding = 1, rgba32f) uniform image3D imgOut;
-        
-        vec3 rgb2hsv(vec3 c) {
-            vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-            vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
-            vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
-            float d = q.x - min(q.w, q.y);
-            float e = 1.0e-10;
-            return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-        }
-
-        vec3 hsv2rgb(vec3 c) {
-            vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-            vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-            return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-        }
-
-        void main() {
-            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
-            ivec3 size = imageSize(imgIn);
-            
-            if (pos.x >= size.x || pos.y >= size.y) return;
-            
-            vec4 color = imageLoad(imgIn, pos);
-            if (color.a > 0.01) {
-                vec3 hsv = rgb2hsv(color.rgb);
-                hsv.y = min(hsv.y * 1.2, 1.0); // Increase saturation by 20%
-                color.rgb = hsv2rgb(hsv);
-            }
-            imageStore(imgOut, pos, color);
-        }
-    )");
+    m_computeSaturate = createProgram(QOpenGLShader::Compute, "saturate.comp");
     m_computeSaturate->link();
 
-    // Compute Shader: Comb Fix (fill alternating empty lines/columns)
-    m_computeCombFix = new QOpenGLShaderProgram;
-    m_computeCombFix->addShaderFromSourceCode(QOpenGLShader::Compute, R"(
-        #version 430 core
-        layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
-
-        layout(binding = 0, rgba32f) uniform image3D imgIn;
-        layout(binding = 1, rgba32f) uniform image3D imgOut;
-
-        bool isFilled(vec4 v) { return v.a > 0.05; }
-        float colorDist(vec3 a, vec3 b) { return length(a - b); }
-
-        void main() {
-            ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
-            ivec3 size = imageSize(imgIn);
-
-            if (pos.x >= size.x || pos.y >= size.y) return;
-
-            vec4 cur = imageLoad(imgIn, pos);
-            if (isFilled(cur)) {
-                imageStore(imgOut, pos, cur);
-                return;
-            }
-
-            // Clamp neighbor fetches
-            ivec3 leftPos  = ivec3(max(pos.x - 1, 0), pos.y, pos.z);
-            ivec3 rightPos = ivec3(min(pos.x + 1, size.x - 1), pos.y, pos.z);
-            ivec3 upPos    = ivec3(pos.x, max(pos.y - 1, 0), pos.z);
-            ivec3 downPos  = ivec3(pos.x, min(pos.y + 1, size.y - 1), pos.z);
-
-            vec4 left  = imageLoad(imgIn, leftPos);
-            vec4 right = imageLoad(imgIn, rightPos);
-            vec4 up    = imageLoad(imgIn, upPos);
-            vec4 down  = imageLoad(imgIn, downPos);
-
-            bool horizGap = isFilled(left) && isFilled(right) && colorDist(left.rgb, right.rgb) < 0.3;
-            bool vertGap  = isFilled(up) && isFilled(down) && colorDist(up.rgb, down.rgb) < 0.3;
-
-            if (horizGap || vertGap) {
-                vec4 a = horizGap ? left : up;
-                vec4 b = horizGap ? right : down;
-                vec4 fill = vec4((a.rgb + b.rgb) * 0.5, min(1.0, max(a.a, b.a)));
-                imageStore(imgOut, pos, fill);
-            } else {
-                imageStore(imgOut, pos, cur);
-            }
-        }
-    )");
+    m_computeCombFix = createProgram(QOpenGLShader::Compute, "combfix.comp");
     m_computeCombFix->link();
 }
 
@@ -541,7 +230,10 @@ void SqueegeeWindow::resizeGL(int w, int h)
         glDeleteTextures(1, &m_texture3DA);
         glDeleteTextures(1, &m_texture3DB);
         initSimulation();
-        generateComposition();
+        // Only regenerate if user already requested content
+        if (m_hasGenerated) {
+            generateComposition();
+        }
     }
 }
 
@@ -554,9 +246,20 @@ void SqueegeeWindow::paintGL()
         glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
         
-        m_computeSqueegee->setUniformValue("mousePos", QVector2D(m_currentMousePos.x(), height() - m_currentMousePos.y()));
-        m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(m_lastMousePos.x(), height() - m_lastMousePos.y()));
-        m_computeSqueegee->setUniformValue("brushSize", m_brushSize);
+        QVector2D dir = m_currentMousePos - m_lastMousePos;
+        if (dir.lengthSquared() < 0.0001f) dir = QVector2D(1.0f, 0.0f);
+        BrushNoiseResult n = sampleBrushNoise(m_brushSize, m_currentMousePos, dir);
+        QVector2D prevOffset = m_noiseOffsetAccum;
+        QVector2D offset = prevOffset * 0.5f + n.offset * 0.5f; // smooth wobble but keep variance
+        m_noiseOffsetAccum = offset;
+        QVector2D noisyCurrent = m_currentMousePos + offset;
+        QVector2D noisyLast = m_lastMousePos + prevOffset; // use previous offset so segment curves
+        float brushSizeForShader = (m_brushNoiseMode == NoiseBrushIntensity) ? n.size : m_brushSize;
+        
+        m_computeSqueegee->setUniformValue("mousePos", QVector2D(noisyCurrent.x(), height() - noisyCurrent.y()));
+        m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(noisyLast.x(), height() - noisyLast.y()));
+        m_computeSqueegee->setUniformValue("strokeDir", QVector2D(dir.x(), -dir.y())); // flip Y for GL space
+        m_computeSqueegee->setUniformValue("brushSize", brushSizeForShader);
         m_computeSqueegee->setUniformValue("isMouseDown", m_isMouseDown);
         m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
         
@@ -585,6 +288,9 @@ void SqueegeeWindow::paintGL()
     
     // Render Pass
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+    
+    // Ensure opaque white background
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     m_program->bind();
@@ -593,6 +299,7 @@ void SqueegeeWindow::paintGL()
     
     m_vao.bind();
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    m_vao.release();
     m_vao.release();
     m_program->release();
     
@@ -604,6 +311,7 @@ void SqueegeeWindow::mousePressEvent(QMouseEvent *event)
     m_isMouseDown = true;
     m_lastMousePos = QVector2D(event->position().x(), event->position().y());
     m_currentMousePos = m_lastMousePos;
+    m_noiseOffsetAccum = QVector2D(0.0f, 0.0f);
 }
 
 void SqueegeeWindow::mouseMoveEvent(QMouseEvent *event)
@@ -634,6 +342,7 @@ void SqueegeeWindow::wheelEvent(QWheelEvent *event)
 void SqueegeeWindow::generateComposition()
 {
     qDebug() << "Generating 3D composition...";
+    m_hasGenerated = true;
     
     // Clear or Keep
     int w = width();
@@ -851,9 +560,10 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
     
     QVector2D current = start;
     QVector2D last = start;
+    QVector2D noiseOffsetAccum(0.0f, 0.0f);
+    QVector2D noisyLast = last;
     
     m_computeSqueegee->bind();
-    m_computeSqueegee->setUniformValue("brushSize", size);
     m_computeSqueegee->setUniformValue("isMouseDown", true);
     m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
     m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
@@ -861,15 +571,23 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
     for (int i = 0; i < steps; ++i) {
         float t = (float)i / (float)steps;
         current = start + dir * (len * t);
+        QVector2D stepDir = current - last;
+        if (stepDir.lengthSquared() < 0.0001f) stepDir = dir;
+        BrushNoiseResult n = sampleBrushNoise(size, current, stepDir);
+        QVector2D prevOffset = noiseOffsetAccum;
+        QVector2D offset = prevOffset * 0.5f + n.offset * 0.5f;
+        noiseOffsetAccum = offset;
+        QVector2D noisyCurrent = current + offset;
+        noisyLast = last + prevOffset;
+        float brushSizeForShader = (m_brushNoiseMode == NoiseBrushIntensity) ? n.size : size;
         
         glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
         
-        m_computeSqueegee->setUniformValue("mousePos", QVector2D(current.x(), height() - current.y()));
-        m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(last.x(), height() - last.y()));
-        // Uniforms set once above persist if shader is bound, but we re-bind inside loop?
-        // Wait, we release gravity then re-bind squeegee. So we must re-set uniforms.
-        m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
+        m_computeSqueegee->setUniformValue("mousePos", QVector2D(noisyCurrent.x(), height() - noisyCurrent.y()));
+        m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(noisyLast.x(), height() - noisyLast.y()));
+        m_computeSqueegee->setUniformValue("strokeDir", QVector2D(dir.x(), -dir.y())); // flip Y for GL space
+        m_computeSqueegee->setUniformValue("brushSize", brushSizeForShader);
         
         glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 32);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -890,19 +608,48 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
         
         // Re-bind Squeegee for next iteration
         m_computeSqueegee->bind();
-        m_computeSqueegee->setUniformValue("brushSize", size);
-        m_computeSqueegee->setUniformValue("isMouseDown", true);
-        
-        // Re-bind Squeegee for next iteration
-        m_computeSqueegee->bind();
-        m_computeSqueegee->setUniformValue("brushSize", size);
+        m_computeSqueegee->setUniformValue("brushSize", brushSizeForShader);
         m_computeSqueegee->setUniformValue("isMouseDown", true);
         m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
         m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
         
         last = current;
+        noisyLast = noisyCurrent;
     }
     m_computeSqueegee->release();
+}
+
+SqueegeeWindow::BrushNoiseResult SqueegeeWindow::sampleBrushNoise(float baseSize, const QVector2D& pos, const QVector2D& dir) const
+{
+    BrushNoiseResult res;
+    res.size = baseSize;
+
+    if (m_brushNoiseMode == NoiseOff || m_brushNoiseStrength <= 0.0001f) {
+        return res;
+    }
+
+    float scale = std::max(1.0f, m_brushNoiseScale);
+    float n = m_noise.fractal(pos.x() / scale, pos.y() / scale, 4, 2.1f, 0.55f); // richer detail in [-1,1]
+
+    if (m_brushNoiseMode == NoiseBrushIntensity) {
+        float factor = 1.0f + m_brushNoiseStrength * n * 1.6f;
+        factor = std::clamp(factor, 0.2f, 3.5f);
+        res.size = baseSize * factor;
+        return res;
+    }
+
+    if (m_brushNoiseMode == NoiseBrushOffset) {
+        QVector2D dirNorm = dir;
+        if (dirNorm.lengthSquared() < 0.0001f) dirNorm = QVector2D(1.0f, 0.0f);
+        dirNorm.normalize();
+        QVector2D perp(-dirNorm.y(), dirNorm.x());
+        float pixelBase = std::max(4.0f, baseSize * 0.35f); // ensure visible even on small brushes
+        float offsetMag = (pixelBase + baseSize * 0.35f) * m_brushNoiseStrength; // scale with brush size + strength
+        res.offset = perp * (n * offsetMag);
+        return res;
+    }
+
+    return res;
 }
 
 void SqueegeeWindow::applyBlur()

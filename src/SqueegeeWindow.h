@@ -13,7 +13,9 @@
 #include <QVector3D>
 #include <QRandomGenerator>
 
+#include <algorithm>
 #include <QOpenGLFunctions_4_3_Core>
+#include "Noise2D.h"
 
 class SqueegeeWindow : public QOpenGLWindow, protected QOpenGLFunctions_4_3_Core
 {
@@ -35,6 +37,12 @@ public:
         SqueegeeSolid,
         SqueegeeSoft,
         SqueegeeAccurate
+    };
+
+    enum BrushNoiseMode {
+        NoiseOff,
+        NoiseBrushIntensity,
+        NoiseBrushOffset
     };
 
 protected:
@@ -106,11 +114,17 @@ private:
     bool m_depthRadiusScaling = false;
     float m_sharpenAmount = 0.0f;
     QVector<QVector<QVector3D>> m_palettes;
-    
+    Noise2D m_noise;
+    BrushNoiseMode m_brushNoiseMode = NoiseOff;
+    float m_brushNoiseScale = 120.0f;
+    float m_brushNoiseStrength = 0.0f; // 0..1
+    QVector2D m_noiseOffsetAccum = QVector2D(0.0f, 0.0f);
+
     QVector2D m_lastMousePos;
     QVector2D m_currentMousePos;
     bool m_isMouseDown = false;
     int m_frameCount = 0;
+    bool m_hasGenerated = false;
 
 public:
     void setGenAngle(float angle) { m_genAngle = angle; }
@@ -133,9 +147,19 @@ public:
     void setSqueegeeMode(SqueegeeMode mode) { m_squeegeeMode = mode; }
     void setDepthRadiusScaling(bool enabled) { m_depthRadiusScaling = enabled; }
     void setSharpenAmount(float amount) { m_sharpenAmount = amount; update(); }
+    void setBrushNoiseMode(BrushNoiseMode mode) { m_brushNoiseMode = mode; }
+    void setBrushNoiseScale(float scale) { m_brushNoiseScale = std::max(1.0f, scale); }
+    void setBrushNoiseStrength(float strength) { m_brushNoiseStrength = std::clamp(strength, 0.0f, 1.0f); }
     
     void regenerate() { generateComposition(); update(); }
     void regenerateSqueegeeOnly();
     void applySaturation();
     void applyCombFix();
+
+private:
+    struct BrushNoiseResult {
+        float size = 0.0f;
+        QVector2D offset = QVector2D(0.0f, 0.0f);
+    };
+    BrushNoiseResult sampleBrushNoise(float baseSize, const QVector2D& pos, const QVector2D& dir) const;
 };

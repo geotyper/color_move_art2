@@ -1,4 +1,4 @@
-/home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen/UVLADIE3JM/moc_MainWindow.cpp: /home/geotyper/my_projects/CPP/color_move_art2/src/MainWindow.h \
+/home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen/UVLADIE3JM/moc_MeshViewerWidget.cpp: /home/geotyper/my_projects/CPP/color_move_art2/src/MeshViewerWidget.h \
   /home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen/moc_predefs.h \
   /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Geometry/LoopSchemeMaskT.hh \
   /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Geometry/MathDefs.hh \
@@ -48,9 +48,6 @@
   /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/typename.hh \
   /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/vector_cast.hh \
   /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/vector_traits.hh \
-  /home/geotyper/my_projects/CPP/color_move_art2/src/MeshViewerWidget.h \
-  /home/geotyper/my_projects/CPP/color_move_art2/src/Noise2D.h \
-  /home/geotyper/my_projects/CPP/color_move_art2/src/SqueegeeWindow.h \
   /usr/include/GL/gl.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
@@ -206,7 +203,6 @@
   /usr/include/c++/11/pstl/glue_algorithm_defs.h \
   /usr/include/c++/11/pstl/glue_memory_defs.h \
   /usr/include/c++/11/pstl/glue_numeric_defs.h \
-  /usr/include/c++/11/random \
   /usr/include/c++/11/set \
   /usr/include/c++/11/sstream \
   /usr/include/c++/11/stdexcept \
@@ -342,19 +338,14 @@
   /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtCore/QEvent \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QList \
-  /usr/include/x86_64-linux-gnu/qt6/QtCore/QMargins \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QObject \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QPair \
-  /usr/include/x86_64-linux-gnu/qt6/QtCore/QRandomGenerator \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QRect \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QScopedPointer \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QSize \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QSizeF \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QTimer \
-  /usr/include/x86_64-linux-gnu/qt6/QtCore/QtGlobal \
-  /usr/include/x86_64-linux-gnu/qt6/QtCore/qabstractitemmodel.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qalgorithms.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qanystringview.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qarraydata.h \
@@ -392,7 +383,6 @@
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qiterator.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qline.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qlist.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtCore/qlocale.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qlogging.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qmap.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qmargins.h \
@@ -410,10 +400,8 @@
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qpoint.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qpointer.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qprocessordetection.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtCore/qrandom.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qrect.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qrefcount.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtCore/qregularexpression.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qscopedpointer.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qscopeguard.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qset.h \
@@ -443,18 +431,10 @@
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qvariant.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qvarlengtharray.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qversiontagging.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/QImage \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QKeyEvent \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/QMouseEvent \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/QOpenGLContext \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/QPaintDevice \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/QPaintDeviceWindow \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QSurfaceFormat \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QTransform \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/QVector2D \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QVector3D \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/QWheelEvent \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/QWindow \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qbitmap.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qbrush.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qcolor.h \
@@ -465,7 +445,6 @@
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qfontinfo.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qfontmetrics.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qgenericmatrix.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/qicon.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qimage.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qinputdevice.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qkeysequence.h \
@@ -475,9 +454,7 @@
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qopenglcontext_platform.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qopenglext.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qpaintdevice.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/qpaintdevicewindow.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qpalette.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/qpicture.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qpixelformat.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qpixmap.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qpointingdevice.h \
@@ -487,75 +464,33 @@
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qrgb.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qrgba64.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qscreen.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/qsurface.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qsurfaceformat.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/qtextdocument.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qtgui-config.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiglobal.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qtransform.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/qvalidator.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qvector2d.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qvector3d.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qvector4d.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qvectornd.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtGui/qwindow.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qwindowdefs.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/QOpenGLBuffer \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/QOpenGLFunctions_4_3_Core \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/QOpenGLShaderProgram \
-  /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/QOpenGLTexture \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/QOpenGLVersionFunctions \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/QOpenGLVersionProfile \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/QOpenGLVertexArrayObject \
-  /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/QOpenGLWindow \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qopenglbuffer.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qopenglfunctions_4_3_core.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qopenglshaderprogram.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qopengltexture.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qopenglversionfunctions.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qopenglversionprofile.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qopenglvertexarrayobject.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qopenglwindow.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGL/qtopenglglobal.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets/QOpenGLWidget \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets/qopenglwidget.h \
   /usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets/qtopenglwidgetsglobal.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QCheckBox \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QComboBox \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QFormLayout \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QHBoxLayout \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QLabel \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QLayout \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QMainWindow \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QMdiArea \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QPushButton \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QSlider \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QVBoxLayout \
   /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QWidget \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractbutton.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractitemdelegate.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractscrollarea.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractslider.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractspinbox.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qboxlayout.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qcheckbox.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qcombobox.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qformlayout.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qframe.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qgridlayout.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qlabel.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qlayout.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qlayoutitem.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qmainwindow.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qmdiarea.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qpushbutton.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qrubberband.h \
   /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qsizepolicy.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qslider.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qstyle.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qstyleoption.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtabbar.h \
-  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtabwidget.h \
   /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgets-config.h \
   /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgetsglobal.h \
   /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qwidget.h \

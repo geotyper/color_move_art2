@@ -1,0 +1,100 @@
+#version 430 core
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(binding = 0, rgba32f) uniform image3D imgIn;
+layout(binding = 1, rgba32f) uniform image3D imgOut;
+
+uniform vec2 mousePos;
+uniform vec2 lastMousePos;
+uniform vec2 strokeDir; // original (unwobbled) direction
+uniform float brushSize;
+uniform bool isMouseDown;
+uniform bool toroidal;
+uniform int squeegeeMode; // 0: solid, 1: soft, 2: accurate
+
+float segmentDistance(vec2 p, vec2 a, vec2 b) {
+    vec2 pa = p - a;
+    vec2 ba = b - a;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    return length(pa - ba * h);
+}
+
+void main() {
+    ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
+    ivec3 size = imageSize(imgIn);
+    
+    if (pos.x >= size.x || pos.y >= size.y) return;
+    
+    vec4 current = imageLoad(imgIn, pos);
+    
+    if (!isMouseDown) {
+        imageStore(imgOut, pos, current);
+        return;
+    }
+    
+    float dist = segmentDistance(vec2(pos.xy), lastMousePos, mousePos);
+    
+    if (toroidal) {
+        vec2 fSize = vec2(size.xy);
+        for (float dy = -1.0; dy <= 1.0; dy += 1.0) {
+            for (float dx = -1.0; dx <= 1.0; dx += 1.0) {
+                if (dx == 0.0 && dy == 0.0) continue;
+                vec2 offset = vec2(dx, dy) * fSize;
+                dist = min(dist, segmentDistance(vec2(pos.xy), lastMousePos + offset, mousePos + offset));
+            }
+        }
+    }
+    
+    if (dist < brushSize) {
+        vec2 dir = normalize(strokeDir);
+        if (length(dir) < 0.1) dir = vec2(0.0);
+        vec2 perp = vec2(-dir.y, dir.x);
+
+        float falloff = 1.0;
+        if (squeegeeMode == 1) { 
+            float t = clamp(dist / max(brushSize, 0.0001), 0.0, 1.0);
+            falloff = pow(1.0 - t, 0.5);
+        }
+        
+        float baseShift = 2.0;
+        float shift = baseShift; 
+
+        vec2 offsetDir = dir;
+        if (squeegeeMode == 2) { 
+            float jitter = ((int(pos.x + pos.y + pos.z) & 1) == 0) ? 0.5 : -0.5;
+            offsetDir += perp * jitter * 0.05;
+        }
+        ivec3 samplePos = ivec3(vec2(pos.xy) - offsetDir * shift, pos.z);
+        
+        if (toroidal) {
+            samplePos.x = int(mod(float(samplePos.x), float(size.x)));
+            samplePos.y = int(mod(float(samplePos.y), float(size.y)));
+        } else {
+            samplePos.x = clamp(samplePos.x, 0, size.x - 1);
+            samplePos.y = clamp(samplePos.y, 0, size.y - 1);
+        }
+        
+        vec4 smearColor = imageLoad(imgIn, samplePos);
+        
+        if (smearColor.a > 0.01) {
+            vec4 result = smearColor;
+            
+            if (current.a > 0.01) {
+                float pickup = (squeegeeMode == 2) ? 0.35 : 0.2;
+                if (squeegeeMode == 1) pickup *= falloff; 
+                result = mix(result, current, pickup);
+            }
+            
+            float decay = 0.995;
+            if (squeegeeMode == 1) decay = mix(0.997, 0.999, 1.0 - falloff); 
+            if (squeegeeMode == 2) decay = 0.999;       
+            result.a *= decay;
+            
+            imageStore(imgOut, pos, result);
+        } else {
+            imageStore(imgOut, pos, current);
+        }
+    } else {
+        imageStore(imgOut, pos, current);
+    }
+}

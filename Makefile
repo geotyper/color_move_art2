@@ -190,6 +190,30 @@ src/MainWindow.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/MainWindow.cpp.s
 .PHONY : src/MainWindow.cpp.s
 
+src/MeshViewerWidget.o: src/MeshViewerWidget.cpp.o
+.PHONY : src/MeshViewerWidget.o
+
+# target to build an object file
+src/MeshViewerWidget.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/MeshViewerWidget.cpp.o
+.PHONY : src/MeshViewerWidget.cpp.o
+
+src/MeshViewerWidget.i: src/MeshViewerWidget.cpp.i
+.PHONY : src/MeshViewerWidget.i
+
+# target to preprocess a source file
+src/MeshViewerWidget.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/MeshViewerWidget.cpp.i
+.PHONY : src/MeshViewerWidget.cpp.i
+
+src/MeshViewerWidget.s: src/MeshViewerWidget.cpp.s
+.PHONY : src/MeshViewerWidget.s
+
+# target to generate assembly for a file
+src/MeshViewerWidget.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/MeshViewerWidget.cpp.s
+.PHONY : src/MeshViewerWidget.cpp.s
+
 src/SqueegeeWindow.o: src/SqueegeeWindow.cpp.o
 .PHONY : src/SqueegeeWindow.o
 
@@ -254,6 +278,9 @@ help:
 	@echo "... src/MainWindow.o"
 	@echo "... src/MainWindow.i"
 	@echo "... src/MainWindow.s"
+	@echo "... src/MeshViewerWidget.o"
+	@echo "... src/MeshViewerWidget.i"
+	@echo "... src/MeshViewerWidget.s"
 	@echo "... src/SqueegeeWindow.o"
 	@echo "... src/SqueegeeWindow.i"
 	@echo "... src/SqueegeeWindow.s"

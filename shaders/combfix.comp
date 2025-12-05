@@ -1,0 +1,43 @@
+#version 430 core
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(binding = 0, rgba32f) uniform image3D imgIn;
+layout(binding = 1, rgba32f) uniform image3D imgOut;
+
+bool isFilled(vec4 v) { return v.a > 0.05; }
+float colorDist(vec3 a, vec3 b) { return length(a - b); }
+
+void main() {
+    ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
+    ivec3 size = imageSize(imgIn);
+
+    if (pos.x >= size.x || pos.y >= size.y) return;
+
+    vec4 cur = imageLoad(imgIn, pos);
+    if (isFilled(cur)) {
+        imageStore(imgOut, pos, cur);
+        return;
+    }
+
+    ivec3 leftPos  = ivec3(max(pos.x - 1, 0), pos.y, pos.z);
+    ivec3 rightPos = ivec3(min(pos.x + 1, size.x - 1), pos.y, pos.z);
+    ivec3 upPos    = ivec3(pos.x, max(pos.y - 1, 0), pos.z);
+    ivec3 downPos  = ivec3(pos.x, min(pos.y + 1, size.y - 1), pos.z);
+
+    vec4 left  = imageLoad(imgIn, leftPos);
+    vec4 right = imageLoad(imgIn, rightPos);
+    vec4 up    = imageLoad(imgIn, upPos);
+    vec4 down  = imageLoad(imgIn, downPos);
+
+    bool horizGap = isFilled(left) && isFilled(right) && colorDist(left.rgb, right.rgb) < 0.3;
+    bool vertGap  = isFilled(up) && isFilled(down) && colorDist(up.rgb, down.rgb) < 0.3;
+
+    if (horizGap || vertGap) {
+        vec4 a = horizGap ? left : up;
+        vec4 b = horizGap ? right : down;
+        vec4 fill = vec4((a.rgb + b.rgb) * 0.5, min(1.0, max(a.a, b.a)));
+        imageStore(imgOut, pos, fill);
+    } else {
+        imageStore(imgOut, pos, cur);
+    }
+}
