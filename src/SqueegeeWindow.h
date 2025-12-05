@@ -118,6 +118,7 @@ private:
     BrushNoiseMode m_brushNoiseMode = NoiseOff;
     float m_brushNoiseScale = 120.0f;
     float m_brushNoiseStrength = 0.0f; // 0..1
+    float m_minSizeRatio = 0.1f; // 0.1 .. 0.9
     QVector2D m_noiseOffsetAccum = QVector2D(0.0f, 0.0f);
 
     QVector2D m_lastMousePos;
@@ -150,6 +151,7 @@ public:
     void setBrushNoiseMode(BrushNoiseMode mode) { m_brushNoiseMode = mode; }
     void setBrushNoiseScale(float scale) { m_brushNoiseScale = std::max(1.0f, scale); }
     void setBrushNoiseStrength(float strength) { m_brushNoiseStrength = std::clamp(strength, 0.0f, 1.0f); }
+    void setMinSizeRatio(float ratio) { m_minSizeRatio = std::clamp(ratio, 0.1f, 0.9f); }
     
     void regenerate() { generateComposition(); update(); }
     void regenerateSqueegeeOnly();

@@ -587,7 +587,11 @@ void SqueegeeWindow::generateDrops(std::vector<float>& buffer, int w, int h, int
             int cx = QRandomGenerator::global()->bounded(w);
             int cy = QRandomGenerator::global()->bounded(h);
             int cz = QRandomGenerator::global()->bounded(d);
-            int r = QRandomGenerator::global()->bounded(5, m_dropMaxSize + 1);
+            
+            int minSize = std::max(1, int(m_dropMaxSize * m_minSizeRatio));
+            int maxSize = std::max(minSize + 1, m_dropMaxSize + 1);
+            
+            int r = QRandomGenerator::global()->bounded(minSize, maxSize);
             points.append({cx, cy, cz, r});
         }
     } else { // ModeGrid

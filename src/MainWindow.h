@@ -30,6 +30,7 @@ private slots:
     void onStepsChanged(int value);
     void onDensityChanged(int value); // Restored
     void onSizeChanged(int value);
+    void onMinSizeRatioChanged(int value);
     void onConcentricChanged(int value);
     void onPreviewToggled(bool checked);
     void onToroidalToggled(bool checked);
@@ -98,6 +99,10 @@ protected:
     QLabel *m_opacityLabel;
     QLabel *m_gridStepLabel;
     QLabel *m_sizeLabel;
+    
+    QSlider *m_minSizeRatioSlider;
+    QLabel *m_minSizeRatioLabel;
+    
     QLabel *m_concentricLabel;
     QLabel *m_noiseScaleLabel;
     QLabel *m_noiseStrengthLabel;

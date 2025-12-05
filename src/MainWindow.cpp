@@ -86,9 +86,9 @@ MainWindow::MainWindow()
 
 
     
-    // Drop Max Size Slider (10 - 100)
+    // Drop Max Size Slider (1 - 100)
     m_sizeSlider = new QSlider(Qt::Horizontal);
-    m_sizeSlider->setRange(10, 100);
+    m_sizeSlider->setRange(1, 100);
     m_sizeSlider->setValue(25);
     m_sizeLabel = new QLabel("25 px");
     connect(m_sizeSlider, &QSlider::valueChanged, this, &MainWindow::onSizeChanged);
@@ -205,8 +205,19 @@ MainWindow::MainWindow()
     genLayout->addWidget(m_genModeCombo);
     
     // Size
+    m_sizeSlider->setRange(1, 150); // Allow down to 1px
     genLayout->addWidget(m_sizeLabel);
     genLayout->addWidget(m_sizeSlider);
+    
+    // Min Size Ratio
+    m_minSizeRatioLabel = new QLabel("Min Size: 10%");
+    m_minSizeRatioSlider = new QSlider(Qt::Horizontal);
+    m_minSizeRatioSlider->setRange(10, 90); // 0.1 to 0.9
+    m_minSizeRatioSlider->setValue(10);
+    connect(m_minSizeRatioSlider, &QSlider::valueChanged, this, &MainWindow::onMinSizeRatioChanged);
+    
+    genLayout->addWidget(m_minSizeRatioLabel);
+    genLayout->addWidget(m_minSizeRatioSlider);
     
     // Concentric
     genLayout->addWidget(m_concentricLabel);
@@ -391,6 +402,13 @@ void MainWindow::onSizeChanged(int value)
 {
     m_sizeLabel->setText(QString::number(value) + " px");
     m_squeegeeWindow->setDropMaxSize(value);
+}
+
+void MainWindow::onMinSizeRatioChanged(int value)
+{
+    float ratio = value / 100.0f;
+    m_minSizeRatioLabel->setText(QString("Min Size: %1%").arg(value));
+    m_squeegeeWindow->setMinSizeRatio(ratio);
 }
 
 void MainWindow::onConcentricChanged(int value)
