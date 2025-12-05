@@ -153,10 +153,12 @@ public:
     
     void regenerate() { generateComposition(); update(); }
     void regenerateSqueegeeOnly();
+    void regenerateShiftedOverlay();
     void applySaturation();
     void applyCombFix();
 
 private:
+    void generateDrops(std::vector<float>& buffer, int w, int h, int d);
     struct BrushNoiseResult {
         float size = 0.0f;
         QVector2D offset = QVector2D(0.0f, 0.0f);

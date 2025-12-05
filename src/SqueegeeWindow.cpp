@@ -363,130 +363,7 @@ void SqueegeeWindow::generateComposition()
         glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());
     }
     
-    // Use selected palette
-    const QVector<QVector3D>& currentPalette = m_palettes[m_currentPaletteIdx];
-    int colorCount = currentPalette.size();
-    
-    // Determine points to draw
-    struct DrawPoint {
-        int x, y, z, r;
-    };
-    QVector<DrawPoint> points;
-    
-    if (m_genMode == ModeRandom) {
-        for (int i = 0; i < m_genDensity; ++i) {
-            int cx = QRandomGenerator::global()->bounded(w);
-            int cy = QRandomGenerator::global()->bounded(h);
-            int cz = QRandomGenerator::global()->bounded(d);
-            int r = QRandomGenerator::global()->bounded(5, m_dropMaxSize + 1);
-            points.append({cx, cy, cz, r});
-        }
-    } else { // ModeGrid
-        for (int y = m_gridStep / 2; y < h; y += m_gridStep) {
-            for (int x = m_gridStep / 2; x < w; x += m_gridStep) {
-                int cz = QRandomGenerator::global()->bounded(d);
-                // For grid, size is fixed to Max Size or random?
-                // Let's make it random up to max size for variety, or fixed?
-                // User asked for "Grid with defined step and size of squares".
-                // So size should probably be related to Drop Max Size.
-                // Let's use Drop Max Size as the size.
-                int r = m_dropMaxSize; 
-                points.append({x, y, cz, r});
-            }
-        }
-    }
-    
-    for (const auto& p : points) {
-        int cx = p.x;
-        int cy = p.y;
-        int cz = p.z;
-        int r = p.r;
-        
-        // Concentric Logic
-        int rings = 1;
-        if (m_genConcentric > 1) {
-            rings = QRandomGenerator::global()->bounded(1, m_genConcentric + 1);
-        }
-        
-        for (int ring = 0; ring < rings; ++ring) {
-            int currentR = r * (rings - ring) / rings;
-            if (currentR < 2) break;
-
-            if (m_depthRadiusScaling) {
-                // Scale radius by depth: top layers get smaller radius, deeper layers larger.
-                float depthScale = float((d - 1) - cz) / float(d - 1); // 0 at top, 1 at bottom
-                currentR = std::max(1, int(std::round(currentR * depthScale)));
-            }
-            
-            int colorIdx = QRandomGenerator::global()->bounded(colorCount);
-            QVector3D col = currentPalette[colorIdx];
-            
-            if (m_genShape == ShapeCircle) {
-                // Circle Logic
-                if (m_drawBorders) {
-                    int borderR = currentR + 1;
-                    for (int y = cy - borderR; y <= cy + borderR; ++y) {
-                        for (int x = cx - borderR; x <= cx + borderR; ++x) {
-                            if (x >= 0 && x < w && y >= 0 && y < h) {
-                                float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
-                                if (dist <= borderR) {
-                                    int idx = (cz * w * h + y * w + x) * 4;
-                                    data[idx + 0] = 0.0f;
-                                    data[idx + 1] = 0.0f;
-                                    data[idx + 2] = 0.0f;
-                                    data[idx + 3] = 1.0f;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                for (int y = cy - currentR; y <= cy + currentR; ++y) {
-                    for (int x = cx - currentR; x <= cx + currentR; ++x) {
-                        if (x >= 0 && x < w && y >= 0 && y < h) {
-                            float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
-                            if (dist <= currentR) {
-                                int idx = (cz * w * h + y * w + x) * 4;
-                                data[idx + 0] = col.x();
-                                data[idx + 1] = col.y();
-                                data[idx + 2] = col.z();
-                                data[idx + 3] = 0.8f;
-                            }
-                        }
-                    }
-                }
-            } else { // ShapeSquare
-                // Square Logic
-                // currentR is half-width
-                if (m_drawBorders) {
-                    int borderR = currentR + 1;
-                    for (int y = cy - borderR; y <= cy + borderR; ++y) {
-                        for (int x = cx - borderR; x <= cx + borderR; ++x) {
-                            if (x >= 0 && x < w && y >= 0 && y < h) {
-                                int idx = (cz * w * h + y * w + x) * 4;
-                                data[idx + 0] = 0.0f;
-                                data[idx + 1] = 0.0f;
-                                data[idx + 2] = 0.0f;
-                                data[idx + 3] = 1.0f;
-                            }
-                        }
-                    }
-                }
-                
-                for (int y = cy - currentR; y <= cy + currentR; ++y) {
-                    for (int x = cx - currentR; x <= cx + currentR; ++x) {
-                        if (x >= 0 && x < w && y >= 0 && y < h) {
-                            int idx = (cz * w * h + y * w + x) * 4;
-                            data[idx + 0] = col.x();
-                            data[idx + 1] = col.y();
-                            data[idx + 2] = col.z();
-                            data[idx + 3] = 0.8f;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    generateDrops(data, w, h, d);
     
     glBindTexture(GL_TEXTURE_3D, m_texture3DA);
     glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());
@@ -691,5 +568,240 @@ void SqueegeeWindow::applySaturation()
     
     std::swap(m_texture3DA, m_texture3DB);
     m_computeSaturate->release();
+    update();
+}
+void SqueegeeWindow::generateDrops(std::vector<float>& buffer, int w, int h, int d)
+{
+    // Use selected palette
+    const QVector<QVector3D>& currentPalette = m_palettes[m_currentPaletteIdx];
+    int colorCount = currentPalette.size();
+    
+    // Determine points to draw
+    struct DrawPoint {
+        int x, y, z, r;
+    };
+    QVector<DrawPoint> points;
+    
+    if (m_genMode == ModeRandom) {
+        for (int i = 0; i < m_genDensity; ++i) {
+            int cx = QRandomGenerator::global()->bounded(w);
+            int cy = QRandomGenerator::global()->bounded(h);
+            int cz = QRandomGenerator::global()->bounded(d);
+            int r = QRandomGenerator::global()->bounded(5, m_dropMaxSize + 1);
+            points.append({cx, cy, cz, r});
+        }
+    } else { // ModeGrid
+        for (int y = m_gridStep / 2; y < h; y += m_gridStep) {
+            for (int x = m_gridStep / 2; x < w; x += m_gridStep) {
+                int cz = QRandomGenerator::global()->bounded(d);
+                int r = m_dropMaxSize; 
+                points.append({x, y, cz, r});
+            }
+        }
+    }
+    
+    for (const auto& p : points) {
+        int cx = p.x;
+        int cy = p.y;
+        int cz = p.z;
+        int r = p.r;
+        
+        // Concentric Logic
+        int rings = 1;
+        if (m_genConcentric > 1) {
+            rings = QRandomGenerator::global()->bounded(1, m_genConcentric + 1);
+        }
+        
+        for (int ring = 0; ring < rings; ++ring) {
+            int currentR = r * (rings - ring) / rings;
+            if (currentR < 2) break;
+
+            if (m_depthRadiusScaling) {
+                // Scale radius by depth: top layers get smaller radius, deeper layers larger.
+                float depthScale = float((d - 1) - cz) / float(d - 1); // 0 at top, 1 at bottom
+                currentR = std::max(1, int(std::round(currentR * depthScale)));
+            }
+            
+            int colorIdx = QRandomGenerator::global()->bounded(colorCount);
+            QVector3D col = currentPalette[colorIdx];
+            
+            if (m_genShape == ShapeCircle) {
+                // Circle Logic
+                if (m_drawBorders) {
+                    int borderR = currentR + 1;
+                    for (int y = cy - borderR; y <= cy + borderR; ++y) {
+                        for (int x = cx - borderR; x <= cx + borderR; ++x) {
+                            if (x >= 0 && x < w && y >= 0 && y < h) {
+                                float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
+                                if (dist <= borderR) {
+                                    int idx = (cz * w * h + y * w + x) * 4;
+                                    buffer[idx + 0] = 0.0f;
+                                    buffer[idx + 1] = 0.0f;
+                                    buffer[idx + 2] = 0.0f;
+                                    buffer[idx + 3] = 1.0f;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (int y = cy - currentR; y <= cy + currentR; ++y) {
+                    for (int x = cx - currentR; x <= cx + currentR; ++x) {
+                        if (x >= 0 && x < w && y >= 0 && y < h) {
+                            float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
+                            if (dist <= currentR) {
+                                int idx = (cz * w * h + y * w + x) * 4;
+                                buffer[idx + 0] = col.x();
+                                buffer[idx + 1] = col.y();
+                                buffer[idx + 2] = col.z();
+                                buffer[idx + 3] = 0.8f;
+                            }
+                        }
+                    }
+                }
+            } else { // ShapeSquare
+                // Square Logic
+                if (m_drawBorders) {
+                    int borderR = currentR + 1;
+                    for (int y = cy - borderR; y <= cy + borderR; ++y) {
+                        for (int x = cx - borderR; x <= cx + borderR; ++x) {
+                            if (x >= 0 && x < w && y >= 0 && y < h) {
+                                int idx = (cz * w * h + y * w + x) * 4;
+                                buffer[idx + 0] = 0.0f;
+                                buffer[idx + 1] = 0.0f;
+                                buffer[idx + 2] = 0.0f;
+                                buffer[idx + 3] = 1.0f;
+                            }
+                        }
+                    }
+                }
+                
+                for (int y = cy - currentR; y <= cy + currentR; ++y) {
+                    for (int x = cx - currentR; x <= cx + currentR; ++x) {
+                        if (x >= 0 && x < w && y >= 0 && y < h) {
+                            int idx = (cz * w * h + y * w + x) * 4;
+                            buffer[idx + 0] = col.x();
+                            buffer[idx + 1] = col.y();
+                            buffer[idx + 2] = col.z();
+                            buffer[idx + 3] = 0.8f;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void SqueegeeWindow::regenerateShiftedOverlay()
+{
+    qDebug() << "Regenerating Shifted Overlay with Simulation...";
+    m_hasGenerated = true; // Mark as generated so we know there's content
+    
+    int w = width();
+    int h = height();
+    int d = 32;
+    
+    // 1. Read existing Main Texture (current state of canvas)
+    std::vector<float> bufferExisting(w * h * d * 4);
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, bufferExisting.data());
+    
+    // 2. Prepare Temporary Textures for the new "Layer" generation
+    // We need two textures to run the compute simulation (ping-pong)
+    GLuint tempTexA, tempTexB;
+    glGenTextures(1, &tempTexA);
+    glBindTexture(GL_TEXTURE_3D, tempTexA);
+    glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, w, h, d);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    glGenTextures(1, &tempTexB);
+    glBindTexture(GL_TEXTURE_3D, tempTexB);
+    glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32F, w, h, d);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    // 3. Initialize Temp Texture A with Drops (Fresh State)
+    std::vector<float> bufferNew(w * h * d * 4, 0.0f);
+    generateDrops(bufferNew, w, h, d); // Fill bufferNew with drops
+    
+    // Upload drops to TempA
+    glBindTexture(GL_TEXTURE_3D, tempTexA);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, bufferNew.data());
+
+    // Clear TempB just in case
+    // (Optional if simulateStroke overwrites completely, but good practice)
+    std::vector<float> clearBuff(w * h * d * 4, 0.0f);
+    glBindTexture(GL_TEXTURE_3D, tempTexB);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, clearBuff.data());
+    
+    // 4. Run Squeegee Simulation on Temporary Textures
+    // We temporarily swap the member variables so simulateStroke operates on our temps
+    GLuint backupTexA = m_texture3DA;
+    GLuint backupTexB = m_texture3DB;
+    
+    m_texture3DA = tempTexA;
+    m_texture3DB = tempTexB;
+    
+    // -- Simulation Logic Copied from generateComposition --
+    if (!m_showPreview) {
+        float rad = qDegreesToRadians(m_genAngle);
+        QVector2D dir(std::cos(rad), std::sin(rad));
+        QVector2D center(w * 0.5f, h * 0.5f);
+        float diag = std::sqrt(float(w*w + h*h));
+        QVector2D start = center - dir * diag;
+        QVector2D end = center + dir * diag;
+        float squeegeeWidth = width() * m_genWidth;
+        
+        for (int i = 0; i < m_genPasses; ++i) {
+            simulateStroke(start, end, squeegeeWidth);
+        }
+    }
+    // Result is now in m_texture3DA (whichever was last target, usually simulateStroke swaps)
+    // Actually simulateStroke does swaps. We need to be careful.
+    // simulateStroke ends with a swap if it runs.
+    // If it ran an odd number of swaps inside (it shouldn't, loop logic usually consistent),
+    // m_texture3DA will point to the result.
+    
+    // 5. Read back the simulation result
+    // The result is in the texture currently pointed to by m_texture3DA
+    std::vector<float> bufferResult(w * h * d * 4);
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, bufferResult.data());
+    
+    // 6. Restore Member Variables
+    m_texture3DA = backupTexA;
+    m_texture3DB = backupTexB;
+    
+    // 7. Clean up Temporary Textures
+    glDeleteTextures(1, &tempTexA);
+    glDeleteTextures(1, &tempTexB);
+    
+    // 8. Mix Result into Existing Mix with Random Shift
+    int zShift = QRandomGenerator::global()->bounded(d);
+    
+    for (int z = 0; z < d; ++z) {
+        int targetZ = (z + zShift) % d;
+        for (int y = 0; y < h; ++y) {
+            for (int x = 0; x < w; ++x) {
+                int idxSrc = ((z * h + y) * w + x) * 4;
+                int idxDst = ((targetZ * h + y) * w + x) * 4;
+                
+                float srcAlpha = bufferResult[idxSrc + 3];
+                if (srcAlpha > 0.0f) {
+                    // Overlay logic: simple overwrite if valid pixel
+                    bufferExisting[idxDst + 0] = bufferResult[idxSrc + 0];
+                    bufferExisting[idxDst + 1] = bufferResult[idxSrc + 1];
+                    bufferExisting[idxDst + 2] = bufferResult[idxSrc + 2];
+                    bufferExisting[idxDst + 3] = bufferResult[idxSrc + 3];
+                }
+            }
+        }
+    }
+    
+    // 9. Upload Final Composite to Real Texture
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, bufferExisting.data());
+    
     update();
 }

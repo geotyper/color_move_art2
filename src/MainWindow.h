@@ -28,7 +28,7 @@ private slots:
     void onWidthChanged(int value);
     void onPassesChanged(int value);
     void onStepsChanged(int value);
-    // void onDensityChanged(int value); // This slot is removed
+    void onDensityChanged(int value); // Restored
     void onSizeChanged(int value);
     void onConcentricChanged(int value);
     void onPreviewToggled(bool checked);
@@ -50,6 +50,7 @@ private slots:
 
     void onRegenerate();
     void onRegenerateOverlay();
+    void onRegenerateShiftedOverlay();
     void onRegenerateOverlaySqueegeeOnly();
     void onSaturate();
     void onCombFix();
@@ -87,10 +88,13 @@ protected:
     QCheckBox *m_depthScalingCheckBox;
     QComboBox *m_noiseModeCombo;
     
+    QSlider *m_densitySlider; // New Density Slider
+    
     QLabel *m_angleLabel;
     QLabel *m_widthLabel;
     QLabel *m_passesLabel;
     QLabel *m_stepsLabel;
+    QLabel *m_densityLabel; // New Density Label
     QLabel *m_opacityLabel;
     QLabel *m_gridStepLabel;
     QLabel *m_sizeLabel;
