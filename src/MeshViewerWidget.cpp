@@ -264,7 +264,6 @@ void MeshViewerWidget::keyPressEvent(QKeyEvent *event)
 void MeshViewerWidget::setLightDirection(const QVector3D &dir)
 {
     m_lightDir = dir.normalized();
-    qDebug() << "Light Dir Set:" << m_lightDir;
     update();
 }
 
