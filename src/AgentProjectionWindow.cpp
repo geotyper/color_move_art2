@@ -74,24 +74,28 @@ void AgentProjectionWindow::updateAgents()
     auto projected = m_meshViewer->getProjectedAgents(width(), height());
     
     for (const auto &p : projected) {
-        // Draw Trail
-        if (p.screenTrail.size() > 1) {
-            QPolygonF poly;
-            for (const auto &tp : p.screenTrail) {
-                poly << QPointF(tp.x(), tp.y());
+        // Draw Trail Segments
+        QColor trailColor = p.color;
+        trailColor.setAlpha(150);
+        painter.setPen(QPen(trailColor, 1));
+        painter.setBrush(Qt::NoBrush);
+        
+        for (const auto &segment : p.trailSegments) {
+            if (segment.size() > 1) {
+                QPolygonF poly;
+                for (const auto &tp : segment) {
+                    poly << QPointF(tp.x(), tp.y());
+                }
+                painter.drawPolyline(poly);
             }
-            // Fade trail opacity
-            QColor trailColor = p.color;
-            trailColor.setAlpha(150);
-            painter.setPen(QPen(trailColor, 1));
-            painter.setBrush(Qt::NoBrush);
-            painter.drawPolyline(poly);
         }
         
         // Draw Head
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(p.color);
-        painter.drawEllipse(QPointF(p.screenPos.x(), p.screenPos.y()), 2, 2);
+        if (p.isVisible) {
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(p.color);
+            painter.drawEllipse(QPointF(p.screenPos.x(), p.screenPos.y()), 2, 2);
+        }
     }
     
     update();

@@ -592,41 +592,61 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
     QMatrix4x4 model;
     model.rotate(-20.0f, 1.0f, 0.0f, 0.0f);
     model.rotate(m_rotationY, 0.0f, 1.0f, 0.0f);
-    QMatrix4x4 mvp = proj * view * model;
+    
+    QMatrix4x4 mv = view * model; // ModelView for Visibility Check
+    QMatrix4x4 mvp = proj * mv;   // MVP for Projection
+    
+    // Sphere Center in View Space (assuming model center is 0,0,0)
+    QVector3D sphereCenterView = (mv * QVector4D(0,0,0,1)).toVector3D();
+
+    auto isVisible = [&](const QVector3D &worldPos) -> bool {
+        QVector3D pView = (mv * QVector4D(worldPos, 1.0)).toVector3D();
+        QVector3D normal = (pView - sphereCenterView).normalized(); 
+        QVector3D viewDir = -pView.normalized(); // Or just (0,0,1) if proper View Space? 
+                                                 // In View Space, camera is at 0,0,0 looking down -Z.
+                                                 // So viewDir is (0,0,1)? 
+                                                 // Dot(Normal, (0,0,1)) > 0 means Normal.z > 0.
+                                                 // Or simple check: Normal.z > 0.
+                                                 // Let's use Normal.z > 0 for standard view space.
+        return normal.z() > 0.05f; // Slight culling bias to hide horizon artifacts
+    };
+
+    auto project = [&](const QVector3D &worldPos) -> QVector2D {
+        QVector4D clip = mvp * QVector4D(worldPos, 1.0);
+        if (clip.w() > 0) {
+            QVector3D ndc = clip.toVector3D() / clip.w();
+             float sx = (ndc.x() + 1.0f) * 0.5f * viewWidth;
+             float sy = (1.0f - ndc.y()) * 0.5f * viewHeight;
+             return QVector2D(sx, sy);
+        }
+        return QVector2D(-10000, -10000);
+    };
     
     for (const auto &agent : m_surfaceAgents) {
-        // Head
         QVector3D worldPos = getAgentWorldPos(agent);
-        QVector4D clip = mvp * QVector4D(worldPos, 1.0);
         
         AgentRenderInfo info;
         info.color = agent.color;
-        bool visible = false;
+        info.isVisible = isVisible(worldPos);
+        info.screenPos = project(worldPos);
         
-        if (clip.w() > 0) {
-            QVector3D ndc = clip.toVector3D() / clip.w();
-            if (ndc.z() >= -1 && ndc.z() <= 1 && ndc.x() >= -1 && ndc.x() <= 1 && ndc.y() >= -1 && ndc.y() <= 1) {
-                float sx = (ndc.x() + 1.0f) * 0.5f * viewWidth;
-                float sy = (1.0f - ndc.y()) * 0.5f * viewHeight;
-                info.screenPos = QVector2D(sx, sy);
-                visible = true;
-            }
-        }
-        
-        if (visible) {
-            // Trail
-            for (const auto &p : agent.trail) {
-                 QVector4D tClip = mvp * QVector4D(p, 1.0);
-                 if (tClip.w() > 0) {
-                     QVector3D tNdc = tClip.toVector3D() / tClip.w();
-                     // Don't clip strictly for trails, looks better if trails go off screen usually
-                     float tx = (tNdc.x() + 1.0f) * 0.5f * viewWidth;
-                     float ty = (1.0f - tNdc.y()) * 0.5f * viewHeight;
-                     info.screenTrail.push_back(QVector2D(tx, ty));
+        // Process Trail
+        std::vector<QVector2D> currentSegment;
+        for (const auto &p : agent.trail) {
+             if (isVisible(p)) {
+                 currentSegment.push_back(project(p));
+             } else {
+                 if (!currentSegment.empty()) {
+                     info.trailSegments.push_back(currentSegment);
+                     currentSegment.clear();
                  }
-            }
-            projected.push_back(info);
+             }
         }
+        if (!currentSegment.empty()) {
+            info.trailSegments.push_back(currentSegment);
+        }
+        
+        projected.push_back(info);
     }
     return projected;
 }

@@ -48,7 +48,8 @@ public:
     struct AgentRenderInfo {
         QVector2D screenPos;
         QColor color;
-        std::vector<QVector2D> screenTrail;
+        bool isVisible;
+        std::vector<std::vector<QVector2D>> trailSegments;
     };
     std::vector<AgentRenderInfo> getProjectedAgents(float viewWidth, float viewHeight);
     
