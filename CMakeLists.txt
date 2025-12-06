@@ -17,12 +17,14 @@ find_package(OpenMesh REQUIRED CONFIG)
 
 set(PROJECT_SOURCES
     src/main.cpp
-    src/SqueegeeWindow.cpp
-    src/SqueegeeWindow.h
     src/MainWindow.cpp
     src/MainWindow.h
+    src/SqueegeeWindow.cpp
+    src/SqueegeeWindow.h
     src/MeshViewerWidget.cpp
     src/MeshViewerWidget.h
+    src/AgentProjectionWindow.cpp
+    src/AgentProjectionWindow.h
     src/Noise2D.h
 )
 

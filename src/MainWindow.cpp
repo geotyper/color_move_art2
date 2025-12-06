@@ -7,6 +7,10 @@
 #include <QImage>
 #include <QPixmap>
 #include <QColor>
+#include <QFormLayout>
+#include <QTabWidget>
+#include "MeshViewerWidget.h"
+#include "AgentProjectionWindow.h"
 
 MainWindow::MainWindow()
 {
@@ -242,34 +246,49 @@ MainWindow::MainWindow()
     connect(m_toroidalCheckBox, &QCheckBox::toggled, this, &MainWindow::onToroidalToggled);
     formLayout->addRow(m_toroidalCheckBox);
 
-    
-    controlLayout->addLayout(formLayout);
+    // BUTTONS (Global)
+    QGridLayout *btnLayout = new QGridLayout();
     
     QPushButton *regenBtn = new QPushButton("Regenerate (R)");
     connect(regenBtn, &QPushButton::clicked, this, &MainWindow::onRegenerate);
-    controlLayout->addWidget(regenBtn);
+    btnLayout->addWidget(regenBtn, 0, 0);
 
-    QPushButton *regenOverlayBtn = new QPushButton("Regenerate (Overlay)");
+    QPushButton *regenOverlayBtn = new QPushButton("Regen (Overlay)");
     connect(regenOverlayBtn, &QPushButton::clicked, this, &MainWindow::onRegenerateOverlay);
-    controlLayout->addWidget(regenOverlayBtn);
+    btnLayout->addWidget(regenOverlayBtn, 0, 1);
 
-    QPushButton *regenShiftedBtn = new QPushButton("Regenerate (Shifted)");
+    QPushButton *regenShiftedBtn = new QPushButton("Regen (Shifted)");
     connect(regenShiftedBtn, &QPushButton::clicked, this, &MainWindow::onRegenerateShiftedOverlay);
-    controlLayout->addWidget(regenShiftedBtn);
+    btnLayout->addWidget(regenShiftedBtn, 1, 0);
 
-    QPushButton *regenOverlaySqueegeeBtn = new QPushButton("Regenerate2 (Overlay)");
+    QPushButton *regenOverlaySqueegeeBtn = new QPushButton("Regen2 (Overlay)");
     connect(regenOverlaySqueegeeBtn, &QPushButton::clicked, this, &MainWindow::onRegenerateOverlaySqueegeeOnly);
-    controlLayout->addWidget(regenOverlaySqueegeeBtn);
+    btnLayout->addWidget(regenOverlaySqueegeeBtn, 1, 1);
 
     QPushButton *saturateBtn = new QPushButton("Saturate");
     connect(saturateBtn, &QPushButton::clicked, this, &MainWindow::onSaturate);
-    controlLayout->addWidget(saturateBtn);
+    btnLayout->addWidget(saturateBtn, 2, 0);
 
     QPushButton *combFixBtn = new QPushButton("Comb Fix");
     connect(combFixBtn, &QPushButton::clicked, this, &MainWindow::onCombFix);
-    controlLayout->addWidget(combFixBtn);
+    btnLayout->addWidget(combFixBtn, 2, 1);
     
-    controlLayout->addStretch();
+    controlLayout->addLayout(btnLayout);
+    
+    // TABS
+    QTabWidget *tabs = new QTabWidget();
+    controlLayout->addWidget(tabs);
+    
+    // --- TAB 1: BRUSH ---
+    QWidget *tabBrush = new QWidget();
+    QVBoxLayout *brushLayout = new QVBoxLayout(tabBrush);
+    brushLayout->addLayout(formLayout); // Restore the missing menu!
+    brushLayout->addStretch();
+    tabs->addTab(tabBrush, "Brush");
+
+    // --- TAB 2: 3D VIEW ---
+    QWidget *tab3D = new QWidget();
+    QVBoxLayout *tab3DLayout = new QVBoxLayout(tab3D);
     
     // Light Controls
     QFormLayout *lightLayout = new QFormLayout();
@@ -288,10 +307,35 @@ MainWindow::MainWindow()
     m_zoomSlider->setValue(30); // 3.0
     connect(m_zoomSlider, &QSlider::valueChanged, this, &MainWindow::onZoomChanged);
     
-    lightLayout->addRow("Light Azimuth:", m_lightAzimuthSlider);
-    lightLayout->addRow("Light Elevation:", m_lightElevationSlider);
-    lightLayout->addRow("Zoom (Dist):", m_zoomSlider);
-    controlLayout->addLayout(lightLayout);
+    lightLayout->addRow("Azimuth:", m_lightAzimuthSlider);
+    lightLayout->addRow("Elevation:", m_lightElevationSlider);
+    lightLayout->addRow("Zoom:", m_zoomSlider);
+    
+    tab3DLayout->addWidget(new QLabel("<b>Lighting & Camera:</b>"));
+    tab3DLayout->addLayout(lightLayout);
+    tab3DLayout->addSpacing(15);
+    
+    // Agent Controls
+    QFormLayout *agentLayout = new QFormLayout();
+    m_agentButton = new QPushButton("Start Agents");
+    m_agentButton->setCheckable(true);
+    connect(m_agentButton, &QPushButton::clicked, this, &MainWindow::onToggleAgents);
+    
+    m_agentCountLabel = new QLabel("1000 agents");
+    m_agentCountSlider = new QSlider(Qt::Horizontal);
+    m_agentCountSlider->setRange(10, 5000);
+    m_agentCountSlider->setValue(1000);
+    connect(m_agentCountSlider, &QSlider::valueChanged, this, &MainWindow::onAgentCountChanged);
+    
+    agentLayout->addRow("Simulation:", m_agentButton);
+    agentLayout->addRow(m_agentCountLabel);
+    agentLayout->addRow("Count:", m_agentCountSlider);
+    
+    tab3DLayout->addWidget(new QLabel("<b>Agent Projection:</b>"));
+    tab3DLayout->addLayout(agentLayout);
+    tab3DLayout->addStretch();
+    
+    tabs->addTab(tab3D, "3D View");
     
     QLabel *info = new QLabel("Controls:\nSpace: Toggle Tool\n1-5: Colors\nWheel: Brush Size\nB: Blur");
     controlLayout->addWidget(info);
@@ -327,6 +371,14 @@ MainWindow::MainWindow()
     squeegeeWin->resize(640, 480);
     squeegeeWin->show();
 
+    // Agent Viewer
+    m_agentWindow = new AgentProjectionWindow(m_meshViewer);
+    QMdiSubWindow *agentSub = m_mdiArea->addSubWindow(m_agentWindow);
+    agentSub->setWindowTitle("Agent Projection");
+    agentSub->setAttribute(Qt::WA_DeleteOnClose, false);
+    agentSub->resize(480, 360);
+    agentSub->show();
+    
     mainLayout->addWidget(m_mdiArea, 1);
 
     // Initial values
@@ -654,5 +706,22 @@ void MainWindow::onZoomChanged(int value)
     float dist = value / 10.0f;
     if (m_meshViewer) {
         m_meshViewer->setCameraDistance(dist);
+    }
+}
+
+void MainWindow::onToggleAgents()
+{
+    bool run = m_agentButton->isChecked();
+    m_agentButton->setText(run ? "Stop Agents" : "Start Agents");
+    if (m_agentWindow) {
+        m_agentWindow->setRunning(run);
+    }
+}
+
+void MainWindow::onAgentCountChanged(int value)
+{
+    m_agentCountLabel->setText(QString("%1 agents").arg(value));
+    if (m_agentWindow) {
+        m_agentWindow->setAgentCount(value);
     }
 }

@@ -23,6 +23,8 @@ public:
 
     void setLightDirection(const QVector3D &dir);
     void setCameraDistance(float dist);
+    
+    bool checkRayIntersection(float x, float y, float viewWidth, float viewHeight);
 
 protected:
     void initializeGL() override;

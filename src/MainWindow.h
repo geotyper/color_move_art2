@@ -57,6 +57,7 @@ private slots:
     void onCombFix();
     void onLightChanged();
     void onZoomChanged(int value);
+    void onAgentCountChanged(int value);
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
@@ -67,6 +68,12 @@ private:
     QSlider *m_lightAzimuthSlider;
     QSlider *m_lightElevationSlider;
     QSlider *m_zoomSlider;
+    
+    class AgentProjectionWindow *m_agentWindow;
+    void onToggleAgents();
+    QPushButton *m_agentButton;
+    QSlider *m_agentCountSlider;
+    QLabel *m_agentCountLabel;
 
 protected:
     void showEvent(QShowEvent *event) override;

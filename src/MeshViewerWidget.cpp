@@ -272,3 +272,47 @@ void MeshViewerWidget::setCameraDistance(float dist)
     m_cameraDistance = dist;
     update();
 }
+
+bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, float viewHeight)
+{
+    // Reconstruct Camera Matrices
+    QMatrix4x4 view;
+    view.translate(0.0f, 0.0f, -m_cameraDistance);
+
+    QMatrix4x4 proj;
+    const float aspect = viewWidth > 0 ? viewWidth / viewHeight : 1.0f;
+    proj.perspective(45.0f, aspect, 0.1f, 100.0f);
+    
+    QMatrix4x4 invVP = (proj * view).inverted();
+    
+    // Normalized Device Coordinates (-1 to 1)
+    float nx = (2.0f * x / viewWidth) - 1.0f;
+    float ny = 1.0f - (2.0f * y / viewHeight); // Flip Y
+    
+    // Ray in World Space
+    QVector4D nearPoint(nx, ny, -1.0f, 1.0f);
+    QVector4D farPoint(nx, ny, 1.0f, 1.0f);
+    
+    QVector4D pNear = invVP * nearPoint;
+    QVector4D pFar = invVP * farPoint;
+    
+    QVector3D pNear3 = pNear.toVector3D() / pNear.w();
+    QVector3D pFar3 = pFar.toVector3D() / pFar.w();
+    
+    QVector3D rayOrigin = pNear3;
+    QVector3D rayDir = (pFar3 - pNear3).normalized();
+    
+    // Sphere Intersection at (0,0,0) with Radius 1
+    // (O + tD)^2 = R^2
+    // O^2 + 2t(O.D) + t^2(D.D) = R^2
+    // D is normalized, so D.D = 1
+    // t^2 + 2t(O.D) + O^2 - R^2 = 0
+    
+    float a = 1.0f;
+    float b = 2.0f * QVector3D::dotProduct(rayOrigin, rayDir);
+    float c = rayOrigin.lengthSquared() - 1.0f; // Radius^2 = 1
+    
+    float discriminant = b*b - 4*a*c;
+    
+    return (discriminant >= 0.0f);
+}
