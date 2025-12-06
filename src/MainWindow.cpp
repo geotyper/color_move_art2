@@ -327,9 +327,17 @@ MainWindow::MainWindow()
     m_agentCountSlider->setValue(1000);
     connect(m_agentCountSlider, &QSlider::valueChanged, this, &MainWindow::onAgentCountChanged);
     
+    m_agentLifetimeLabel = new QLabel("1000 ticks");
+    m_agentLifetimeSlider = new QSlider(Qt::Horizontal);
+    m_agentLifetimeSlider->setRange(10, 1500);
+    m_agentLifetimeSlider->setValue(1000);
+    connect(m_agentLifetimeSlider, &QSlider::valueChanged, this, &MainWindow::onAgentLifetimeChanged);
+    
     agentLayout->addRow("Simulation:", m_agentButton);
     agentLayout->addRow(m_agentCountLabel);
     agentLayout->addRow("Count:", m_agentCountSlider);
+    agentLayout->addRow(m_agentLifetimeLabel);
+    agentLayout->addRow("Lifetime:", m_agentLifetimeSlider);
     
     tab3DLayout->addWidget(new QLabel("<b>Agent Projection:</b>"));
     tab3DLayout->addLayout(agentLayout);
@@ -352,11 +360,11 @@ MainWindow::MainWindow()
 
     m_meshViewer = new MeshViewerWidget();
     m_meshViewer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    QMdiSubWindow *meshWin = m_mdiArea->addSubWindow(m_meshViewer);
-    meshWin->setWindowTitle("3D Mesh Viewer");
-    meshWin->setAttribute(Qt::WA_DeleteOnClose, false);
-    meshWin->resize(640, 480);
-    meshWin->show();
+    m_meshSubWindow = m_mdiArea->addSubWindow(m_meshViewer);
+    m_meshSubWindow->setWindowTitle("3D Mesh Viewer");
+    m_meshSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+    m_meshSubWindow->resize(640, 480);
+    m_meshSubWindow->show();
 
     // Squeegee Window
     // Squeegee Window
@@ -365,19 +373,20 @@ MainWindow::MainWindow()
     m_squeegeeWindow->setMinimumSize(480, 360);
     m_squeegeeWindow->setFocusPolicy(Qt::StrongFocus);
     
-    QMdiSubWindow *squeegeeWin = m_mdiArea->addSubWindow(m_squeegeeWindow);
-    squeegeeWin->setWindowTitle("2D Brush Canvas");
-    squeegeeWin->setAttribute(Qt::WA_DeleteOnClose, false);
-    squeegeeWin->resize(640, 480);
-    squeegeeWin->show();
+    m_squeegeeSubWindow = m_mdiArea->addSubWindow(m_squeegeeWindow);
+    m_squeegeeSubWindow->setWindowTitle("2D Brush Canvas");
+    m_squeegeeSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+    m_squeegeeSubWindow->resize(640, 480);
+    m_squeegeeSubWindow->show();
 
     // Agent Viewer
+    // Agent Viewer
     m_agentWindow = new AgentProjectionWindow(m_meshViewer);
-    QMdiSubWindow *agentSub = m_mdiArea->addSubWindow(m_agentWindow);
-    agentSub->setWindowTitle("Agent Projection");
-    agentSub->setAttribute(Qt::WA_DeleteOnClose, false);
-    agentSub->resize(480, 360);
-    agentSub->show();
+    m_agentSubWindow = m_mdiArea->addSubWindow(m_agentWindow);
+    m_agentSubWindow->setWindowTitle("Agent Projection");
+    m_agentSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+    m_agentSubWindow->resize(480, 360);
+    m_agentSubWindow->show();
     
     mainLayout->addWidget(m_mdiArea, 1);
 
@@ -390,17 +399,61 @@ MainWindow::MainWindow()
     onNoiseScaleChanged(m_noiseScaleSlider->value());
     onNoiseStrengthChanged(m_noiseStrengthSlider->value());
     updateNoisePreview();
+
+    loadSettings();
 }
 
 void MainWindow::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
     if (m_tiledOnce) return;
+    
+    // Check if we loaded specific geometries. If so, don't tile.
+    QSettings settings;
+    if (settings.contains("geometry")) {
+        // Assume loaded
+        m_tiledOnce = true;
+        return;
+    }
+
     m_tiledOnce = true;
     // Tile after the window is actually shown so layout sizes are valid
     QTimer::singleShot(0, this, [this]() {
         m_mdiArea->tileSubWindows();
     });
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    saveSettings();
+    QMainWindow::closeEvent(event);
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+    
+    if (m_meshSubWindow) settings.setValue("meshWinGeometry", m_meshSubWindow->saveGeometry());
+    if (m_squeegeeSubWindow) settings.setValue("squeegeeWinGeometry", m_squeegeeSubWindow->saveGeometry());
+    if (m_agentSubWindow) settings.setValue("agentWinGeometry", m_agentSubWindow->saveGeometry());
+}
+
+void MainWindow::loadSettings()
+{
+    QSettings settings;
+    if (settings.contains("geometry")) restoreGeometry(settings.value("geometry").toByteArray());
+    if (settings.contains("windowState")) restoreState(settings.value("windowState").toByteArray());
+    
+    if (m_meshSubWindow && settings.contains("meshWinGeometry")) 
+        m_meshSubWindow->restoreGeometry(settings.value("meshWinGeometry").toByteArray());
+        
+    if (m_squeegeeSubWindow && settings.contains("squeegeeWinGeometry"))
+        m_squeegeeSubWindow->restoreGeometry(settings.value("squeegeeWinGeometry").toByteArray());
+        
+    if (m_agentSubWindow && settings.contains("agentWinGeometry"))
+        m_agentSubWindow->restoreGeometry(settings.value("agentWinGeometry").toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -723,5 +776,13 @@ void MainWindow::onAgentCountChanged(int value)
     m_agentCountLabel->setText(QString("%1 agents").arg(value));
     if (m_agentWindow) {
         m_agentWindow->setAgentCount(value);
+    }
+}
+
+void MainWindow::onAgentLifetimeChanged(int value)
+{
+    m_agentLifetimeLabel->setText(QString("%1 ticks").arg(value));
+    if (m_agentWindow) {
+        m_agentWindow->setAgentLifetime(value);
     }
 }

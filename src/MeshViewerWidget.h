@@ -27,6 +27,8 @@ struct SurfaceAgent {
     float speed; // Scalar speed
     QColor color;
     std::deque<QVector3D> trail; // World positions
+    int age = 0;
+    int maxAge = 1000;
 };
 
 class MeshViewerWidget : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
@@ -43,6 +45,7 @@ public:
     // Check intersection and return hit info
     bool checkRayIntersection(float x, float y, float viewWidth, float viewHeight, QVector3D &hitPos);
     void updateAgents();
+    void setAgentLifetime(int ticks) { m_agentLifetime = ticks; }
     
     // Returns list of agents projected to 2D screen coordinates
     struct AgentRenderInfo {
@@ -92,6 +95,7 @@ private:
     
     MyMesh m_mesh; // New member
     std::vector<SurfaceAgent> m_surfaceAgents; // New member
+    int m_agentLifetime = 1000;
     
     // Helper to get world pos from agent
     QVector3D getAgentWorldPos(const SurfaceAgent &agent); // New member

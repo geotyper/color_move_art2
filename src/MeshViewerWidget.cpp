@@ -365,6 +365,8 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
                 newAgent.speed = 0.005f; // reduced speed for stability check
                 newAgent.worldVelocity = tangent * newAgent.speed;
                 newAgent.color = QColor::fromHsvF(QRandomGenerator::global()->generateDouble(), 1.0, 1.0);
+                newAgent.maxAge = m_agentLifetime;
+                newAgent.age = 0;
             }
         }
     }
@@ -405,7 +407,15 @@ QVector3D solveBarycentricVelocity(const QVector3D &worldVel, const QVector3D &v
 }
 
 void MeshViewerWidget::updateAgents() {
+    // Remove dead agents
+    if (!m_surfaceAgents.empty()) {
+        m_surfaceAgents.erase(std::remove_if(m_surfaceAgents.begin(), m_surfaceAgents.end(),
+            [](const SurfaceAgent &a) { return a.age >= a.maxAge; }),
+            m_surfaceAgents.end());
+    }
+
     for (auto &agent : m_surfaceAgents) {
+        agent.age++;
         float remainingTime = 1.0f;
         
         while (remainingTime > 1e-4f) {

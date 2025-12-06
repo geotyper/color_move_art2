@@ -5,6 +5,8 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    app.setOrganizationName("GeoTyper");
+    app.setApplicationName("ColorMoveArt2");
 
     QSurfaceFormat format;
     format.setMajorVersion(4);

@@ -20,6 +20,11 @@ void AgentProjectionWindow::setAgentCount(int n)
     m_targetCount = n;
 }
 
+void AgentProjectionWindow::setAgentLifetime(int ticks)
+{
+    if (m_meshViewer) m_meshViewer->setAgentLifetime(ticks);
+}
+
 void AgentProjectionWindow::setRunning(bool run)
 {
     m_running = run;

@@ -16,6 +16,7 @@ public:
     
     void setAgentCount(int n);
     void setRunning(bool run);
+    void setAgentLifetime(int ticks);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

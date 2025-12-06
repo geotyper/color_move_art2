@@ -11,6 +11,8 @@
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QMdiArea>
+#include <QCloseEvent>
+#include <QSettings>
 #include "SqueegeeWindow.h"
 #include "MeshViewerWidget.h"
 #include "Noise2D.h"
@@ -24,6 +26,7 @@ public:
     ~MainWindow();
 
 private slots:
+    void onAgentLifetimeChanged(int value);
     void onAngleChanged(int value);
     void onWidthChanged(int value);
     void onPassesChanged(int value);
@@ -74,8 +77,19 @@ private:
     QPushButton *m_agentButton;
     QSlider *m_agentCountSlider;
     QLabel *m_agentCountLabel;
+    QSlider *m_agentLifetimeSlider;
+    QLabel *m_agentLifetimeLabel;
+
+    // Subwindows
+    QMdiSubWindow *m_meshSubWindow;
+    QMdiSubWindow *m_squeegeeSubWindow;
+    QMdiSubWindow *m_agentSubWindow;
+
+    void saveSettings();
+    void loadSettings();
 
 protected:
+    void closeEvent(QCloseEvent *event) override;
     void showEvent(QShowEvent *event) override;
     
     QSlider *m_angleSlider;
