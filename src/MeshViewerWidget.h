@@ -23,7 +23,8 @@ typedef OpenMesh::TriMesh_ArrayKernelT<> MyMesh;
 struct SurfaceAgent {
     OpenMesh::FaceHandle face;
     QVector3D bary; // u, v, w
-    QVector3D velocity; // barycentric velocity
+    QVector3D worldVelocity; // Tangent vector in World Space
+    float speed; // Scalar speed
     QColor color;
     std::deque<QVector3D> trail; // World positions
 };

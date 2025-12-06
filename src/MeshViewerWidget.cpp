@@ -353,10 +353,17 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
                 // Bary: w (v0), u (v1), v (v2)
                 newAgent.bary = QVector3D(1.0f - u - v, u, v);
                 
-                // Random Tangent Velocity
-                float du = (QRandomGenerator::global()->generateDouble() - 0.5) * 0.02; // Faster
-                float dv = (QRandomGenerator::global()->generateDouble() - 0.5) * 0.02;
-                newAgent.velocity = QVector3D(du, dv, -(du+dv)); 
+                // Random Tangent Velocity in World Space
+                float du = (QRandomGenerator::global()->generateDouble() - 0.5);
+                float dv = (QRandomGenerator::global()->generateDouble() - 0.5);
+                
+                // Construct tangent plane basis? Or just random vector projected.
+                QVector3D n = QVector3D::crossProduct(v1-v0, v2-v0).normalized();
+                QVector3D rnd(du, dv, (QRandomGenerator::global()->generateDouble() - 0.5));
+                QVector3D tangent = (rnd - QVector3D::dotProduct(rnd, n) * n).normalized();
+                
+                newAgent.speed = 0.005f; // reduced speed for stability check
+                newAgent.worldVelocity = tangent * newAgent.speed;
                 newAgent.color = QColor::fromHsvF(QRandomGenerator::global()->generateDouble(), 1.0, 1.0);
             }
         }
@@ -370,90 +377,191 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     return false;
 }
 
+// Convert World Velocity to Barycentric Change Rates (w_dot, u_dot, v_dot)
+QVector3D solveBarycentricVelocity(const QVector3D &worldVel, const QVector3D &v0, const QVector3D &v1, const QVector3D &v2) {
+    // V = u_dot * (v1 - v0) + v_dot * (v2 - v0)
+    // We solve for u_dot, v_dot.
+    // Overdetermined system (3 eq, 2 var). Use Least Squares or project to 2D?
+    // Projecting to 2D plane basis is best. But algebraic solve works too.
+    // V . e1 = u_dot * (e1.e1) + v_dot * (e2.e1)
+    // V . e2 = u_dot * (e1.e2) + v_dot * (e2.e2)
+    
+    QVector3D e1 = v1 - v0;
+    QVector3D e2 = v2 - v0;
+    
+    float dot00 = QVector3D::dotProduct(e1, e1);
+    float dot01 = QVector3D::dotProduct(e1, e2);
+    float dot11 = QVector3D::dotProduct(e2, e2);
+    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+    
+    float dotV0 = QVector3D::dotProduct(worldVel, e1);
+    float dotV1 = QVector3D::dotProduct(worldVel, e2);
+    
+    float u_dot = (dot11 * dotV0 - dot01 * dotV1) * invDenom;
+    float v_dot = (dot00 * dotV1 - dot01 * dotV0) * invDenom;
+    float w_dot = -u_dot - v_dot;
+    
+    return QVector3D(w_dot, u_dot, v_dot);
+}
+
 void MeshViewerWidget::updateAgents() {
     for (auto &agent : m_surfaceAgents) {
-        // Record trail
-        QVector3D currentPos = getAgentWorldPos(agent);
-        agent.trail.push_back(currentPos);
-        if (agent.trail.size() > 100) agent.trail.pop_front();
+        float remainingTime = 1.0f;
         
-        // Move
-        agent.bary += agent.velocity;
-        
-        // Robust crossing logic
-        // Only handle one crossing at a time, priority: w, u, v
-        // "Nudge" means: if we cross into neighbor, set coordinate to epsilon, not 0.
-        
-        int crossIndex = -1;
-        // Check strict < 0
-        if (agent.bary.x() < 0) crossIndex = 0; // w corresponds to v0. opposite edge: v1-v2
-        else if (agent.bary.y() < 0) crossIndex = 1; // u corresponds to v1. opposite edge: v2-v0
-        else if (agent.bary.z() < 0) crossIndex = 2; // v corresponds to v2. opposite edge: v0-v1
-        
-        if (crossIndex != -1) {
-            std::vector<MyMesh::HalfedgeHandle> hes;
-            for (auto he : m_mesh.fh_range(agent.face)) hes.push_back(he);
+        while (remainingTime > 1e-4f) {
+            if (!agent.face.is_valid()) break;
+
+            // Get Vertices
+            auto fv = m_mesh.fv_range(agent.face);
+            auto it = fv.begin();
+            auto p0 = m_mesh.point(*it);
+            auto p1 = m_mesh.point(*(++it));
+            auto p2 = m_mesh.point(*(++it));
+            QVector3D v0(p0[0], p0[1], p0[2]);
+            QVector3D v1(p1[0], p1[1], p1[2]);
+            QVector3D v2(p2[0], p2[1], p2[2]);
             
-            std::vector<MyMesh::VertexHandle> vhs;
-            for (auto v : m_mesh.fv_range(agent.face)) vhs.push_back(v);
+            // Calculate Barycentric Velocity
+            QVector3D baryVel = solveBarycentricVelocity(agent.worldVelocity, v0, v1, v2);
             
-            // Map Index to Target Edge Vertices
-            // i=0 (w, v0) -> Edge v1-v2.
-            // i=1 (u, v1) -> Edge v2-v0.
-            // i=2 (v, v2) -> Edge v0-v1.
-            MyMesh::VertexHandle startV = vhs[(crossIndex + 1) % 3];
-            MyMesh::VertexHandle endV = vhs[(crossIndex + 2) % 3];
+            // Calculate Max Time until Edge Hit
+            // bary + t * baryVel = 0 for any component
+            // t = -bary / baryVel
+            float minT = remainingTime;
+            int hitIndex = -1; // 0=w, 1=u, 2=v
             
-            bool found = false;
-            MyMesh::HalfedgeHandle targetHe;
-            for (auto he : hes) {
-                if (m_mesh.from_vertex_handle(he) == startV && m_mesh.to_vertex_handle(he) == endV) {
-                    targetHe = he;
-                    found = true;
-                    break;
+            float baryArr[3] = {agent.bary.x(), agent.bary.y(), agent.bary.z()};
+            float velArr[3] = {baryVel.x(), baryVel.y(), baryVel.z()};
+            
+            for (int i = 0; i < 3; ++i) {
+                if (velArr[i] < -1e-8f) { // Moving towards 0
+                    float t = -baryArr[i] / velArr[i];
+                    if (t < minT) {
+                        minT = t;
+                        hitIndex = i;
+                    }
                 }
             }
             
-            if (found) {
-                auto opp = m_mesh.opposite_halfedge_handle(targetHe);
-                if (!m_mesh.is_boundary(opp)) {
-                    agent.face = m_mesh.face_handle(opp);
-                    
-                    // Simple Transition: Just force inside
-                    // The coordinate for the new vertex (the one opposite the shared edge) is 0+epsilon.
-                    // The other two coordinates need to be swapped/adjusted.
-                    // A proper barycentric transition requires projection.
-                    // But for random walk, we can just strictly clamp the crossed coordinate to epsilon
-                    // and shuffle the others to keep sum=1? No, position must match.
-                    
-                    // Let's just generate random position on new face to prevent stuck/dead logic
-                    // User complained about "respawning".
-                    // Continuity is preferred.
-                    // Let's try:
-                    // 1. Calc World Pos on Edge.
-                    // 2. Project world pos to new face barycentrics.
-                    // 3. Keep velocity? Or randomize? Randomize is safer for now.
-                    
-                    QVector3D pWorld = getAgentWorldPos(agent); // Approx on edge
-                    // Find barycentric on new face for pWorld... expensive?
-                    // Cheap Hack: Set barycenter
-                    agent.bary = QVector3D(0.33, 0.33, 0.33);
-                    // agent.velocity = ... ? Keep same direction?
-                    // Randomize avoids stuck loop
-                    float du = (QRandomGenerator::global()->generateDouble() - 0.5) * 0.02;
-                    float dv = (QRandomGenerator::global()->generateDouble() - 0.5) * 0.02;
-                    agent.velocity = QVector3D(du, dv, -(du+dv));
-                    
-                } else {
-                    // Bounce
-                    agent.velocity = -agent.velocity;
-                    // Clamp to inside
-                    if (crossIndex==0) agent.bary.setX(0.01);
-                    if (crossIndex==1) agent.bary.setY(0.01);
-                    if (crossIndex==2) agent.bary.setZ(0.01);
-                    // Re-normalize sum?
-                    float sum = agent.bary.x() + agent.bary.y() + agent.bary.z();
-                    agent.bary /= sum;
+            // Move Agent
+            agent.bary += baryVel * minT;
+            
+            // Update Trail
+            if (minT > 0) {
+                 // Sample position occasionally or at end of step?
+                 // For smooth curve, maybe sample each sub-step
+                 // But loop might run many times.
+                 // Let's just update trail once per frame outside loop? 
+                 // Or here?
+                 // The trails look jagged if we don't capture corners.
+                 // Let's add corner point.
+                 QVector3D currentPos = v0 * agent.bary.x() + v1 * agent.bary.y() + v2 * agent.bary.z();
+                 if (agent.trail.empty() || (agent.trail.back() - currentPos).lengthSquared() > 1e-6) {
+                      agent.trail.push_back(currentPos);
+                      if (agent.trail.size() > 100) agent.trail.pop_front();
+                 }
+            }
+
+            remainingTime -= minT;
+            
+            // Handle Crossing
+            if (hitIndex != -1) {
+                // We hit an edge.
+                // Clamp coordinate to 0 to prevent drift
+                if (hitIndex == 0) agent.bary.setX(0.0f);
+                if (hitIndex == 1) agent.bary.setY(0.0f);
+                if (hitIndex == 2) agent.bary.setZ(0.0f);
+                
+                // Identify Edge
+                // w=0 (hitIndex 0) -> Edge v1-v2.
+                // u=0 (hitIndex 1) -> Edge v2-v0.
+                // v=0 (hitIndex 2) -> Edge v0-v1.
+                std::vector<MyMesh::VertexHandle> vhs;
+                vhs.push_back(*fv.begin());       // v0
+                vhs.push_back(*(++fv.begin()));   // v1
+                vhs.push_back(*(++++fv.begin())); // v2
+                
+                MyMesh::VertexHandle startV = vhs[(hitIndex + 1) % 3];
+                MyMesh::VertexHandle endV = vhs[(hitIndex + 2) % 3];
+                
+                // Find Halfedge
+                bool found = false;
+                MyMesh::HalfedgeHandle targetHe;
+                for (auto he : m_mesh.fh_range(agent.face)) {
+                    if (m_mesh.from_vertex_handle(he) == startV && m_mesh.to_vertex_handle(he) == endV) {
+                        targetHe = he;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                bool bounced = true;
+                if (found) {
+                    auto opp = m_mesh.opposite_halfedge_handle(targetHe);
+                    if (!m_mesh.is_boundary(opp)) {
+                        bounced = false;
+                        agent.face = m_mesh.face_handle(opp);
+                        
+                        // New Face Vertices
+                        // We need to map position P (on shared edge) to new barycentrics.
+                        // Or simplify: Shared vertices retain their world positions.
+                        // We are at P = weightA * A + weightB * B.
+                        // In new face, A and B are some vertices.
+                        // Let's just re-calculate barycentric from World Pos P for robustness.
+                        QVector3D wPos = v0 * agent.bary.x() + v1 * agent.bary.y() + v2 * agent.bary.z();
+                        
+                        // Get new vertices
+                        auto nfv = m_mesh.fv_range(agent.face);
+                        auto nit = nfv.begin();
+                        auto np0 = m_mesh.point(*nit);
+                        auto np1 = m_mesh.point(*(++nit));
+                        auto np2 = m_mesh.point(*(++nit));
+                        QVector3D nv0(np0[0], np0[1], np0[2]);
+                        QVector3D nv1(np1[0], np1[1], np1[2]);
+                        QVector3D nv2(np2[0], np2[1], np2[2]);
+                        
+                        // Solve for P = x*nv0 + y*nv1 + z*nv2
+                        // P is on edge, so one weight is 0.
+                        // But solving fully corrects any drift.
+                        // Usage: same helper as solveBarycentricVelocity but for Position P relative to v0?
+                        // P - v0 = u * e1 + v * e2
+                        QVector3D ne1 = nv1 - nv0;
+                        QVector3D ne2 = nv2 - nv0;
+                        QVector3D P_v0 = wPos - nv0;
+                        
+                        float d00 = QVector3D::dotProduct(ne1, ne1);
+                        float d01 = QVector3D::dotProduct(ne1, ne2);
+                        float d11 = QVector3D::dotProduct(ne2, ne2);
+                        float id = 1.0f / (d00 * d11 - d01 * d01);
+                        
+                        float dP0 = QVector3D::dotProduct(P_v0, ne1);
+                        float dP1 = QVector3D::dotProduct(P_v0, ne2);
+                        
+                        float nu = (d11 * dP0 - d01 * dP1) * id;
+                        float nv = (d00 * dP1 - d01 * dP0) * id;
+                        float nw = 1.0f - nu - nv;
+                        
+                        agent.bary = QVector3D(nw, nu, nv); // (w, u, v)
+                        
+                        // Refract Velocity
+                        // Project current velocity onto new plane
+                        QVector3D normal = QVector3D::crossProduct(ne1, ne2).normalized();
+                        QVector3D tangent = agent.worldVelocity - QVector3D::dotProduct(agent.worldVelocity, normal) * normal;
+                        agent.worldVelocity = tangent.normalized() * agent.speed;
+                        
+                        // Nudge slightly into face to avoid immediate bounce back due to float precision?
+                        // Or just trust the loop.
+                        // Let's nudge a tiny bit towards center (0.33, 0.33, 0.33)
+                        // agent.bary = agent.bary * 0.99f + QVector3D(0.33f, 0.33f, 0.33f) * 0.01f;
+                        
+                    }
+                }
+                
+                if (bounced) {
+                    // Reflect velocity?
+                    // For now simple bounce
+                     agent.worldVelocity = -agent.worldVelocity;
+                     remainingTime = 0; // End step
                 }
             }
         }
