@@ -23,6 +23,11 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
+// GLM Includes
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
 
@@ -38,11 +43,11 @@ typedef OpenMesh::TriMesh_ArrayKernelT<> MyMesh;
 
 struct SurfaceAgent {
     OpenMesh::FaceHandle face;
-    QVector3D bary; // u, v, w
-    QVector3D worldVelocity; // Tangent vector in World Space
+    glm::vec3 bary; // u, v, w
+    glm::vec3 worldVelocity; // Tangent vector in World Space
     float speed; // Scalar speed
     QColor color;
-    std::deque<QVector3D> trail; // World positions
+    std::deque<glm::vec3> trail; // World positions
     int age = 0;
     int maxAge = 1000;
 };
@@ -59,7 +64,7 @@ public:
     void setCameraDistance(float dist);
     
     // Check intersection and return hit info
-    bool checkRayIntersection(float x, float y, float viewWidth, float viewHeight, QVector3D &hitPos);
+    bool checkRayIntersection(float x, float y, float viewWidth, float viewHeight, glm::vec3 &hitPos);
     void updateAgents();
     void setAgentLifetime(int ticks) { m_agentLifetime = ticks; }
     
@@ -79,7 +84,9 @@ protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void paintGL() override;
-    // keyPressEvent removed as per instruction
+    
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     // using Mesh = OpenMesh::TriMesh_ArrayKernelT<>; // Removed as per instruction
@@ -98,15 +105,18 @@ private:
     QOpenGLBuffer m_vbo; // Modified initialization
 
     struct VertexData { // New struct definition
-        QVector3D position;
-        QVector3D normal;
+        glm::vec3 position;
+        glm::vec3 normal;
     };
     std::vector<VertexData> m_vertices; // Type changed
     int m_vertexCount = 0;
     float m_rotationY = 0.0f;
+    float m_rotationX = -20.0f; // Initial X rotation
+    QPoint m_lastMousePos;
+    bool m_isMouseDown = false;
     QTimer *m_timer = nullptr; // Modified initialization (removed nullptr from instruction, but keeping it for consistency with original)
     bool m_showWireframe = false;
-    QVector3D m_lightDir = QVector3D(0.3f, 0.7f, 0.4f).normalized();
+    glm::vec3 m_lightDir = glm::normalize(glm::vec3(0.3f, 0.7f, 0.4f));
     float m_cameraDistance = 5.0f; // Modified value
     
     MyMesh m_mesh; // New member
@@ -117,5 +127,5 @@ private:
     bgi::rtree<BoostValue, bgi::quadratic<16>> m_rtree;
 
     // Helper to get world pos from agent
-    QVector3D getAgentWorldPos(const SurfaceAgent &agent); // New member
+    glm::vec3 getAgentWorldPos(const SurfaceAgent &agent); // New member
 };

@@ -122,20 +122,14 @@ void SqueegeeWindow::initializeGL()
 void SqueegeeWindow::initShaders()
 {
     auto loadSource = [](const QString& name) -> QByteArray {
-        QString baseDir = QCoreApplication::applicationDirPath();
-        QStringList candidates{
-            QDir(baseDir).filePath("shaders/" + name),
-            QDir(baseDir + "/..").filePath("shaders/" + name)
-        };
-        for (const QString& path : candidates) {
-            QFile f(path);
-            if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QByteArray data = f.readAll();
-                f.close();
-                return data;
-            }
+        QString path = ":/shaders/" + name;
+        QFile f(path);
+        if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QByteArray data = f.readAll();
+            f.close();
+            return data;
         }
-        qWarning() << "Failed to open shader" << name << "checked" << candidates;
+        qWarning() << "Failed to open shader from resource" << path;
         return {};
     };
 
@@ -558,6 +552,23 @@ void SqueegeeWindow::applyCombFix()
     update();
 }
 
+void SqueegeeWindow::clearCanvas()
+{
+    makeCurrent();
+    int w = width();
+    int h = height();
+    int d = 32;
+    std::vector<float> clearData(w * h * d * 4, 0.0f);
+    
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, clearData.data());
+    
+    glBindTexture(GL_TEXTURE_3D, m_texture3DB);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, clearData.data());
+    
+    update();
+}
+
 void SqueegeeWindow::applySaturation()
 {
     m_computeSaturate->bind();
@@ -782,9 +793,9 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                 glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
                 glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
                 
-                m_computeSqueegee->setUniformValue("mousePos", QVector2D(noisyCurrent.x(), height() - noisyCurrent.y()));
-                m_computeSqueegee->setUniformValue("lastMousePos", QVector2D(noisyLast.x(), height() - noisyLast.y()));
-                m_computeSqueegee->setUniformValue("strokeDir", QVector2D(dirNorm.x(), -dirNorm.y()));
+                m_computeSqueegee->setUniformValue("mousePos", noisyCurrent);
+                m_computeSqueegee->setUniformValue("lastMousePos", noisyLast);
+                m_computeSqueegee->setUniformValue("strokeDir", dirNorm);
                 m_computeSqueegee->setUniformValue("brushSize", brushSizeForShader);
                 
                 // Color Injection? 

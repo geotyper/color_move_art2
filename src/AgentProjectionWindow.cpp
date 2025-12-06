@@ -56,7 +56,7 @@ void AgentProjectionWindow::updateAgents()
         // Try to spawn 'needed' agents, but limit per frame to avoid freeze if bad luck
         int attempts = needed * 2;
         int spawned = 0;
-        QVector3D hit;
+        glm::vec3 hit;
         
         for (int i = 0; i < attempts && spawned < needed; ++i) {
             float rx = QRandomGenerator::global()->bounded((double)width());
@@ -69,7 +69,7 @@ void AgentProjectionWindow::updateAgents()
     }
     
     // Physics Step
-    m_meshViewer->updateAgents();
+    // m_meshViewer->updateAgents(); // Handled by MeshViewerWidget's timer
     
     // Render Step
     m_canvas.fill(Qt::black);

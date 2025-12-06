@@ -335,6 +335,9 @@ MainWindow::MainWindow()
 
     QPushButton *paintTrailsBtn = new QPushButton("Paint Trails");
     connect(paintTrailsBtn, &QPushButton::clicked, this, &MainWindow::onPaintTrails);
+
+    QPushButton *clearCanvasBtn = new QPushButton("Clear Canvas");
+    connect(clearCanvasBtn, &QPushButton::clicked, this, &MainWindow::onClearCanvas);
     
     m_agentCountLabel = new QLabel("10 agents");
     m_agentCountSlider = new QSlider(Qt::Horizontal);
@@ -351,6 +354,7 @@ MainWindow::MainWindow()
     agentLayout->addRow("Simulation:", m_agentButton);
     agentLayout->addRow(projectAgentsBtn);
     agentLayout->addRow(paintTrailsBtn);
+    agentLayout->addRow(clearCanvasBtn);
     agentLayout->addRow(m_agentCountLabel);
     agentLayout->addRow("Count:", m_agentCountSlider);
     agentLayout->addRow(m_agentLifetimeLabel);
@@ -850,7 +854,7 @@ void MainWindow::onPaintTrails()
     // But mostly just draw the trail segments.
     
     for (const auto& a : agents) {
-        if (!a.isVisible) continue;
+
         
         // Flatten segments into one path for simplicity, or keep segments?
         // SqueegeeWindow::PathInfo takes a single vector of points.
@@ -883,4 +887,9 @@ void MainWindow::onPaintTrails()
     }
     
     m_squeegeeWindow->paintPaths(paths);
+}
+
+void MainWindow::onClearCanvas()
+{
+    if (m_squeegeeWindow) m_squeegeeWindow->clearCanvas();
 }

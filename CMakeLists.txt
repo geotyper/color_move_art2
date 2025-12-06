@@ -27,6 +27,7 @@ set(PROJECT_SOURCES
     src/AgentProjectionWindow.cpp
     src/AgentProjectionWindow.h
     src/Noise2D.h
+    resources.qrc
 )
 
 add_executable(ColorMoveArt2 ${PROJECT_SOURCES})
@@ -40,6 +41,10 @@ target_link_libraries(ColorMoveArt2 PRIVATE
     OpenMeshCore
     OpenMeshTools
     Boost::headers
+)
+
+target_include_directories(ColorMoveArt2 PRIVATE
+    /home/geotyper/CPP_lib/glm
 )
 
 set_target_properties(ColorMoveArt2 PROPERTIES

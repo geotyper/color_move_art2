@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/render.vert</file>
+        <file>shaders/render.frag</file>
+        <file>shaders/squeegee.comp</file>
+        <file>shaders/gravity.comp</file>
+        <file>shaders/blur.comp</file>
+        <file>shaders/combfix.comp</file>
+        <file>shaders/saturate.comp</file>
+        <file>shaders/mesh.vert</file>
+        <file>shaders/mesh.frag</file>
+    </qresource>
+</RCC>

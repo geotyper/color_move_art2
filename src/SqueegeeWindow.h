@@ -159,6 +159,7 @@ public:
     void regenerateShiftedOverlay();
     void applySaturation();
     void applyCombFix();
+    void clearCanvas();
 
 
 
