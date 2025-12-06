@@ -176,11 +176,19 @@ MainWindow::MainWindow()
     m_noisePreviewLabel->setScaledContents(true);
     formLayout->addRow("Noise Preview:", m_noisePreviewLabel);
 
+    // Sharpen Slider
     m_sharpenSlider = new QSlider(Qt::Horizontal);
     m_sharpenSlider->setRange(0, 200); // 0.0 - 2.0
     m_sharpenSlider->setValue(0);
     connect(m_sharpenSlider, &QSlider::valueChanged, this, &MainWindow::onSharpenChanged);
     formLayout->addRow("Sharpen:", m_sharpenSlider);
+
+    // Brush Type Combo (Restored)
+    m_brushTypeCombo = new QComboBox();
+    m_brushTypeCombo->addItem("Normal");
+    m_brushTypeCombo->addItem("Missing Teeth");
+    // Connect to something if needed, or just poll it like we do in onPaintTrails
+    formLayout->addRow("Brush Type:", m_brushTypeCombo);
 
     // Grid Step Slider (10 - 200 px)
     m_gridStepSlider = new QSlider(Qt::Horizontal);
@@ -324,6 +332,9 @@ MainWindow::MainWindow()
 
     QPushButton *projectAgentsBtn = new QPushButton("Project to Canvas");
     connect(projectAgentsBtn, &QPushButton::clicked, this, &MainWindow::onProjectAgents);
+
+    QPushButton *paintTrailsBtn = new QPushButton("Paint Trails");
+    connect(paintTrailsBtn, &QPushButton::clicked, this, &MainWindow::onPaintTrails);
     
     m_agentCountLabel = new QLabel("10 agents");
     m_agentCountSlider = new QSlider(Qt::Horizontal);
@@ -339,6 +350,7 @@ MainWindow::MainWindow()
     
     agentLayout->addRow("Simulation:", m_agentButton);
     agentLayout->addRow(projectAgentsBtn);
+    agentLayout->addRow(paintTrailsBtn);
     agentLayout->addRow(m_agentCountLabel);
     agentLayout->addRow("Count:", m_agentCountSlider);
     agentLayout->addRow(m_agentLifetimeLabel);
@@ -813,4 +825,62 @@ void MainWindow::onProjectAgents()
     }
     
     m_squeegeeWindow->spawnDrops(drops);
+}
+
+void MainWindow::onPaintTrails()
+{
+    if (!m_meshViewer || !m_squeegeeWindow) return;
+    
+    int w = m_squeegeeWindow->width();
+    int h = m_squeegeeWindow->height();
+    
+    auto agents = m_meshViewer->getProjectedAgents(w, h); // This gets trails too
+    
+    QVector<SqueegeeWindow::PathInfo> paths;
+    
+    // Choose length: if trajectory (trail) is shorter than "path brush" (user intent?),
+    // wait, "if agent trajectories are shorter than brush path then we choose brush length"
+    // The prompt says: "if trajectories of agent are shorter than brush path then we choose brush length"
+    // "если траетории агента короче чем путь кисти то выбираем длину кисти"
+    // This phrasing is slightly ambiguous.
+    // Maybe: "Draw the trail. If the trail is very short, draw at least 'brush length'?"
+    // OR: "Use brush settings from menu."
+    // Let's interprete: Draw the ACTUAL agent trails.
+    // If the trail is empty or point, maybe draw a dot?
+    // But mostly just draw the trail segments.
+    
+    for (const auto& a : agents) {
+        if (!a.isVisible) continue;
+        
+        // Flatten segments into one path for simplicity, or keep segments?
+        // SqueegeeWindow::PathInfo takes a single vector of points.
+        // AgentRenderInfo has vector<vector<vec2>> trailSegments.
+        
+        for (const auto& seg : a.trailSegments) {
+            SqueegeeWindow::PathInfo info;
+            info.color = a.color;
+            info.size = m_brushTypeCombo->currentText() == "Missing Teeth" ? 20.0f : 50.0f; 
+            // Better: use current global brush size/settings from squeegee window?
+            // Accessing m_squeegeeWindow members directly is hard if private.
+            // But we can just use a default or maybe reuse the "Drop Size" slider for now?
+            // Or assume SqueegeeWindow uses internal brush size if we pass 0?
+            // "settings of brush from menu" -> The SqueegeeWindow has internal m_brushSize (controlled by wheel).
+            // But UI doesn't expose it via slider usually.
+            // The prompt says "settings of brush from menu".
+            // Let's use m_sizeSlider (Drop Size) as a proxy for width, or better, the SqueegeeWindow's current brush size.
+            // But SqueegeeWindow::paintPaths takes size as arg.
+            // Let's pass m_sizeSlider->value() for consistency with "Project Agents".
+            info.size = (float)m_sizeSlider->value();
+            
+            for (const auto& p : seg) {
+                // Flip Y
+                info.points.append(QVector2D(p.x(), h - 1.0f - p.y()));
+            }
+            if (!info.points.isEmpty()) {
+                paths.append(info);
+            }
+        }
+    }
+    
+    m_squeegeeWindow->paintPaths(paths);
 }

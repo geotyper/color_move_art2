@@ -169,6 +169,13 @@ public:
     };
     void spawnDrops(const QVector<DropInfo>& drops);
 
+    struct PathInfo {
+        QVector<QVector2D> points;
+        QColor color;
+        float size;
+    };
+    void paintPaths(const QVector<PathInfo>& paths);
+
 private:
     void generateDrops(std::vector<float>& buffer, int w, int h, int d);
     void drawShapeIntoBuffer(std::vector<float>& buffer, int w, int h, int d, int cx, int cy, int cz, int r, QVector3D col);
