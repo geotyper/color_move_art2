@@ -603,7 +603,8 @@ void SqueegeeWindow::generateDrops(std::vector<float>& buffer, int w, int h, int
                 points.append({x, y, cz, r});
             }
         }
-    }
+        }
+
     
     for (const auto& p : points) {
         int cx = p.x;
@@ -622,79 +623,109 @@ void SqueegeeWindow::generateDrops(std::vector<float>& buffer, int w, int h, int
             if (currentR < 2) break;
 
             if (m_depthRadiusScaling) {
-                // Scale radius by depth: top layers get smaller radius, deeper layers larger.
-                float depthScale = float((d - 1) - cz) / float(d - 1); // 0 at top, 1 at bottom
+                float depthScale = float((d - 1) - cz) / float(d - 1);
                 currentR = std::max(1, int(std::round(currentR * depthScale)));
             }
             
             int colorIdx = QRandomGenerator::global()->bounded(colorCount);
             QVector3D col = currentPalette[colorIdx];
             
-            if (m_genShape == ShapeCircle) {
-                // Circle Logic
-                if (m_drawBorders) {
-                    int borderR = currentR + 1;
-                    for (int y = cy - borderR; y <= cy + borderR; ++y) {
-                        for (int x = cx - borderR; x <= cx + borderR; ++x) {
-                            if (x >= 0 && x < w && y >= 0 && y < h) {
-                                float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
-                                if (dist <= borderR) {
-                                    int idx = (cz * w * h + y * w + x) * 4;
-                                    buffer[idx + 0] = 0.0f;
-                                    buffer[idx + 1] = 0.0f;
-                                    buffer[idx + 2] = 0.0f;
-                                    buffer[idx + 3] = 1.0f;
-                                }
-                            }
-                        }
-                    }
-                }
+            drawShapeIntoBuffer(buffer, w, h, d, cx, cy, cz, currentR, col);
+        }
+    }
+}
 
-                for (int y = cy - currentR; y <= cy + currentR; ++y) {
-                    for (int x = cx - currentR; x <= cx + currentR; ++x) {
-                        if (x >= 0 && x < w && y >= 0 && y < h) {
-                            float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
-                            if (dist <= currentR) {
-                                int idx = (cz * w * h + y * w + x) * 4;
-                                buffer[idx + 0] = col.x();
-                                buffer[idx + 1] = col.y();
-                                buffer[idx + 2] = col.z();
-                                buffer[idx + 3] = 0.8f;
-                            }
-                        }
-                    }
-                }
-            } else { // ShapeSquare
-                // Square Logic
-                if (m_drawBorders) {
-                    int borderR = currentR + 1;
-                    for (int y = cy - borderR; y <= cy + borderR; ++y) {
-                        for (int x = cx - borderR; x <= cx + borderR; ++x) {
-                            if (x >= 0 && x < w && y >= 0 && y < h) {
-                                int idx = (cz * w * h + y * w + x) * 4;
-                                buffer[idx + 0] = 0.0f;
-                                buffer[idx + 1] = 0.0f;
-                                buffer[idx + 2] = 0.0f;
-                                buffer[idx + 3] = 1.0f;
-                            }
-                        }
-                    }
-                }
-                
-                for (int y = cy - currentR; y <= cy + currentR; ++y) {
-                    for (int x = cx - currentR; x <= cx + currentR; ++x) {
-                        if (x >= 0 && x < w && y >= 0 && y < h) {
+void SqueegeeWindow::drawShapeIntoBuffer(std::vector<float>& buffer, int w, int h, int d, int cx, int cy, int cz, int r, QVector3D col)
+{
+    if (m_genShape == ShapeCircle) {
+        // Circle Logic
+        if (m_drawBorders) {
+            int borderR = r + 1;
+            for (int y = cy - borderR; y <= cy + borderR; ++y) {
+                for (int x = cx - borderR; x <= cx + borderR; ++x) {
+                    if (x >= 0 && x < w && y >= 0 && y < h) {
+                        float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
+                        if (dist <= borderR) {
                             int idx = (cz * w * h + y * w + x) * 4;
-                            buffer[idx + 0] = col.x();
-                            buffer[idx + 1] = col.y();
-                            buffer[idx + 2] = col.z();
-                            buffer[idx + 3] = 0.8f;
+                            buffer[idx + 0] = 0.0f;
+                            buffer[idx + 1] = 0.0f;
+                            buffer[idx + 2] = 0.0f;
+                            buffer[idx + 3] = 1.0f;
                         }
                     }
                 }
             }
         }
+
+        for (int y = cy - r; y <= cy + r; ++y) {
+            for (int x = cx - r; x <= cx + r; ++x) {
+                if (x >= 0 && x < w && y >= 0 && y < h) {
+                    float dist = std::sqrt(std::pow(x - cx, 2) + std::pow(y - cy, 2));
+                    if (dist <= r) {
+                        int idx = (cz * w * h + y * w + x) * 4;
+                        buffer[idx + 0] = col.x();
+                        buffer[idx + 1] = col.y();
+                        buffer[idx + 2] = col.z();
+                        buffer[idx + 3] = 0.8f;
+                    }
+                }
+            }
+        }
+    } else { // ShapeSquare
+        // Square Logic
+        if (m_drawBorders) {
+            int borderR = r + 1;
+            for (int y = cy - borderR; y <= cy + borderR; ++y) {
+                for (int x = cx - borderR; x <= cx + borderR; ++x) {
+                    if (x >= 0 && x < w && y >= 0 && y < h) {
+                        int idx = (cz * w * h + y * w + x) * 4;
+                        buffer[idx + 0] = 0.0f;
+                        buffer[idx + 1] = 0.0f;
+                        buffer[idx + 2] = 0.0f;
+                        buffer[idx + 3] = 1.0f;
+                    }
+                }
+            }
+        }
+        
+        for (int y = cy - r; y <= cy + r; ++y) {
+            for (int x = cx - r; x <= cx + r; ++x) {
+                if (x >= 0 && x < w && y >= 0 && y < h) {
+                    int idx = (cz * w * h + y * w + x) * 4;
+                    buffer[idx + 0] = col.x();
+                    buffer[idx + 1] = col.y();
+                    buffer[idx + 2] = col.z();
+                    buffer[idx + 3] = 0.8f;
+                }
+            }
+        }
     }
+}
+
+void SqueegeeWindow::spawnDrops(const QVector<DropInfo>& drops)
+{
+    makeCurrent();
+    int w = width();
+    int h = height();
+    int d = 32;
+    
+    // Readback
+    std::vector<float> data(w * h * d * 4);
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, data.data());
+    
+    for (const auto& drop : drops) {
+        int cz = QRandomGenerator::global()->bounded(d); // Random depth
+        QVector3D col(drop.color.redF(), drop.color.greenF(), drop.color.blueF());
+        // For agents, we might not want concentric rings or border per se, but let's respect current settings
+        // for consistency? Or force simple circle?
+        // Let's call helper. It uses m_settings.
+        drawShapeIntoBuffer(data, w, h, d, (int)drop.pos.x(), (int)drop.pos.y(), cz, (int)drop.size, col);
+    }
+    
+    // Upload
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());
+    update();
 }
 
 void SqueegeeWindow::regenerateShiftedOverlay()

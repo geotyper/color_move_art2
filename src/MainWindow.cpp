@@ -319,7 +319,11 @@ MainWindow::MainWindow()
     QFormLayout *agentLayout = new QFormLayout();
     m_agentButton = new QPushButton("Start Agents");
     m_agentButton->setCheckable(true);
+    m_agentButton->setCheckable(true);
     connect(m_agentButton, &QPushButton::clicked, this, &MainWindow::onToggleAgents);
+
+    QPushButton *projectAgentsBtn = new QPushButton("Project to Canvas");
+    connect(projectAgentsBtn, &QPushButton::clicked, this, &MainWindow::onProjectAgents);
     
     m_agentCountLabel = new QLabel("10 agents");
     m_agentCountSlider = new QSlider(Qt::Horizontal);
@@ -334,6 +338,7 @@ MainWindow::MainWindow()
     connect(m_agentLifetimeSlider, &QSlider::valueChanged, this, &MainWindow::onAgentLifetimeChanged);
     
     agentLayout->addRow("Simulation:", m_agentButton);
+    agentLayout->addRow(projectAgentsBtn);
     agentLayout->addRow(m_agentCountLabel);
     agentLayout->addRow("Count:", m_agentCountSlider);
     agentLayout->addRow(m_agentLifetimeLabel);
@@ -785,4 +790,27 @@ void MainWindow::onAgentLifetimeChanged(int value)
     if (m_agentWindow) {
         m_agentWindow->setAgentLifetime(value);
     }
+}
+
+void MainWindow::onProjectAgents()
+{
+    if (!m_meshViewer || !m_squeegeeWindow) return;
+    
+    int w = m_squeegeeWindow->width();
+    int h = m_squeegeeWindow->height();
+    
+    auto agents = m_meshViewer->getProjectedAgents(w, h);
+    
+    QVector<SqueegeeWindow::DropInfo> drops;
+    for (const auto& a : agents) {
+        if (a.isVisible && a.screenPos.x() >= 0 && a.screenPos.x() < w && a.screenPos.y() >= 0 && a.screenPos.y() < h) {
+            SqueegeeWindow::DropInfo info;
+            info.pos = QVector2D(a.screenPos.x(), h - 1.0f - a.screenPos.y());
+            info.color = a.color;
+            info.size = m_sizeSlider->value(); // Use current drop size from UI
+            drops.append(info);
+        }
+    }
+    
+    m_squeegeeWindow->spawnDrops(drops);
 }

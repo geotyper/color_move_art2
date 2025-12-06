@@ -12,6 +12,7 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QRandomGenerator>
+#include <QColor>
 
 #include <algorithm>
 #include <QOpenGLFunctions_4_3_Core>
@@ -159,8 +160,19 @@ public:
     void applySaturation();
     void applyCombFix();
 
+
+
+    struct DropInfo {
+        QVector2D pos;
+        QColor color;
+        float size;
+    };
+    void spawnDrops(const QVector<DropInfo>& drops);
+
 private:
     void generateDrops(std::vector<float>& buffer, int w, int h, int d);
+    void drawShapeIntoBuffer(std::vector<float>& buffer, int w, int h, int d, int cx, int cy, int cz, int r, QVector3D col);
+
     struct BrushNoiseResult {
         float size = 0.0f;
         QVector2D offset = QVector2D(0.0f, 0.0f);

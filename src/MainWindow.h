@@ -61,6 +61,7 @@ private slots:
     void onLightChanged();
     void onZoomChanged(int value);
     void onAgentCountChanged(int value);
+    void onProjectAgents();
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
