@@ -737,7 +737,7 @@ void SqueegeeWindow::spawnDrops(const QVector<DropInfo>& drops)
         // Validation log for first few
         if (drawnCount < 3) qDebug() << "Drop" << drawnCount << "Pos" << drop.pos;
 
-        int cz = QRandomGenerator::global()->bounded(d); 
+        int cz = drop.layer >= 0 ? drop.layer % d : QRandomGenerator::global()->bounded(d);
         QVector3D col(drop.color.redF(), drop.color.greenF(), drop.color.blueF());
         drawShapeIntoBuffer(data, w, h, d, (int)drop.pos.x(), (int)drop.pos.y(), cz, (int)drop.size, col);
         drawnCount++;
@@ -753,111 +753,41 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
 {
     if (paths.isEmpty()) return;
     makeCurrent();
-    
-    // We reuse the compute shader logic from simulateStroke but manually stepping along the path
-    m_computeSqueegee->bind();
-    m_computeSqueegee->setUniformValue("isMouseDown", true);
-    m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
-    m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
-    
-    // For each path
+
+    int w = width();
+    int h = height();
+    int d = 32;
+    if (w <= 0 || h <= 0) return;
+
+    std::vector<float> data(w * h * d * 4);
+    glBindTexture(GL_TEXTURE_3D, m_texture3DA);
+    glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, data.data());
+
     for (const auto& path : paths) {
         if (path.points.size() < 2) continue;
-        
-        QVector2D lastPos = path.points[0];
-        QVector2D noisyLast = lastPos; // Reset noise accumulation for each path? 
-                                       // Or keep continuity? Reset makes sense for distinct strokes.
-        m_noiseOffsetAccum = QVector2D(0,0);
-        
-        // Iterate segments
+
+        int cz = path.layer >= 0 ? path.layer % d : QRandomGenerator::global()->bounded(d);
+        float step = std::max(1.0f, path.size * 0.5f);
+
         for (int i = 0; i < path.points.size() - 1; ++i) {
-            QVector2D start = path.points[i];
-            QVector2D end = path.points[i+1];
-            
-            QVector2D dir = end - start;
+            QVector2D a = path.points[i];
+            QVector2D b = path.points[i + 1];
+            QVector2D dir = b - a;
             float len = dir.length();
             if (len < 0.001f) continue;
-            
-            QVector2D dirNorm = dir.normalized();
-            
-            // Step size: roughly 1 pixel or brushSize/4? 
-            // Too small steps = slow. Too large = gaps.
-            // Let's use 1.0f for smooth lines.
-            int steps = std::max(1, (int)std::ceil(len)); // 1 step per pixel approx
-            
-            for (int s = 0; s < steps; ++s) {
-                float t = (float)s / (float)steps;
-                QVector2D current = start + dir * t;
-                
-                // --- Uniform Update & Dispatch (Inner loop of simulateStroke) ---
-                BrushNoiseResult n = sampleBrushNoise(path.size, current, dirNorm);
-                QVector2D prevOffset = m_noiseOffsetAccum;
-                QVector2D offset = prevOffset * 0.5f + n.offset * 0.5f;
-                m_noiseOffsetAccum = offset;
-                
-                QVector2D noisyCurrent = current + offset;
-                // noisyLast is carried over
-                
-                float brushSizeForShader = (m_brushNoiseMode == NoiseBrushIntensity) ? n.size : path.size;
-                
-                glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
-                glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-                
-                m_computeSqueegee->setUniformValue("mousePos", noisyCurrent);
-                m_computeSqueegee->setUniformValue("lastMousePos", noisyLast);
-                m_computeSqueegee->setUniformValue("strokeDir", dirNorm);
-                m_computeSqueegee->setUniformValue("brushSize", brushSizeForShader);
-                
-                // Color Injection? 
-                // The squeegee shader currently just pushes existing paint. 
-                // It DOES NOT inject new color unless we modify the shader or pre-seed the texture.
-                // WAIT. The user wants to "paint with brush". 
-                // The current squeegee tool pushes paint. It doesn't ADD paint usually, unless logic changed?
-                // Let's check squeegee.comp? 
-                // Actually, standard squeegee just smears.
-                // BUT, if we want to visualize agents, we usually want to ADD color.
-                // If the user said "conduct with brush along trajectory", maybe they imply smearing?
-                // "провести кистью по траеторирям" -> "swipe brush along trajectories"
-                // If we want COLOR, we might need to inject color.
-                // For now, let's assume the user wants the SQUEEGEE effect (smearing existing paint).
-                // Or...
-                // If I look at `simulateStroke` in `generateComposition`, it moves paint.
-                // If I want to DRAW trails, I might need to deposit paint first?
-                // User said "conduct with brush", implying the tool they use manually.
-                // If I manually use the brush, I am smearing.
-                // So this logic is correct for "simulating the brush tool".
-                
-                glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 32);
-                glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-                
-                std::swap(m_texture3DA, m_texture3DB);
-                
-                // Gravity
-                m_computeGravity->bind();
-                glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
-                glBindImageTexture(1, m_texture3DB, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-                glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 1);
-                glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-                std::swap(m_texture3DA, m_texture3DB);
-                m_computeGravity->release();
-                
-                m_computeSqueegee->bind(); // Rebind
-                // Restore uniforms lost by unbind? QOpenGLShaderProgram keeps module state usually?
-                // Ideally yes, but let's be safe or just minimal rebind.
-                // Actually we set uniforms every loop anyway.
-                m_computeSqueegee->setUniformValue("isMouseDown", true);
-                m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
-                m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
-                
-                noisyLast = noisyCurrent;
-            } // end steps
-            
-            lastPos = end; // Update reference for next segment continuity if needed, 
-                           // though we used stepping variable 'noisyLast' for continuity
+            dir.normalize();
+
+            int samples = std::max(1, (int)std::ceil(len / step));
+            for (int s = 0; s <= samples; ++s) {
+                float t = (float)s / (float)samples;
+                QVector2D p = a + dir * (len * t);
+                drawShapeIntoBuffer(data, w, h, d, (int)p.x(), (int)p.y(), cz, (int)path.size, QVector3D(path.color.redF(), path.color.greenF(), path.color.blueF()));
+            }
         }
     }
-    
-    m_computeSqueegee->release();
+
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());
+    glFinish();
     update();
 }
 

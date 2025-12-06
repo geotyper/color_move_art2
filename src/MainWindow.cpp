@@ -841,6 +841,7 @@ void MainWindow::onProjectAgents()
             info.pos = QVector2D(px, py);
             info.color = a.color;
             info.size = (float)m_sizeSlider->value();
+            info.layer = a.layer;
             drops.append(info);
         }
     }
@@ -873,6 +874,7 @@ void MainWindow::onPaintTrails()
              SqueegeeWindow::PathInfo info;
              info.color = a.color;
              info.size = (float)m_sizeSlider->value();
+             info.layer = a.layer;
              
              for (const auto& p : seg) {
                  float px = p.x() * scale + offsetX;

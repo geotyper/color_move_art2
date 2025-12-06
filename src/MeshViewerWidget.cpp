@@ -349,6 +349,7 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
                 newAgent.color = QColor::fromHsv(std::rand() % 360, 200, 255);
                 newAgent.maxAge = m_agentLifetime;
                 newAgent.age = 0;
+                newAgent.layer = QRandomGenerator::global()->bounded(32); // stick to a fixed texture slice
             }
         }
     }
@@ -597,6 +598,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         info.screenPos = project(pos);
         info.color = agent.color;
         info.isVisible = isVisible(pos);
+        info.layer = agent.layer;
         
         std::vector<QVector2D> currentSegment;
         for (const auto &p : agent.trail) {

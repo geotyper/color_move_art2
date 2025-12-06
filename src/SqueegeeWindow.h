@@ -168,6 +168,7 @@ public:
         QVector2D pos;
         QColor color;
         float size;
+        int layer = -1; // -1 -> random layer, otherwise fixed
     };
     void spawnDrops(const QVector<DropInfo>& drops);
 
@@ -175,6 +176,7 @@ public:
         QVector<QVector2D> points;
         QColor color;
         float size;
+        int layer = -1;
     };
     void paintPaths(const QVector<PathInfo>& paths);
 

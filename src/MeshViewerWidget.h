@@ -46,6 +46,7 @@ struct SurfaceAgent {
     glm::vec3 bary; // u, v, w
     glm::vec3 worldVelocity; // Tangent vector in World Space
     float speed; // Scalar speed
+    int layer = 0; // Assigned texture layer for painting
     QColor color;
     std::deque<glm::vec3> trail; // World positions
     int age = 0;
@@ -74,6 +75,7 @@ public:
         QVector2D screenPos;
         QColor color;
         bool isVisible;
+        int layer = 0;
         std::vector<std::vector<QVector2D>> trailSegments;
     };
     std::vector<AgentRenderInfo> getProjectedAgents(float viewWidth, float viewHeight);
