@@ -64,6 +64,7 @@ private slots:
     void onProjectAgents();
     void onPaintTrails();
     void onClearCanvas();
+    void onBackgroundColorClicked();
 
 private:
     SqueegeeWindow *m_squeegeeWindow;

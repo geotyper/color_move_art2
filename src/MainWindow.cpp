@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QColor>
+#include <QColorDialog>
 #include <numeric>
 #include <QFormLayout>
 #include <QTabWidget>
@@ -118,6 +119,7 @@ MainWindow::MainWindow()
     m_paletteCombo->addItem("Forest & Berry");
     m_paletteCombo->addItem("Modern Pop Art");
     m_paletteCombo->addItem("Cyberpunk");
+    m_paletteCombo->addItem("Single Color Gray");
     connect(m_paletteCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPaletteChanged);
     formLayout->addRow("Palette:", m_paletteCombo);
 
@@ -254,6 +256,11 @@ MainWindow::MainWindow()
     m_toroidalCheckBox = new QCheckBox("Toroidal Movement");
     connect(m_toroidalCheckBox, &QCheckBox::toggled, this, &MainWindow::onToroidalToggled);
     formLayout->addRow(m_toroidalCheckBox);
+
+    // Background Color Button
+    QPushButton *bgColorBtn = new QPushButton("Background Color");
+    connect(bgColorBtn, &QPushButton::clicked, this, &MainWindow::onBackgroundColorClicked);
+    formLayout->addRow(bgColorBtn);
 
     // BUTTONS (Global)
     QGridLayout *btnLayout = new QGridLayout();
@@ -908,4 +915,12 @@ void MainWindow::onPaintTrails()
 void MainWindow::onClearCanvas()
 {
     if (m_squeegeeWindow) m_squeegeeWindow->clearCanvas();
+}
+
+void MainWindow::onBackgroundColorClicked()
+{
+    QColor color = QColorDialog::getColor(Qt::white, this, "Select Background Color", QColorDialog::DontUseNativeDialog);
+    if (color.isValid()) {
+        m_squeegeeWindow->setBackgroundColor(color);
+    }
 }

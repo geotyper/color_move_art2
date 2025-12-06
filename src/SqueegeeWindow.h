@@ -46,6 +46,8 @@ public:
         NoiseBrushOffset
     };
 
+    void setBackgroundColor(const QColor &color);
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -186,6 +188,8 @@ public:
 private:
     void generateDrops(std::vector<float>& buffer, int w, int h, int d);
     void drawShapeIntoBuffer(std::vector<float>& buffer, int w, int h, int d, int cx, int cy, int cz, int r, QVector3D col);
+
+    QColor m_backgroundColor = Qt::white;
 
     struct BrushNoiseResult {
         float size = 0.0f;

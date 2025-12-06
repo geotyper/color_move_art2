@@ -82,6 +82,11 @@ SqueegeeWindow::SqueegeeWindow(QWidget *parent)
         QVector3D(1.0f, 0.2f, 0.2f), // Laser Red
         QVector3D(0.8f, 0.8f, 0.9f)  // Chrome
     });
+
+    // Palette 8: Single Color Gray
+    m_palettes.append({
+        QVector3D(0.5f, 0.5f, 0.5f) // Medium Gray
+    });
 }
 
 SqueegeeWindow::~SqueegeeWindow()
@@ -285,12 +290,13 @@ void SqueegeeWindow::paintGL()
     // Render Pass
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
     
-    // Ensure opaque white background
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    // Ensure opaque background
+    glClearColor(m_backgroundColor.redF(), m_backgroundColor.greenF(), m_backgroundColor.blueF(), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     m_program->bind();
     m_program->setUniformValue("sharpenAmount", m_sharpenAmount);
+    m_program->setUniformValue("bgColor", m_backgroundColor);
     glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
     
     m_vao.bind();
@@ -299,6 +305,12 @@ void SqueegeeWindow::paintGL()
     m_vao.release();
     m_program->release();
     
+    update();
+}
+
+void SqueegeeWindow::setBackgroundColor(const QColor &color)
+{
+    m_backgroundColor = color;
     update();
 }
 
