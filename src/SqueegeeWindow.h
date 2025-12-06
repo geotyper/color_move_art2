@@ -58,6 +58,7 @@ protected:
 
 private:
     void initShaders();
+    bool m_gravityEnabled = false; // Default off to stabilize projection
     void initGeometry();
     void initSimulation();
     void generateComposition();

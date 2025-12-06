@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+15c71ff8365d3ed219be103fd7175c58 CMakeFiles/ColorMoveArt2_autogen
+498d82864c63124b6ce245332c6da46b ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp

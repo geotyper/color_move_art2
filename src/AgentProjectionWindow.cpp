@@ -29,9 +29,15 @@ void AgentProjectionWindow::setRunning(bool run)
 {
     m_running = run;
     if (m_running) {
-        if (m_meshViewer) m_meshViewer->clearAgents();
+        if (m_meshViewer) {
+            m_meshViewer->clearAgents();
+            m_meshViewer->setAgentsPaused(false);
+        }
         m_timer->start(16); // ~60fps
     } else {
+        if (m_meshViewer) {
+            m_meshViewer->setAgentsPaused(true);
+        }
         m_timer->stop();
     }
 }
@@ -89,7 +95,7 @@ void AgentProjectionWindow::updateAgents()
             if (segment.size() > 1) {
                 QPolygonF poly;
                 for (const auto &tp : segment) {
-                    poly << QPointF(tp.x(), tp.y());
+                    poly << QPointF(tp.x(), height() - tp.y());
                 }
                 painter.drawPolyline(poly);
             }
@@ -99,7 +105,7 @@ void AgentProjectionWindow::updateAgents()
         if (p.isVisible) {
             painter.setPen(Qt::NoPen);
             painter.setBrush(p.color);
-            painter.drawEllipse(QPointF(p.screenPos.x(), p.screenPos.y()), 2, 2);
+            painter.drawEllipse(QPointF(p.screenPos.x(), height() - p.screenPos.y()), 2, 2);
         }
     }
     

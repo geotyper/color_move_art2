@@ -1,0 +1,30 @@
+{
+	"BUILD_DIR" : "/home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen",
+	"CMAKE_BINARY_DIR" : "/home/geotyper/my_projects/CPP/color_move_art2",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/geotyper/my_projects/CPP/color_move_art2",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/geotyper/my_projects/CPP/color_move_art2",
+	"CMAKE_SOURCE_DIR" : "/home/geotyper/my_projects/CPP/color_move_art2",
+	"INCLUDE_DIR" : "/home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen/include",
+	"INPUTS" : 
+	[
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/combfix.comp",
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/squeegee.comp",
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/blur.comp",
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/mesh.frag",
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/render.frag",
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/saturate.comp",
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/mesh.vert",
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/gravity.comp",
+		"/home/geotyper/my_projects/CPP/color_move_art2/shaders/render.vert"
+	],
+	"LOCK_FILE" : "/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles/ColorMoveArt2_autogen.dir/AutoRcc_resources_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "resources" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_resources.cpp",
+	"RCC_EXECUTABLE" : "/usr/lib/qt6/libexec/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles/ColorMoveArt2_autogen.dir/AutoRcc_resources_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/home/geotyper/my_projects/CPP/color_move_art2/resources.qrc",
+	"VERBOSITY" : 0
+}

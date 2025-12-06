@@ -1,4 +1,4 @@
-/home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen/UVLADIE3JM/moc_MeshViewerWidget.cpp: /home/geotyper/my_projects/CPP/color_move_art2/src/MeshViewerWidget.h \
+/home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen/UVLADIE3JM/moc_AgentProjectionWindow.cpp: /home/geotyper/my_projects/CPP/color_move_art2/src/AgentProjectionWindow.h \
   /home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen/moc_predefs.h \
   /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Geometry/LoopSchemeMaskT.hh \
   /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Geometry/MathDefs.hh \
@@ -246,6 +246,7 @@
   /home/geotyper/CPP_lib/glm/glm/vec3.hpp \
   /home/geotyper/CPP_lib/glm/glm/vec4.hpp \
   /home/geotyper/CPP_lib/glm/glm/vector_relational.hpp \
+  /home/geotyper/my_projects/CPP/color_move_art2/src/MeshViewerWidget.h \
   /usr/include/GL/gl.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
@@ -2161,9 +2162,11 @@
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qvarlengtharray.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qversiontagging.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QColor \
+  /usr/include/x86_64-linux-gnu/qt6/QtGui/QImage \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QKeyEvent \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QSurfaceFormat \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QTransform \
+  /usr/include/x86_64-linux-gnu/qt6/QtGui/QVector2D \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QVector3D \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qbitmap.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qbrush.h \

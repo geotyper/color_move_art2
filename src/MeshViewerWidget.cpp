@@ -21,6 +21,7 @@ MeshViewerWidget::MeshViewerWidget(QWidget *parent)
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &MeshViewerWidget::updateAgents);
     m_timer->start(16); // ~60 FPS
+    m_agentsPaused = false;
 }
 
 MeshViewerWidget::~MeshViewerWidget()
@@ -41,6 +42,11 @@ void MeshViewerWidget::setCameraDistance(float dist)
 {
     m_cameraDistance = dist;
     update();
+}
+
+void MeshViewerWidget::setAgentsPaused(bool paused)
+{
+    m_agentsPaused = paused;
 }
 
 void MeshViewerWidget::initializeGL()
@@ -376,6 +382,7 @@ glm::vec3 solveBarycentricVelocity(const glm::vec3 &worldVel, const glm::vec3 &v
 }
 
 void MeshViewerWidget::updateAgents() {
+    if (m_agentsPaused) return;
     if (!m_surfaceAgents.empty()) {
         m_surfaceAgents.erase(std::remove_if(m_surfaceAgents.begin(), m_surfaceAgents.end(),
             [](const SurfaceAgent &a) { return a.age >= a.maxAge; }),
@@ -557,6 +564,13 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
 
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -m_cameraDistance));
     
+    // Debug Instability
+    qDebug() << "getProjectedAgents: Rot" << m_rotationX << m_rotationY << "CamDist" << m_cameraDistance << "ViewSize" << viewWidth << viewHeight;
+    if (!m_surfaceAgents.empty()) {
+       qDebug() << "Agent[0] World" << getAgentWorldPos(m_surfaceAgents[0]).x << getAgentWorldPos(m_surfaceAgents[0]).y << getAgentWorldPos(m_surfaceAgents[0]).z;
+    }
+
+    // Use MeshViewer's own aspect ratio to match the 3D view exactly
     float aspect = width() > 0 ? (float)width() / (float)height() : 1.0f;
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
     
@@ -573,7 +587,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
 
     auto project = [&](const glm::vec3 &worldPos) -> QVector2D {
         glm::vec3 p = glm::project(worldPos, mv, proj, viewport);
-        return QVector2D(p.x, viewHeight - p.y);
+        return QVector2D(p.x, p.y);
     };
 
     for (const auto &agent : m_surfaceAgents) {
@@ -601,6 +615,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         
         projected.push_back(info);
     }
+    
     return projected;
 }
 

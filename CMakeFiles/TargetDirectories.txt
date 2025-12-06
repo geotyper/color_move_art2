@@ -1,0 +1,4 @@
+/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles/ColorMoveArt2.dir
+/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles/edit_cache.dir
+/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles/rebuild_cache.dir
+/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles/ColorMoveArt2_autogen.dir

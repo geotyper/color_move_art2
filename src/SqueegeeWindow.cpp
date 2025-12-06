@@ -268,6 +268,7 @@ void SqueegeeWindow::paintGL()
     }
     
     // Compute Pass: Gravity (Run every frame or every N frames)
+    if (m_gravityEnabled)
     {
         m_computeGravity->bind();
         glBindImageTexture(0, m_texture3DA, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -720,22 +721,31 @@ void SqueegeeWindow::spawnDrops(const QVector<DropInfo>& drops)
     int h = height();
     int d = 32;
     
+    qDebug() << "spawnDrops: Count" << drops.size() << "Canvas" << w << h;
+    if (drops.isEmpty()) return;
+    
+    // Force previous ops to finish
+    glFinish();
+    
     // Readback
     std::vector<float> data(w * h * d * 4);
     glBindTexture(GL_TEXTURE_3D, m_texture3DA);
     glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, data.data());
     
+    int drawnCount = 0;
     for (const auto& drop : drops) {
-        int cz = QRandomGenerator::global()->bounded(d); // Random depth
+        // Validation log for first few
+        if (drawnCount < 3) qDebug() << "Drop" << drawnCount << "Pos" << drop.pos;
+
+        int cz = QRandomGenerator::global()->bounded(d); 
         QVector3D col(drop.color.redF(), drop.color.greenF(), drop.color.blueF());
-        // For agents, we might not want concentric rings or border per se, but let's respect current settings
-        // for consistency? Or force simple circle?
-        // Let's call helper. It uses m_settings.
         drawShapeIntoBuffer(data, w, h, d, (int)drop.pos.x(), (int)drop.pos.y(), cz, (int)drop.size, col);
+        drawnCount++;
     }
     
     // Upload
     glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());
+    glFinish(); // Ensure upload finishes
     update();
 }
 

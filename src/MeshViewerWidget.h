@@ -62,6 +62,7 @@ public:
 
     void setLightDirection(const QVector3D &dir);
     void setCameraDistance(float dist);
+    void setAgentsPaused(bool paused);
     
     // Check intersection and return hit info
     bool checkRayIntersection(float x, float y, float viewWidth, float viewHeight, glm::vec3 &hitPos);
@@ -122,6 +123,7 @@ private:
     MyMesh m_mesh; // New member
     std::vector<SurfaceAgent> m_surfaceAgents; // New member
     int m_agentLifetime = 1000;
+    bool m_agentsPaused = false;
     
     // Spatial Index
     bgi::rtree<BoostValue, bgi::quadratic<16>> m_rtree;

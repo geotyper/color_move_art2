@@ -812,80 +812,80 @@ void MainWindow::onProjectAgents()
 {
     if (!m_meshViewer || !m_squeegeeWindow) return;
     
-    int w = m_squeegeeWindow->width();
-    int h = m_squeegeeWindow->height();
-    
-    auto agents = m_meshViewer->getProjectedAgents(w, h);
-    
+    int canvasW = m_squeegeeWindow->width();
+    int canvasH = m_squeegeeWindow->height();
+    int camW = m_meshViewer->width();
+    int camH = m_meshViewer->height();
+    if (camW <= 0 || camH <= 0 || canvasW <= 0 || canvasH <= 0) return;
+
+    // Preserve MeshViewer camera aspect; letterbox into the squeegee canvas.
+    float scale = std::min((float)canvasW / (float)camW, (float)canvasH / (float)camH);
+    float offsetX = (canvasW - camW * scale) * 0.5f;
+    float offsetY = (canvasH - camH * scale) * 0.5f;
+
+    // Project using the same camera/viewport as the 3D view, then scale into the brush canvas.
+    auto agents = m_meshViewer->getProjectedAgents(camW, camH);
+
+    // Clear previous projection so each press reflects the current agent set only.
+    m_squeegeeWindow->clearCanvas();
+
+    // Drops Only (Project Agents)
     QVector<SqueegeeWindow::DropInfo> drops;
     for (const auto& a : agents) {
-        if (a.isVisible && a.screenPos.x() >= 0 && a.screenPos.x() < w && a.screenPos.y() >= 0 && a.screenPos.y() < h) {
+        float px = a.screenPos.x() * scale + offsetX;
+        float py = a.screenPos.y() * scale + offsetY;
+        
+        if (a.isVisible && px >= 0 && px < canvasW && py >= 0 && py < canvasH) {
             SqueegeeWindow::DropInfo info;
-            info.pos = QVector2D(a.screenPos.x(), h - 1.0f - a.screenPos.y());
+            // spawnDrops (CPU) expects Raw GL Y.
+            info.pos = QVector2D(px, py);
             info.color = a.color;
-            info.size = m_sizeSlider->value(); // Use current drop size from UI
+            info.size = (float)m_sizeSlider->value();
             drops.append(info);
         }
     }
-    
     m_squeegeeWindow->spawnDrops(drops);
 }
 
 void MainWindow::onPaintTrails()
 {
     if (!m_meshViewer || !m_squeegeeWindow) return;
-    
-    int w = m_squeegeeWindow->width();
-    int h = m_squeegeeWindow->height();
-    
-    auto agents = m_meshViewer->getProjectedAgents(w, h); // This gets trails too
-    
-    QVector<SqueegeeWindow::PathInfo> paths;
-    
-    // Choose length: if trajectory (trail) is shorter than "path brush" (user intent?),
-    // wait, "if agent trajectories are shorter than brush path then we choose brush length"
-    // The prompt says: "if trajectories of agent are shorter than brush path then we choose brush length"
-    // "если траетории агента короче чем путь кисти то выбираем длину кисти"
-    // This phrasing is slightly ambiguous.
-    // Maybe: "Draw the trail. If the trail is very short, draw at least 'brush length'?"
-    // OR: "Use brush settings from menu."
-    // Let's interprete: Draw the ACTUAL agent trails.
-    // If the trail is empty or point, maybe draw a dot?
-    // But mostly just draw the trail segments.
-    
-    for (const auto& a : agents) {
 
-        
-        // Flatten segments into one path for simplicity, or keep segments?
-        // SqueegeeWindow::PathInfo takes a single vector of points.
-        // AgentRenderInfo has vector<vector<vec2>> trailSegments.
-        
-        for (const auto& seg : a.trailSegments) {
-            SqueegeeWindow::PathInfo info;
-            info.color = a.color;
-            info.size = m_brushTypeCombo->currentText() == "Missing Teeth" ? 20.0f : 50.0f; 
-            // Better: use current global brush size/settings from squeegee window?
-            // Accessing m_squeegeeWindow members directly is hard if private.
-            // But we can just use a default or maybe reuse the "Drop Size" slider for now?
-            // Or assume SqueegeeWindow uses internal brush size if we pass 0?
-            // "settings of brush from menu" -> The SqueegeeWindow has internal m_brushSize (controlled by wheel).
-            // But UI doesn't expose it via slider usually.
-            // The prompt says "settings of brush from menu".
-            // Let's use m_sizeSlider (Drop Size) as a proxy for width, or better, the SqueegeeWindow's current brush size.
-            // But SqueegeeWindow::paintPaths takes size as arg.
-            // Let's pass m_sizeSlider->value() for consistency with "Project Agents".
-            info.size = (float)m_sizeSlider->value();
+    int canvasW = m_squeegeeWindow->width();
+    int canvasH = m_squeegeeWindow->height();
+    int camW = m_meshViewer->width();
+    int camH = m_meshViewer->height();
+    if (camW <= 0 || camH <= 0 || canvasW <= 0 || canvasH <= 0) return;
+
+    float scale = std::min((float)canvasW / (float)camW, (float)canvasH / (float)camH);
+    float offsetX = (canvasW - camW * scale) * 0.5f;
+    float offsetY = (canvasH - camH * scale) * 0.5f;
+
+    // Project trails with the same camera as the 3D view, then map into the brush canvas.
+    auto agents = m_meshViewer->getProjectedAgents(camW, camH);
+
+    QVector<SqueegeeWindow::PathInfo> paths;
+    for (const auto& a : agents) {
+        if (a.trailSegments.empty()) continue;
             
-            for (const auto& p : seg) {
-                // Flip Y
-                info.points.append(QVector2D(p.x(), h - 1.0f - p.y()));
-            }
-            if (!info.points.isEmpty()) {
-                paths.append(info);
-            }
+        for (const auto& seg : a.trailSegments) {
+             if (seg.size() < 2) continue;
+             SqueegeeWindow::PathInfo info;
+             info.color = a.color;
+             info.size = (float)m_sizeSlider->value();
+             
+             for (const auto& p : seg) {
+                 float px = p.x() * scale + offsetX;
+                 float py = p.y() * scale + offsetY;
+                 // paintPaths (GPU) expects GL Y (Bottom-Up) similar to spawnDrops.
+                 // No need to invert.
+                 info.points.append(QVector2D(px, py));
+             }
+             if (!info.points.isEmpty()) {
+                 paths.append(info);
+             }
         }
     }
-    
     m_squeegeeWindow->paintPaths(paths);
 }
 

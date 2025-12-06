@@ -142,6 +142,30 @@ ColorMoveArt2_autogen/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2_autogen.dir/build.make CMakeFiles/ColorMoveArt2_autogen.dir/build
 .PHONY : ColorMoveArt2_autogen/fast
 
+ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.o: ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o
+.PHONY : ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.o
+
+# target to build an object file
+ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o
+.PHONY : ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o
+
+ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.i: ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.i
+.PHONY : ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.i
+
+# target to preprocess a source file
+ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.i
+.PHONY : ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.i
+
+ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.s: ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.s
+.PHONY : ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.s
+
+# target to generate assembly for a file
+ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.s
+.PHONY : ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.s
+
 ColorMoveArt2_autogen/mocs_compilation.o: ColorMoveArt2_autogen/mocs_compilation.cpp.o
 .PHONY : ColorMoveArt2_autogen/mocs_compilation.o
 
@@ -165,6 +189,30 @@ ColorMoveArt2_autogen/mocs_compilation.s: ColorMoveArt2_autogen/mocs_compilation
 ColorMoveArt2_autogen/mocs_compilation.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/mocs_compilation.cpp.s
 .PHONY : ColorMoveArt2_autogen/mocs_compilation.cpp.s
+
+src/AgentProjectionWindow.o: src/AgentProjectionWindow.cpp.o
+.PHONY : src/AgentProjectionWindow.o
+
+# target to build an object file
+src/AgentProjectionWindow.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.o
+.PHONY : src/AgentProjectionWindow.cpp.o
+
+src/AgentProjectionWindow.i: src/AgentProjectionWindow.cpp.i
+.PHONY : src/AgentProjectionWindow.i
+
+# target to preprocess a source file
+src/AgentProjectionWindow.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.i
+.PHONY : src/AgentProjectionWindow.cpp.i
+
+src/AgentProjectionWindow.s: src/AgentProjectionWindow.cpp.s
+.PHONY : src/AgentProjectionWindow.s
+
+# target to generate assembly for a file
+src/AgentProjectionWindow.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.s
+.PHONY : src/AgentProjectionWindow.cpp.s
 
 src/MainWindow.o: src/MainWindow.cpp.o
 .PHONY : src/MainWindow.o
@@ -272,9 +320,15 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... ColorMoveArt2_autogen"
 	@echo "... ColorMoveArt2"
+	@echo "... ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.o"
+	@echo "... ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.i"
+	@echo "... ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.s"
 	@echo "... ColorMoveArt2_autogen/mocs_compilation.o"
 	@echo "... ColorMoveArt2_autogen/mocs_compilation.i"
 	@echo "... ColorMoveArt2_autogen/mocs_compilation.s"
+	@echo "... src/AgentProjectionWindow.o"
+	@echo "... src/AgentProjectionWindow.i"
+	@echo "... src/AgentProjectionWindow.s"
 	@echo "... src/MainWindow.o"
 	@echo "... src/MainWindow.i"
 	@echo "... src/MainWindow.s"
