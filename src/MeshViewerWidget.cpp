@@ -240,8 +240,25 @@ void MeshViewerWidget::buildSphere()
                 QVector3D(n[0], n[1], n[2])
             });
         }
-    }
     m_vertexCount = static_cast<int>(m_vertices.size());
+    
+    // Build R-tree
+    m_rtree.clear();
+    for (auto f : m_mesh.faces()) {
+        // Calculate AABB for face
+        float minX = std::numeric_limits<float>::max(), minY = minX, minZ = minX;
+        float maxX = std::numeric_limits<float>::lowest(), maxY = maxX, maxZ = maxX;
+        
+        for (auto v : m_mesh.fv_range(f)) {
+            auto p = m_mesh.point(v);
+            minX = std::min(minX, p[0]); minY = std::min(minY, p[1]); minZ = std::min(minZ, p[2]);
+            maxX = std::max(maxX, p[0]); maxY = std::max(maxY, p[1]); maxZ = std::max(maxZ, p[2]);
+        }
+        
+        BoostBox box(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
+        m_rtree.insert(std::make_pair(box, f.idx()));
+    }
+    }
 }
 
 void MeshViewerWidget::uploadMesh()
@@ -333,7 +350,27 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     bool hit = false;
     SurfaceAgent newAgent;
     
-    for (auto f : m_mesh.faces()) {
+
+    
+    // Broad Phase: R-tree query
+    // Create segment from ray start to end (or distinct point far away)
+    // Ray originates at rayOrigModel, goes slightly past 1.0 logic, but let's effectively treat it as segment
+    // Intersecting Ray with Box in Boost requires a linear geometry?
+    // intersects(segment, box) is supported.
+    
+    // Create query segment
+    BoostPoint p1(rayOrigModel.x(), rayOrigModel.y(), rayOrigModel.z());
+    // Create a point very far in direction
+    QVector3D rayFar = rayOrigModel + rayDirModel * 1000.0f; // 1000 units is enough for our radius 1 sphere
+    BoostPoint p2(rayFar.x(), rayFar.y(), rayFar.z());
+    
+    bg::model::segment<BoostPoint> raySegment(p1, p2);
+    
+    std::vector<BoostValue> candidates;
+    m_rtree.query(bgi::intersects(raySegment), std::back_inserter(candidates));
+    
+    for (const auto &val : candidates) {
+        auto f = m_mesh.face_handle(val.second);
         auto fv = m_mesh.fv_range(f);
         auto it = fv.begin();
         auto p0 = m_mesh.point(*it);

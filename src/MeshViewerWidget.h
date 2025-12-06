@@ -18,6 +18,22 @@
 #include <OpenMesh/Core/IO/MeshIO.hh> // New include
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh> // Already present, but instruction had it again. Keeping it as is.
 
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
+
+namespace bg = boost::geometry;
+namespace bgi = boost::geometry::index;
+
+// Define a point in 3D
+typedef bg::model::point<float, 3, bg::cs::cartesian> BoostPoint;
+// Define a box (AABB)
+typedef bg::model::box<BoostPoint> BoostBox;
+// Value stored in R-tree: pair(Box, FaceHandle index)
+// We store int index because FaceHandle is not trivially movable/copyable across all versions or simpler to just debug with int
+typedef std::pair<BoostBox, int> BoostValue;
+
 typedef OpenMesh::TriMesh_ArrayKernelT<> MyMesh;
 
 struct SurfaceAgent {
@@ -97,6 +113,9 @@ private:
     std::vector<SurfaceAgent> m_surfaceAgents; // New member
     int m_agentLifetime = 1000;
     
+    // Spatial Index
+    bgi::rtree<BoostValue, bgi::quadratic<16>> m_rtree;
+
     // Helper to get world pos from agent
     QVector3D getAgentWorldPos(const SurfaceAgent &agent); // New member
 };

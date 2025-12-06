@@ -14,6 +14,7 @@ set(CMAKE_AUTOUIC ON)
 set(OPENMESH_ROOT "/home/geotyper/CPP_lib/OpenMesh" CACHE PATH "Path to OpenMesh checkout/build")
 list(APPEND CMAKE_PREFIX_PATH "${OPENMESH_ROOT}/build" "${OPENMESH_ROOT}/build/Build")
 find_package(OpenMesh REQUIRED CONFIG)
+find_package(Boost REQUIRED)
 
 set(PROJECT_SOURCES
     src/main.cpp
@@ -38,6 +39,7 @@ target_link_libraries(ColorMoveArt2 PRIVATE
     Qt6::OpenGLWidgets
     OpenMeshCore
     OpenMeshTools
+    Boost::headers
 )
 
 set_target_properties(ColorMoveArt2 PROPERTIES

@@ -30,6 +30,6 @@ private:
     QTimer *m_timer;
     QImage m_canvas;
     
-    int m_targetCount = 1000;
+    int m_targetCount = 10;
     bool m_running = false;
 };

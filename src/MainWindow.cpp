@@ -321,10 +321,10 @@ MainWindow::MainWindow()
     m_agentButton->setCheckable(true);
     connect(m_agentButton, &QPushButton::clicked, this, &MainWindow::onToggleAgents);
     
-    m_agentCountLabel = new QLabel("1000 agents");
+    m_agentCountLabel = new QLabel("10 agents");
     m_agentCountSlider = new QSlider(Qt::Horizontal);
     m_agentCountSlider->setRange(10, 5000);
-    m_agentCountSlider->setValue(1000);
+    m_agentCountSlider->setValue(10);
     connect(m_agentCountSlider, &QSlider::valueChanged, this, &MainWindow::onAgentCountChanged);
     
     m_agentLifetimeLabel = new QLabel("1000 ticks");
