@@ -13,25 +13,18 @@ AgentProjectionWindow::AgentProjectionWindow(MeshViewerWidget *meshViewer, QWidg
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &AgentProjectionWindow::updateAgents);
     setAttribute(Qt::WA_OpaquePaintEvent);
-    
-    m_agents.resize(m_agentCount);
-    // Initialize random positions
-    for (auto &agent : m_agents) {
-        agent.pos = QVector2D(QRandomGenerator::global()->bounded(1000), QRandomGenerator::global()->bounded(1000));
-        agent.active = false;
-    }
 }
 
 void AgentProjectionWindow::setAgentCount(int n)
 {
-    m_agentCount = n;
-    m_agents.resize(n);
+    m_targetCount = n;
 }
 
 void AgentProjectionWindow::setRunning(bool run)
 {
     m_running = run;
     if (m_running) {
+        if (m_meshViewer) m_meshViewer->clearAgents();
         m_timer->start(16); // ~60fps
     } else {
         m_timer->stop();
@@ -51,42 +44,57 @@ void AgentProjectionWindow::updateAgents()
 {
     if (!m_meshViewer) return;
     
-    // Clear canvas slightly for trail effect? Or just clear?
-    // User said: "draw this point", implying standard rendering.
-    // Let's clear to black every frame for now, or maybe fade?
-    // "Draw this point by reverse calculation to the screen plane"
-    
-    m_canvas.fill(Qt::black);
-    
-    // Get Camera Matrices from Mesh Viewer
-    // We need to implement getters in MeshViewerWidget or expose these.
-    // For now assuming we can access them or replicate logic.
-    // Ideally MeshViewerWidget should give us specific matrices.
-    
-    QPainter painter(&m_canvas);
-    painter.setPen(Qt::NoPen);
-    
-    for (auto &agent : m_agents) {
-        // Reshuffle undefined agents
-        agent.pos = QVector2D(QRandomGenerator::global()->bounded(width()), QRandomGenerator::global()->bounded(height()));
+    // Spawn / Refill
+    int currentCount = m_meshViewer->getAgentCount();
+    int needed = m_targetCount - currentCount;
+    if (needed > 0) {
+        // Try to spawn 'needed' agents, but limit per frame to avoid freeze if bad luck
+        int attempts = needed * 2;
+        int spawned = 0;
+        QVector3D hit;
         
-        if (checkIntersection(agent.pos)) {
-            painter.setBrush(Qt::green);
-            painter.drawEllipse(QPointF(agent.pos.x(), agent.pos.y()), 2, 2);
+        for (int i = 0; i < attempts && spawned < needed; ++i) {
+            float rx = QRandomGenerator::global()->bounded((double)width());
+            float ry = QRandomGenerator::global()->bounded((double)height());
+            
+            if (m_meshViewer->checkRayIntersection(rx, ry, width(), height(), hit)) {
+                spawned++;
+            }
         }
     }
     
-    update();
-}
-
-bool AgentProjectionWindow::checkIntersection(const QVector2D &screenPos)
-{
-    // Ray Casting Logic
-    // Need View and Projection matrices matching the 3D window
-    // We'll need to ask MeshViewerWidget for its current MVP/Camera state
+    // Physics Step
+    m_meshViewer->updateAgents();
     
-    // Placeholder until we link them: Always false
-    return m_meshViewer->checkRayIntersection(screenPos.x(), screenPos.y(), width(), height());
+    // Render Step
+    m_canvas.fill(Qt::black);
+    QPainter painter(&m_canvas);
+    painter.setPen(Qt::NoPen);
+    
+    auto projected = m_meshViewer->getProjectedAgents(width(), height());
+    
+    for (const auto &p : projected) {
+        // Draw Trail
+        if (p.screenTrail.size() > 1) {
+            QPolygonF poly;
+            for (const auto &tp : p.screenTrail) {
+                poly << QPointF(tp.x(), tp.y());
+            }
+            // Fade trail opacity
+            QColor trailColor = p.color;
+            trailColor.setAlpha(150);
+            painter.setPen(QPen(trailColor, 1));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawPolyline(poly);
+        }
+        
+        // Draw Head
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(p.color);
+        painter.drawEllipse(QPointF(p.screenPos.x(), p.screenPos.y()), 2, 2);
+    }
+    
+    update();
 }
 
 void AgentProjectionWindow::paintEvent(QPaintEvent *)

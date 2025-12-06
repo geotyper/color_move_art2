@@ -23,19 +23,12 @@ protected:
 
 private:
     void updateAgents();
-    bool checkIntersection(const QVector2D &screenPos);
+    // bool checkRayIntersection(const QVector2D &screenPos); // Removed
 
     MeshViewerWidget *m_meshViewer;
     QTimer *m_timer;
     QImage m_canvas;
     
-    struct Agent {
-        QVector2D pos;
-        QColor color;
-        bool active = false;
-    };
-    
-    std::vector<Agent> m_agents;
-    int m_agentCount = 1000;
+    int m_targetCount = 1000;
     bool m_running = false;
 };
