@@ -154,6 +154,8 @@ public:
     void setBrushNoiseScale(float scale) { m_brushNoiseScale = std::max(1.0f, scale); }
     void setBrushNoiseStrength(float strength) { m_brushNoiseStrength = std::clamp(strength, 0.0f, 1.0f); }
     void setMinSizeRatio(float ratio) { m_minSizeRatio = std::clamp(ratio, 0.1f, 0.9f); }
+    const QVector<QVector3D>& getPalettes() const { return m_palettes[m_currentPaletteIdx]; }
+    const QVector<QVector<QVector3D>>& allPalettes() const { return m_palettes; }
     
     void regenerate() { generateComposition(); update(); }
     void regenerateSqueegeeOnly();
@@ -176,6 +178,7 @@ public:
         QVector<QVector2D> points;
         QColor color;
         float size;
+        float brightness = 1.0f;
         int layer = -1;
     };
     void paintPaths(const QVector<PathInfo>& paths);

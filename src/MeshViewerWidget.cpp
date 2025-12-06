@@ -9,6 +9,7 @@
 #include <cmath>
 #include <QDebug>
 #include <limits>
+#include <algorithm>
 
 // We need boost geometry specifics here too if not fully in header
 namespace bg = boost::geometry;
@@ -346,7 +347,12 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
 
                 newAgent.speed = 0.05f; // Increased speed for visibility
                 newAgent.worldVelocity = tangent * newAgent.speed;
-                newAgent.color = QColor::fromHsv(std::rand() % 360, 200, 255);
+                // Color from active palette (cycling if more agents than colors)
+                const QVector<QVector<QVector3D>>* palettesPtr = m_externalPalettes ? m_externalPalettes : &m_palettes;
+                const QVector<QVector3D>& palette = (*palettesPtr)[m_paletteIndex % palettesPtr->size()];
+                int colorIdx = (int)m_surfaceAgents.size() % palette.size();
+                const QVector3D& pal = palette[colorIdx];
+                newAgent.color = QColor::fromRgbF(pal.x(), pal.y(), pal.z());
                 newAgent.maxAge = m_agentLifetime;
                 newAgent.age = 0;
                 newAgent.layer = QRandomGenerator::global()->bounded(32); // stick to a fixed texture slice
@@ -591,6 +597,13 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         return QVector2D(p.x, p.y);
     };
 
+    auto lambert = [&](const glm::vec3 &worldPos) -> float {
+        glm::vec3 n = glm::normalize(worldPos); // sphere radius 1
+        float ndl = std::max(0.0f, glm::dot(n, glm::normalize(m_lightDir)));
+        // Higher contrast and slightly brighter overall to match the 3D view appearance.
+        return std::clamp(0.5f + 0.6f * ndl, 0.0f, 1.0f);
+    };
+
     for (const auto &agent : m_surfaceAgents) {
         glm::vec3 pos = getAgentWorldPos(agent);
         
@@ -599,20 +612,26 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         info.color = agent.color;
         info.isVisible = isVisible(pos);
         info.layer = agent.layer;
+        info.headBrightness = lambert(pos);
         
         std::vector<QVector2D> currentSegment;
+        std::vector<float> currentBright;
         for (const auto &p : agent.trail) {
              if (isVisible(p)) {
                  currentSegment.push_back(project(p));
+                 currentBright.push_back(lambert(p));
              } else {
                  if (!currentSegment.empty()) {
                      info.trailSegments.push_back(currentSegment);
+                     info.trailBrightness.push_back(currentBright);
                      currentSegment.clear();
+                     currentBright.clear();
                  }
              }
         }
         if (!currentSegment.empty()) {
             info.trailSegments.push_back(currentSegment);
+            info.trailBrightness.push_back(currentBright);
         }
         
         projected.push_back(info);

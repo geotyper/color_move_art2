@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QColor>
+#include <numeric>
 #include <QFormLayout>
 #include <QTabWidget>
 #include "MeshViewerWidget.h"
@@ -585,6 +586,8 @@ void MainWindow::onAngleSnapToggled(bool checked)
 void MainWindow::onPaletteChanged(int index)
 {
     m_squeegeeWindow->setPalette(index);
+    if (m_meshViewer) m_meshViewer->setPaletteIndex(index);
+    if (m_meshViewer) m_meshViewer->setPalettes(&m_squeegeeWindow->allPalettes());
 }
 
 void MainWindow::onShapeChanged(int index)
@@ -869,12 +872,23 @@ void MainWindow::onPaintTrails()
     for (const auto& a : agents) {
         if (a.trailSegments.empty()) continue;
             
-        for (const auto& seg : a.trailSegments) {
+        for (int si = 0; si < a.trailSegments.size(); ++si) {
+             const auto& seg = a.trailSegments[si];
              if (seg.size() < 2) continue;
              SqueegeeWindow::PathInfo info;
              info.color = a.color;
              info.size = (float)m_sizeSlider->value();
              info.layer = a.layer;
+             
+             float avgBright = 1.0f;
+             if (si < a.trailBrightness.size()) {
+                 const auto& bseg = a.trailBrightness[si];
+                 if (!bseg.empty()) {
+                     float sum = std::accumulate(bseg.begin(), bseg.end(), 0.0f);
+                     avgBright = sum / (float)bseg.size();
+                 }
+             }
+             info.brightness = avgBright;
              
              for (const auto& p : seg) {
                  float px = p.x() * scale + offsetX;

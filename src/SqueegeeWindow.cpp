@@ -781,7 +781,13 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
             for (int s = 0; s <= samples; ++s) {
                 float t = (float)s / (float)samples;
                 QVector2D p = a + dir * (len * t);
-                drawShapeIntoBuffer(data, w, h, d, (int)p.x(), (int)p.y(), cz, (int)path.size, QVector3D(path.color.redF(), path.color.greenF(), path.color.blueF()));
+                QVector3D col(path.color.redF() * path.brightness,
+                              path.color.greenF() * path.brightness,
+                              path.color.blueF() * path.brightness);
+                col.setX(std::clamp(col.x(), 0.0f, 1.0f));
+                col.setY(std::clamp(col.y(), 0.0f, 1.0f));
+                col.setZ(std::clamp(col.z(), 0.0f, 1.0f));
+                drawShapeIntoBuffer(data, w, h, d, (int)p.x(), (int)p.y(), cz, (int)path.size, col);
             }
         }
     }

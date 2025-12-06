@@ -64,6 +64,9 @@ public:
     void setLightDirection(const QVector3D &dir);
     void setCameraDistance(float dist);
     void setAgentsPaused(bool paused);
+    void setPaletteIndex(int idx) { m_paletteIndex = idx; }
+    int getPaletteIndex() const { return m_paletteIndex; }
+    void setPalettes(const QVector<QVector<QVector3D>>* palettes) { m_externalPalettes = palettes; }
     
     // Check intersection and return hit info
     bool checkRayIntersection(float x, float y, float viewWidth, float viewHeight, glm::vec3 &hitPos);
@@ -77,6 +80,8 @@ public:
         bool isVisible;
         int layer = 0;
         std::vector<std::vector<QVector2D>> trailSegments;
+        float headBrightness = 1.0f;
+        std::vector<std::vector<float>> trailBrightness;
     };
     std::vector<AgentRenderInfo> getProjectedAgents(float viewWidth, float viewHeight);
     
@@ -126,6 +131,12 @@ private:
     std::vector<SurfaceAgent> m_surfaceAgents; // New member
     int m_agentLifetime = 1000;
     bool m_agentsPaused = false;
+    int m_paletteIndex = 0;
+    const QVector<QVector<QVector3D>>* m_externalPalettes = nullptr;
+    QVector<QVector<QVector3D>> m_palettes {
+        { QVector3D(0.8f, 0.2f, 0.2f), QVector3D(0.2f, 0.6f, 0.4f), QVector3D(0.2f, 0.4f, 0.8f),
+          QVector3D(0.9f, 0.7f, 0.1f), QVector3D(0.6f, 0.3f, 0.5f), QVector3D(0.2f, 0.2f, 0.3f) }
+    };
     
     // Spatial Index
     bgi::rtree<BoostValue, bgi::quadratic<16>> m_rtree;
