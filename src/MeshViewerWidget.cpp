@@ -628,12 +628,12 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
     glm::mat4 mv = view * model;
     glm::vec4 viewport(0.0f, 0.0f, viewWidth, viewHeight);
     
-    glm::vec3 sphereCenterView = glm::vec3(mv * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    
+    // Visibility: use proper clip-space frustum test so non-spherical meshes (e.g., cubes) are not culled incorrectly.
     auto isVisible = [&](const glm::vec3 &worldPos) -> bool {
-        glm::vec3 pView = glm::vec3(mv * glm::vec4(worldPos, 1.0f));
-        glm::vec3 normal = glm::normalize(pView - sphereCenterView);
-        return normal.z > 0.0f;
+        glm::vec4 clip = proj * mv * glm::vec4(worldPos, 1.0f);
+        if (clip.w <= 0.0f) return false; // behind eye
+        // Inside clip frustum
+        return std::abs(clip.x) <= clip.w && std::abs(clip.y) <= clip.w && clip.z >= -clip.w && clip.z <= clip.w;
     };
 
     auto project = [&](const glm::vec3 &worldPos) -> QVector2D {
