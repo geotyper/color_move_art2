@@ -207,13 +207,24 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         uint32_t idx2 = indices[i+2];
         
         std::vector<MyMesh::VertexHandle> face_vhandles;
-        face_vhandles.push_back(indexToHandle[idx0]);
-        face_vhandles.push_back(indexToHandle[idx1]);
-        face_vhandles.push_back(indexToHandle[idx2]);
-        m_mesh.add_face(face_vhandles);
+        auto vh0 = indexToHandle[idx0];
+        auto vh1 = indexToHandle[idx1];
+        auto vh2 = indexToHandle[idx2];
+
+        // Skip degenerate triangles (duplicate vertices after welding)
+        if (vh0 == vh1 || vh1 == vh2 || vh2 == vh0) continue;
+
+        face_vhandles.push_back(vh0);
+        face_vhandles.push_back(vh1);
+        face_vhandles.push_back(vh2);
+        auto fh = m_mesh.add_face(face_vhandles);
+        if (!fh.is_valid()) {
+            qDebug() << "Skipped invalid face (maybe non-manifold or duplicate edge)" << idx0 << idx1 << idx2;
+        }
     }
     
     m_mesh.request_face_normals();
+    m_mesh.request_vertex_normals();
     m_mesh.update_normals();
     
     // 3. Build Rendering Buffer & R-Tree
@@ -230,7 +241,8 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         glm::vec3 v1(p1[0], p1[1], p1[2]);
         glm::vec3 v2(p2[0], p2[1], p2[2]);
         
-        glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0)); // Flat shading normal
+            glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0)); // Flat shading normal
+            if (!std::isfinite(n.x) || !std::isfinite(n.y) || !std::isfinite(n.z)) continue;
         
         m_vertices.push_back({v0, n});
         m_vertices.push_back({v1, n});
@@ -660,11 +672,34 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         return QVector2D(p.x, p.y);
     };
 
-    auto lambert = [&](const glm::vec3 &worldPos) -> float {
-        glm::vec3 n = glm::normalize(worldPos); // sphere radius 1
-        float ndl = std::max(0.0f, glm::dot(n, glm::normalize(m_lightDir)));
-        // Higher contrast and slightly brighter overall to match the 3D view appearance.
-        return std::clamp(0.5f + 0.6f * ndl, 0.0f, 1.0f);
+    auto computeNormal = [&](const SurfaceAgent& agentRef, const glm::vec3& fallbackPos) -> glm::vec3 {
+        glm::vec3 normal = glm::normalize(fallbackPos); // fallback
+        if (agentRef.face.is_valid()) {
+            auto fv_norm_it = m_mesh.fv_iter(agentRef.face);
+            auto np0 = m_mesh.normal(*fv_norm_it);
+            auto np1 = m_mesh.normal(*(++fv_norm_it));
+            auto np2 = m_mesh.normal(*(++fv_norm_it));
+            glm::vec3 nv0(np0[0], np0[1], np0[2]);
+            glm::vec3 nv1(np1[0], np1[1], np1[2]);
+            glm::vec3 nv2(np2[0], np2[1], np2[2]);
+            glm::vec3 bary = agentRef.bary;
+            normal = nv0 * bary.x + nv1 * bary.y + nv2 * bary.z;
+            if (!std::isfinite(normal.x) || !std::isfinite(normal.y) || !std::isfinite(normal.z) || glm::dot(normal, normal) < 1e-10f) {
+                normal = glm::normalize(fallbackPos);
+            }
+        }
+        // Rotate normal with the same model transform as the 3D view.
+        glm::vec3 nWorld = glm::normalize(glm::mat3(model) * glm::normalize(normal));
+        if (!std::isfinite(nWorld.x) || !std::isfinite(nWorld.y) || !std::isfinite(nWorld.z)) {
+            nWorld = glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+        return nWorld;
+    };
+
+    auto lambert = [&](const glm::vec3 &normalWorld) -> float {
+        float ndl = std::max(0.0f, glm::dot(glm::normalize(normalWorld), glm::normalize(m_lightDir)));
+        // Match mesh.frag: ambient 0.2 + diffuse
+        return std::clamp(0.2f + ndl, 0.0f, 1.0f);
     };
 
     for (const auto &agent : m_surfaceAgents) {
@@ -675,14 +710,15 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         info.color = agent.color;
         info.isVisible = isVisible(pos);
         info.layer = agent.layer;
-        info.headBrightness = lambert(pos);
+        glm::vec3 normalWorld = computeNormal(agent, pos);
+        info.headBrightness = lambert(normalWorld);
         
         std::vector<QVector2D> currentSegment;
         std::vector<float> currentBright;
         for (const auto &p : agent.trail) {
              if (isVisible(p)) {
                  currentSegment.push_back(project(p));
-                 currentBright.push_back(lambert(p));
+                 currentBright.push_back(lambert(computeNormal(agent, p)));
              } else {
                  if (!currentSegment.empty()) {
                      info.trailSegments.push_back(currentSegment);
