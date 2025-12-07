@@ -144,35 +144,13 @@ void MeshViewerWidget::paintGL()
     m_program.release();
 }
 
-void MeshViewerWidget::buildSphere()
+void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
 {
     m_mesh.clear();
     m_vertices.clear();
     m_surfaceAgents.clear();
     
-    // Generate HexSphere geometry
-    // Resolution = 2, Radius = 1.0f
-    std::vector<Vertex> rawVertices;
-    std::vector<uint32_t> rawIndices;
-    GeomCreate::createHexSphere(2, 1.0f, rawVertices, rawIndices);
-    
-    // Convert to VertexData format for VBO
-    // (Vertex struct in GeomCreate matches VertexData conceptually, but maybe field names/types match?)
-    // Checking HelpStructures.h: Vertex has vec4 position, vec4 normal, vec4 color
-    // MeshViewerWidget::VertexData has vec3 position, vec3 normal.
-    // Need to convert.
-
-    m_vertices.reserve(rawIndices.size()); // We will unpack indices to triangles for GL_TRIANGLES
-    
-    // Also Populate OpenMesh for agent simulation logic
-    // The HexSphere generator outputs a triangulated fan for each hex face.
-    // We need to rebuild an OpenMesh from this for the agents to work (raycast, neighbors).
-    // Or, we can just feed the triangles into OpenMesh.
-    
     // 1. Add Vertices to OpenMesh (deduplicating)
-    // The HexSphere generator outputs duplicated vertices at face boundaries (since each hexagon generates its own perimeter).
-    // We must weld them to ensure valid OpenMesh topology.
-    
     struct VertexKey {
         long long x, y, z;
         bool operator<(const VertexKey& o) const {
@@ -182,15 +160,24 @@ void MeshViewerWidget::buildSphere()
         }
     };
     
-    // Multiplier for quantization (e.g., 5 decimals precision)
     const float quant = 100000.0f;
-    
     std::map<VertexKey, MyMesh::VertexHandle> uniqueVertices;
     std::vector<MyMesh::VertexHandle> indexToHandle;
-    indexToHandle.resize(rawVertices.size());
+    // indexToHandle size based on max index in indices? Or do we assume vertices are indexed 0..N-1?
+    // The input 'vertices' is a list of unique vertices (usually), or raw list? 
+    // GeomCreate functions return 'outVertices' and 'outIndices'. 
+    // 'outIndices' refer to 'outVertices'.
     
-    for(size_t i = 0; i < rawVertices.size(); ++i) {
-        const auto& v = rawVertices[i];
+    // Actually, GeomCreate functions generate vertices and indices.
+    // Ideally we just add them. 
+    // BUT, some generators (like hexsphere or low poly) might duplicate vertices for flat shading or seam texturing?
+    // OpenMesh needs shared vertices for connectivity. 
+    // So we MUST weld vertices based on position if we want agents to move across faces smoothly.
+    
+    indexToHandle.resize(vertices.size());
+    
+    for(size_t i = 0; i < vertices.size(); ++i) {
+        const auto& v = vertices[i];
         VertexKey key;
         key.x = static_cast<long long>(std::round(v.position.x * quant));
         key.y = static_cast<long long>(std::round(v.position.y * quant));
@@ -200,17 +187,19 @@ void MeshViewerWidget::buildSphere()
         if (it != uniqueVertices.end()) {
             indexToHandle[i] = it->second;
         } else {
+            // Note: VertexData uses glm::vec3, Vertex uses glm::vec4. 
             MyMesh::VertexHandle vh = m_mesh.add_vertex(MyMesh::Point(v.position.x, v.position.y, v.position.z));
             uniqueVertices[key] = vh;
             indexToHandle[i] = vh;
         }
     }
     
-    // 2. Add Faces to OpenMesh using unique handles
-    for(size_t i = 0; i < rawIndices.size(); i += 3) {
-        uint32_t idx0 = rawIndices[i];
-        uint32_t idx1 = rawIndices[i+1];
-        uint32_t idx2 = rawIndices[i+2];
+    // 2. Add Faces
+    for(size_t i = 0; i < indices.size(); i += 3) {
+        if (i + 2 >= indices.size()) break;
+        uint32_t idx0 = indices[i];
+        uint32_t idx1 = indices[i+1];
+        uint32_t idx2 = indices[i+2];
         
         std::vector<MyMesh::VertexHandle> face_vhandles;
         face_vhandles.push_back(indexToHandle[idx0]);
@@ -222,9 +211,9 @@ void MeshViewerWidget::buildSphere()
     m_mesh.request_face_normals();
     m_mesh.update_normals();
     
-    // 3. Build m_vertices for Rendering (and R-Tree)
-    // We can reuse the same logic as the old buildSphere: iterate mesh faces
+    // 3. Build Rendering Buffer & R-Tree
     m_rtree.clear();
+    m_vertices.reserve(m_mesh.n_faces() * 3);
     
     for (auto f_it = m_mesh.faces_begin(); f_it != m_mesh.faces_end(); ++f_it) {
         auto fv_it = m_mesh.fv_iter(*f_it);
@@ -232,20 +221,16 @@ void MeshViewerWidget::buildSphere()
         auto p1 = m_mesh.point(*(++fv_it));
         auto p2 = m_mesh.point(*(++fv_it));
         
-        // Use GLM types
         glm::vec3 v0(p0[0], p0[1], p0[2]);
         glm::vec3 v1(p1[0], p1[1], p1[2]);
         glm::vec3 v2(p2[0], p2[1], p2[2]);
         
-        // Use Face Normal for flat shading look, or vertex normals?
-        // Old code calculated face normal.
-        glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+        glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0)); // Flat shading normal
         
         m_vertices.push_back({v0, n});
         m_vertices.push_back({v1, n});
         m_vertices.push_back({v2, n});
         
-        // Add to R-tree
         float minX = std::min({v0.x, v1.x, v2.x});
         float minY = std::min({v0.y, v1.y, v2.y});
         float minZ = std::min({v0.z, v1.z, v2.z});
@@ -258,6 +243,24 @@ void MeshViewerWidget::buildSphere()
     }
     
     m_vertexCount = static_cast<int>(m_vertices.size());
+    
+    // Update VBO
+    makeCurrent();
+    m_vbo.bind();
+    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(VertexData));
+    m_vbo.release();
+    doneCurrent();
+    
+    update();
+}
+
+void MeshViewerWidget::buildSphere()
+{
+    // Generate HexSphere geometry
+    std::vector<Vertex> rawVertices;
+    std::vector<uint32_t> rawIndices;
+    GeomCreate::createHexSphere(2, 1.0f, rawVertices, rawIndices);
+    updateMesh(rawVertices, rawIndices);
 }
 
 void MeshViewerWidget::uploadMesh()

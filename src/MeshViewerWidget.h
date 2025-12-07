@@ -6,12 +6,15 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QTimer>
-#include <QVector3D>
-#include <QKeyEvent>
-#include <QColor> // Added for SurfaceAgent color
-
 #include <vector>
 #include <deque>
+#include <QVector3D>
+#include <QKeyEvent>
+#include "HelpStructures.h"
+
+// ... existing includes ...
+
+
 
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 
@@ -87,6 +90,8 @@ public:
     
     int getAgentCount() const { return static_cast<int>(m_surfaceAgents.size()); }
     void clearAgents() { m_surfaceAgents.clear(); }
+    
+    void updateMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
 
 protected:
     void initializeGL() override;

@@ -140,4 +140,20 @@ protected:
     QSlider *m_noiseStrengthSlider;
     QLabel *m_noisePreviewLabel;
     Noise2D m_noisePreviewGen;
+    
+    // 3D Generation Tab
+    QComboBox *m_primitiveCombo;
+    QSlider *m_primParam1Slider;
+    QLabel *m_primParam1Label;
+    QSlider *m_primParam2Slider;
+    QLabel *m_primParam2Label;
+    QSlider *m_primParam3Slider;
+    QLabel *m_primParam3Label;
+    QPushButton *m_generateMeshBtn;
+    
+    void onPrimitiveChanged(int index);
+    void onPrimParam1Changed(int value);
+    void onPrimParam2Changed(int value);
+    void onPrimParam3Changed(int value);
+    void onGenerateMesh();
 };

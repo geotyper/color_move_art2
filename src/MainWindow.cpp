@@ -373,6 +373,61 @@ MainWindow::MainWindow()
     tab3DLayout->addStretch();
     
     tabs->addTab(tab3D, "3D View");
+
+    // --- TAB 3: 3D GEN ---
+    QWidget *tabGen = new QWidget();
+    QVBoxLayout *tabGenLayout = new QVBoxLayout(tabGen);
+    QFormLayout *genForm = new QFormLayout();
+    
+    m_primitiveCombo = new QComboBox();
+    m_primitiveCombo->addItem("HexSphere");
+    //m_primitiveCombo->addItem("Icosphere"); // Not working fully yet?
+    m_primitiveCombo->addItem("Cube");
+    m_primitiveCombo->addItem("Cube 2 (Split)");
+    m_primitiveCombo->addItem("Cube 3 (Weld)");
+    m_primitiveCombo->addItem("Cube Grid");
+    m_primitiveCombo->addItem("Hollow Cube");
+    m_primitiveCombo->addItem("Cube with Window");
+    m_primitiveCombo->addItem("Cube w/ Center Hole");
+    m_primitiveCombo->addItem("UV Sphere");
+    m_primitiveCombo->addItem("Low Poly Sphere");
+    
+    connect(m_primitiveCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPrimitiveChanged);
+    genForm->addRow("Primitive:", m_primitiveCombo);
+    
+    m_primParam1Label = new QLabel("Param 1");
+    m_primParam1Slider = new QSlider(Qt::Horizontal);
+    m_primParam1Slider->setRange(1, 100);
+    m_primParam1Slider->setValue(2);
+    connect(m_primParam1Slider, &QSlider::valueChanged, this, &MainWindow::onPrimParam1Changed);
+    genForm->addRow(m_primParam1Label, m_primParam1Slider);
+    
+    m_primParam2Label = new QLabel("Param 2");
+    m_primParam2Slider = new QSlider(Qt::Horizontal);
+    m_primParam2Slider->setRange(0, 100);
+    m_primParam2Slider->setValue(50);
+    connect(m_primParam2Slider, &QSlider::valueChanged, this, &MainWindow::onPrimParam2Changed);
+    genForm->addRow(m_primParam2Label, m_primParam2Slider);
+
+    m_primParam3Label = new QLabel("Param 3");
+    m_primParam3Slider = new QSlider(Qt::Horizontal);
+    m_primParam3Slider->setRange(0, 100);
+    m_primParam3Slider->setValue(0);
+    connect(m_primParam3Slider, &QSlider::valueChanged, this, &MainWindow::onPrimParam3Changed);
+    genForm->addRow(m_primParam3Label, m_primParam3Slider);
+    
+    m_generateMeshBtn = new QPushButton("Generate Mesh");
+    connect(m_generateMeshBtn, &QPushButton::clicked, this, &MainWindow::onGenerateMesh);
+    
+    tabGenLayout->addWidget(new QLabel("<b>Mesh Generation:</b>"));
+    tabGenLayout->addLayout(genForm);
+    tabGenLayout->addWidget(m_generateMeshBtn);
+    tabGenLayout->addStretch();
+    
+    tabs->addTab(tabGen, "3D Gen");
+    
+    // Initialize labels
+    onPrimitiveChanged(0);
     
     QLabel *info = new QLabel("Controls:\nSpace: Toggle Tool\n1-5: Colors\nWheel: Brush Size\nB: Blur");
     controlLayout->addWidget(info);
@@ -488,6 +543,163 @@ void MainWindow::loadSettings()
 MainWindow::~MainWindow()
 {
     delete m_squeegeeWindow;
+}
+
+void MainWindow::onPrimitiveChanged(int index)
+{
+    // Update labels and slider ranges based on primitive
+    m_primParam1Slider->setEnabled(true);
+    m_primParam2Slider->setEnabled(true);
+    m_primParam3Slider->setEnabled(true);
+    
+    // Default hiding/showing logic could be added here
+    // For now just update labels
+    QString p1 = "Param 1";
+    QString p2 = "Param 2";
+    QString p3 = "Param 3";
+    
+    switch(index) {
+        case 0: // HexSphere
+            p1 = "Resolution (1-5)";
+            m_primParam1Slider->setRange(1, 5);m_primParam1Slider->setValue(2);
+            p2 = "Radius (0.1-5.0)";
+            m_primParam2Slider->setRange(1, 50);m_primParam2Slider->setValue(10);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 1: // Cube
+            p1 = "N/A"; m_primParam1Slider->setEnabled(false);
+            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 2: // Cube 2
+            p1 = "N/A"; m_primParam1Slider->setEnabled(false);
+            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 3: // Cube 3
+            p1 = "N/A"; m_primParam1Slider->setEnabled(false);
+            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 4: // Cube Grid
+            p1 = "Subdivisions (1-50)";
+            m_primParam1Slider->setRange(1, 50); m_primParam1Slider->setValue(10);
+            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 5: // Hollow Cube
+            p1 = "Subdivisions (3-50)";
+            m_primParam1Slider->setRange(3, 50); m_primParam1Slider->setValue(10);
+            p2 = "Hole Size %";
+            m_primParam2Slider->setRange(10, 90); m_primParam2Slider->setValue(50);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 6: // Cube with Window
+            p1 = "Subdivisions (3-50)";
+            m_primParam1Slider->setRange(3, 50); m_primParam1Slider->setValue(10);
+            p2 = "Window Scale %";
+            m_primParam2Slider->setRange(10, 90); m_primParam2Slider->setValue(40);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 7: // Cube w/ Center Hole
+            p1 = "Subdivisions (3-50)";
+            m_primParam1Slider->setRange(3, 50); m_primParam1Slider->setValue(10);
+            p2 = "Hole Cells";
+            m_primParam2Slider->setRange(1, 49); m_primParam2Slider->setValue(4);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 8: // UV Sphere
+            p1 = "Lat Div (3-100)";
+            m_primParam1Slider->setRange(3, 100); m_primParam1Slider->setValue(20);
+            p2 = "Lon Div (3-100)";
+            m_primParam2Slider->setRange(3, 100); m_primParam2Slider->setValue(20);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+        case 9: // Low Poly Sphere
+            p1 = "N/A"; m_primParam1Slider->setEnabled(false);
+            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
+            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+            break;
+    }
+    
+    m_primParam1Label->setText(p1);
+    m_primParam2Label->setText(p2);
+    m_primParam3Label->setText(p3);
+}
+
+void MainWindow::onPrimParam1Changed(int value)
+{
+    // Optional: Update value label
+}
+
+void MainWindow::onPrimParam2Changed(int value)
+{
+    // Optional: Update value label
+}
+
+void MainWindow::onPrimParam3Changed(int value)
+{
+    // Optional: Update value label
+}
+
+#include "GeomCreate.h"
+
+void MainWindow::onGenerateMesh()
+{
+    if (!m_meshViewer) return;
+    
+    int index = m_primitiveCombo->currentIndex();
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+    
+    // Params
+    int p1 = m_primParam1Slider->value();
+    int p2 = m_primParam2Slider->value();
+    int p3 = m_primParam3Slider->value();
+    
+    switch(index) {
+        case 0: // HexSphere
+            GeomCreate::createHexSphere(p1, (float)p2 / 10.0f, vertices, indices);
+            break;
+        case 1: // Cube
+            GeomCreate::createCube(vertices, indices);
+            break;
+        case 2: // Cube 2
+            GeomCreate::createCube2(vertices, indices);
+            break;
+        case 3: // Cube 3
+            GeomCreate::createCube3(vertices, indices);
+            break;
+        case 4: // Cube Grid
+            GeomCreate::createCubeGrid(vertices, indices, p1);
+            break;
+        case 5: // Hollow Cube
+            GeomCreate::createHollowCube(vertices, indices, p1, (float)p2 / 100.0f);
+            break;
+        case 6: // Cube with Window
+            GeomCreate::createCubeWithSquareHole(vertices, indices, p1, (float)p2 / 100.0f);
+            break;
+        case 7: // Cube w/ Center Hole
+            {
+               // Ensure holeCells < N
+               int hole = std::min(p2, p1 - 1);
+               // Ensure parity matches for centering
+               // If (N - hole) is odd, adjust hole
+               if ((p1 - hole) % 2 != 0) {
+                   hole = std::max(1, hole - 1);
+               }
+               GeomCreate::createCubeCenterHole(vertices, indices, p1, hole);
+            }
+            break;
+        case 8: // UV Sphere
+            GeomCreate::createUVSphere(p1, p2, vertices, indices);
+            break;
+        case 9: // Low Poly Sphere
+            GeomCreate::createLowPolySphere(vertices, indices);
+            break;
+    }
+    
+    m_meshViewer->updateMesh(vertices, indices);
 }
 
 void MainWindow::onAngleChanged(int value)
