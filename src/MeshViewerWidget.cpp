@@ -476,6 +476,7 @@ void MeshViewerWidget::updateAgents() {
             glm::vec3 v1(p1[0], p1[1], p1[2]);
             glm::vec3 v2(p2[0], p2[1], p2[2]);
             
+            glm::vec3 faceNormal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
             glm::vec3 baryVel = solveBarycentricVelocity(agent.worldVelocity, v0, v1, v2);
             if (std::isnan(baryVel.x) || std::isnan(baryVel.y) || std::isnan(baryVel.z)) {
                 qDebug() << "Agent" << agentId << "NaN velocity!";
@@ -536,21 +537,21 @@ void MeshViewerWidget::updateAgents() {
                 if (hitIndex == 1) { va = vh2; vb = vh0; } 
                 if (hitIndex == 2) { va = vh0; vb = vh1; } 
                 
-                OpenMesh::HalfedgeHandle hitEdge = m_mesh.find_halfedge(va, vb);
-                if (!hitEdge.is_valid()) {
-                     qDebug() << "Agent" << agentId << "hit invalid edge!";
-                     agent.worldVelocity = -agent.worldVelocity; // Reflect on invalid edge
-                     remainingTime = 0;
-                     break;
-                }
-                auto opp = m_mesh.opposite_halfedge_handle(hitEdge);
-                
-                if (!m_mesh.is_boundary(opp)) {
-                    agent.face = m_mesh.face_handle(opp);
-                    if (!agent.face.is_valid()) {
-                        remainingTime = 0; break; 
-                    }
-                    
+                // Robust edge traversal: find the undirected edge and pick the opposite face even if winding differs.
+                OpenMesh::HalfedgeHandle heForward = m_mesh.find_halfedge(va, vb);
+                OpenMesh::HalfedgeHandle heBackward = m_mesh.find_halfedge(vb, va);
+                OpenMesh::FaceHandle f0, f1;
+                if (heForward.is_valid()) f0 = m_mesh.face_handle(heForward);
+                if (heBackward.is_valid()) f1 = m_mesh.face_handle(heBackward);
+
+                OpenMesh::FaceHandle nextFace;
+                if (f0 == agent.face && f1.is_valid()) nextFace = f1;
+                else if (f1 == agent.face && f0.is_valid()) nextFace = f0;
+                else if (f0.is_valid() && f1.is_valid()) nextFace = (f0 == agent.face) ? f1 : f0;
+
+                if (nextFace.is_valid()) {
+                    agent.face = nextFace;
+
                     // Recompute physics on new face
                     auto nfv = m_mesh.fv_range(agent.face);
                     auto nit = nfv.begin();
@@ -565,14 +566,15 @@ void MeshViewerWidget::updateAgents() {
                     glm::vec3 ne2 = nv2 - nv0;
                     
                     // Simple projection to new barycentric coords
-                    // Approximate wPos from shared edge
                     glm::vec3 wPos = v0 * agent.bary.x + v1 * agent.bary.y + v2 * agent.bary.z;
                     glm::vec3 P_v0 = wPos - nv0;
                     
                     float d00 = glm::dot(ne1, ne1);
                     float d01 = glm::dot(ne1, ne2);
                     float d11 = glm::dot(ne2, ne2);
-                    float id = 1.0f / (d00 * d11 - d01 * d01);
+                    float denom = d00 * d11 - d01 * d01;
+                    if (std::abs(denom) < 1e-8f) denom = 1e-8f;
+                    float id = 1.0f / denom;
                     float dP0 = glm::dot(P_v0, ne1);
                     float dP1 = glm::dot(P_v0, ne2);
                     float nu = (d11 * dP0 - d01 * dP1) * id;
@@ -581,8 +583,25 @@ void MeshViewerWidget::updateAgents() {
                     
                     agent.bary = glm::vec3(nw, nu, nv);
                     
-                    glm::vec3 normal = glm::normalize(glm::cross(ne1, ne2));
-                    glm::vec3 t = agent.worldVelocity - glm::dot(agent.worldVelocity, normal) * normal;
+                    // Rotate velocity across the hinge to preserve direction across the edge.
+                    auto vaPos = m_mesh.point(va);
+                    auto vbPos = m_mesh.point(vb);
+                    glm::vec3 edgeDir = glm::normalize(glm::vec3(vbPos[0] - vaPos[0], vbPos[1] - vaPos[1], vbPos[2] - vaPos[2]));
+
+                    glm::vec3 newNormal = glm::normalize(glm::cross(ne1, ne2));
+                    float cosAng = std::clamp(glm::dot(faceNormal, newNormal), -1.0f, 1.0f);
+                    float sign = glm::dot(edgeDir, glm::cross(faceNormal, newNormal)) >= 0.0f ? 1.0f : -1.0f;
+                    float angle = std::acos(cosAng) * sign;
+
+                    glm::vec3 rotatedVel = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, edgeDir) * glm::vec4(agent.worldVelocity, 0.0f));
+                    // Ensure tangential to the new face
+                    glm::vec3 normal = newNormal;
+                    glm::vec3 t = rotatedVel - glm::dot(rotatedVel, normal) * normal;
+                    if (glm::dot(t, t) < 1e-8f) {
+                        // Degenerate tangent; pick any perpendicular
+                        t = glm::cross(normal, glm::vec3(1.0f, 0.0f, 0.0f));
+                        if (glm::dot(t, t) < 1e-8f) t = glm::cross(normal, glm::vec3(0.0f, 1.0f, 0.0f));
+                    }
                     agent.worldVelocity = glm::normalize(t) * agent.speed;
                 } else {
                     agent.worldVelocity = -agent.worldVelocity; // Bounce
