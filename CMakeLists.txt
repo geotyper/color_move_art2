@@ -16,6 +16,10 @@ list(APPEND CMAKE_PREFIX_PATH "${OPENMESH_ROOT}/build" "${OPENMESH_ROOT}/build/B
 find_package(OpenMesh REQUIRED CONFIG)
 find_package(Boost REQUIRED)
 
+#--------------------------------- Find CGAL ---------------------------------#
+list(APPEND CMAKE_PREFIX_PATH "/home/geotyper/CPP_lib")
+find_package(CGAL REQUIRED COMPONENTS Core)
+
 set(PROJECT_SOURCES
     src/main.cpp
     src/MainWindow.cpp

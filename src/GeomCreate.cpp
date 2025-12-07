@@ -886,4 +886,9 @@ void GeomCreate::createHexSphere(int resolution, float radius, std::vector<Verte
     }
 }
 
+void GeomCreate::createLowPolySphere(std::vector<Vertex>& outVertices,
+                                     std::vector<uint32_t>& outIndices) {
+    createIcosphere(1, outVertices, outIndices);
+}
+
 
