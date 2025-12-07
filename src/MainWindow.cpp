@@ -13,6 +13,203 @@
 #include <QTabWidget>
 #include "MeshViewerWidget.h"
 #include "AgentProjectionWindow.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
+#include <cmath>
+#include "CgalMeshBuilder.h"
+#include <unordered_map>
+#include <unordered_set>
+#include <CGAL/Polygon_mesh_processing/repair.h>
+#include <CGAL/Polygon_mesh_processing/stitch_borders.h>
+
+namespace {
+using SM = CgalMeshBuilder::SurfaceMesh;
+using Kernel = CgalMeshBuilder::Kernel;
+using Vector = Kernel::Vector_3;
+namespace PMP = CGAL::Polygon_mesh_processing;
+
+static SM toSurfaceMesh(const std::vector<Vertex>& verts, const std::vector<uint32_t>& indices) {
+    SM sm;
+    // Weld vertices by position to restore shared topology before doing CGAL ops.
+    struct Key {
+        int x, y, z;
+        bool operator==(const Key& o) const { return x==o.x && y==o.y && z==o.z; }
+    };
+    struct KeyHash {
+        std::size_t operator()(const Key& k) const {
+            std::size_t h = std::hash<int>()(k.x);
+            h ^= std::hash<int>()(k.y + 0x9e3779b9 + (h<<6) + (h>>2));
+            h ^= std::hash<int>()(k.z + 0x9e3779b9 + (h<<6) + (h>>2));
+            return h;
+        }
+    };
+
+    const float quant = 1e5f;
+    std::unordered_map<Key, SM::Vertex_index, KeyHash> welded;
+    welded.reserve(verts.size() * 2);
+
+    auto addWelded = [&](const Vertex& v) -> SM::Vertex_index {
+        Key k {
+            static_cast<int>(std::round(v.position.x * quant)),
+            static_cast<int>(std::round(v.position.y * quant)),
+            static_cast<int>(std::round(v.position.z * quant))
+        };
+        auto it = welded.find(k);
+        if (it != welded.end()) return it->second;
+        SM::Vertex_index nv = sm.add_vertex(SM::Point(v.position.x, v.position.y, v.position.z));
+        welded[k] = nv;
+        return nv;
+    };
+
+    std::vector<SM::Vertex_index> vmap;
+    vmap.reserve(verts.size());
+    for (const auto& v : verts) {
+        vmap.push_back(addWelded(v));
+    }
+
+    for (std::size_t i = 0; i + 2 < indices.size(); i += 3) {
+        uint32_t a = indices[i], b = indices[i + 1], c = indices[i + 2];
+        if (a >= vmap.size() || b >= vmap.size() || c >= vmap.size()) continue;
+        // Skip degenerate after welding
+        if (vmap[a] == vmap[b] || vmap[b] == vmap[c] || vmap[c] == vmap[a]) continue;
+        sm.add_face(vmap[a], vmap[b], vmap[c]);
+    }
+    return sm;
+}
+
+static bool mergeCoplanarPatches(SM& sm, double normalEps = 1e-4, double distEps = 1e-4) {
+    auto faceNormal = [&](SM::Face_index f) {
+        auto h0 = sm.halfedge(f);
+        if (h0 == SM::null_halfedge()) return Vector(0,0,1);
+        auto a = sm.point(target(h0, sm));
+        auto b = sm.point(target(next(h0, sm), sm));
+        auto c = sm.point(target(next(next(h0, sm), sm), sm));
+        auto n = CGAL::cross_product(b - a, c - a);
+        double len2 = n.squared_length();
+        return (len2 > 1e-16) ? n / std::sqrt(len2) : Vector(0,0,1);
+    };
+    auto facePlane = [&](SM::Face_index f, Vector& nOut, double& dOut) {
+        nOut = faceNormal(f);
+        auto h0 = sm.halfedge(f);
+        auto p0 = sm.point(target(h0, sm));
+        dOut = -(nOut.x()*p0.x() + nOut.y()*p0.y() + nOut.z()*p0.z());
+    };
+
+    std::unordered_set<SM::Face_index> visited;
+    bool mergedAny = false;
+
+    for (auto fStart : sm.faces()) {
+        if (sm.is_removed(fStart) || visited.count(fStart)) continue;
+        Vector nBase; double dBase = 0.0;
+        facePlane(fStart, nBase, dBase);
+
+        // Grow coplanar region.
+        std::vector<SM::Face_index> region;
+        std::vector<SM::Face_index> stack = {fStart};
+        visited.insert(fStart);
+        while (!stack.empty()) {
+            auto f = stack.back();
+            stack.pop_back();
+            region.push_back(f);
+            for (auto h : CGAL::halfedges_around_face(sm.halfedge(f), sm)) {
+                auto fo = sm.face(sm.opposite(h));
+                if (fo == SM::null_face() || sm.is_removed(fo) || visited.count(fo)) continue;
+                Vector nN; double dN;
+                facePlane(fo, nN, dN);
+                double ndot = CGAL::to_double(nBase * nN);
+                if (std::abs(ndot - 1.0) > normalEps) continue;
+                auto p = sm.point(target(sm.halfedge(fo), sm));
+                double dist = nBase.x()*p.x() + nBase.y()*p.y() + nBase.z()*p.z() + dBase;
+                if (std::abs(dist) > distEps) continue;
+                visited.insert(fo);
+                stack.push_back(fo);
+            }
+        }
+
+        if (region.size() <= 1) continue;
+
+        // Collect boundary directed edges of the region.
+        std::unordered_map<SM::Vertex_index, SM::Vertex_index> nextMap;
+        std::size_t boundaryCount = 0;
+        std::unordered_set<SM::Halfedge_index> regionEdges;
+        regionEdges.reserve(region.size() * 3);
+        for (auto f : region)
+            for (auto h : CGAL::halfedges_around_face(sm.halfedge(f), sm))
+                regionEdges.insert(h);
+
+        for (auto h : regionEdges) {
+            auto fo = sm.face(sm.opposite(h));
+            if (fo == SM::null_face() || !regionEdges.count(sm.opposite(h))) {
+                auto s = source(h, sm);
+                auto t = target(h, sm);
+                nextMap[s] = t;
+                ++boundaryCount;
+            }
+        }
+        if (boundaryCount < 3) continue;
+
+        // Build one boundary loop from nextMap.
+        std::vector<SM::Vertex_index> ring;
+        ring.reserve(boundaryCount);
+        auto start = nextMap.begin()->first;
+        auto v = start;
+        std::size_t guard = boundaryCount + 2;
+        while (guard-- && nextMap.count(v)) {
+            ring.push_back(v);
+            v = nextMap[v];
+            if (v == start) break;
+        }
+        if (ring.size() < 3 || v != start) continue;
+
+        // Remove region faces, add new polygon face.
+        for (auto f : region) {
+            auto h = sm.halfedge(f);
+            if (h != SM::null_halfedge()) CGAL::Euler::remove_face(h, sm);
+        }
+        auto fNew = CGAL::Euler::add_face(ring, sm);
+        if (fNew == SM::null_face()) {
+            std::reverse(ring.begin(), ring.end());
+            fNew = CGAL::Euler::add_face(ring, sm);
+        }
+        if (fNew != SM::null_face()) mergedAny = true;
+    }
+
+    if (mergedAny) sm.collect_garbage();
+    return mergedAny;
+}
+
+static void fromSurfaceMesh(const SM& sm, std::vector<Vertex>& outV, std::vector<uint32_t>& outI) {
+    outV.clear();
+    outI.clear();
+    for (auto f : sm.faces()) {
+        std::vector<SM::Vertex_index> ring;
+        auto h0 = sm.halfedge(f);
+        if (h0 == SM::null_halfedge()) continue;
+        auto h = h0;
+        do {
+            ring.push_back(target(h, sm));
+            h = next(h, sm);
+        } while (h != h0);
+        if (ring.size() != 3) continue; // expect triangles after triangulate
+
+        glm::vec3 p0(sm.point(ring[0]).x(), sm.point(ring[0]).y(), sm.point(ring[0]).z());
+        glm::vec3 p1(sm.point(ring[1]).x(), sm.point(ring[1]).y(), sm.point(ring[1]).z());
+        glm::vec3 p2(sm.point(ring[2]).x(), sm.point(ring[2]).y(), sm.point(ring[2]).z());
+        glm::vec3 n = glm::normalize(glm::cross(p1 - p0, p2 - p0));
+        if (!std::isfinite(n.x) || !std::isfinite(n.y) || !std::isfinite(n.z)) continue;
+
+        uint32_t base = static_cast<uint32_t>(outV.size());
+        glm::vec4 normal(n, 0.0f);
+        glm::vec4 color(1.0f);
+        outV.push_back({glm::vec4(p0, 1.0f), normal, color});
+        outV.push_back({glm::vec4(p1, 1.0f), normal, color});
+        outV.push_back({glm::vec4(p2, 1.0f), normal, color});
+        outI.push_back(base + 0);
+        outI.push_back(base + 1);
+        outI.push_back(base + 2);
+    }
+}
+} // namespace
 
 MainWindow::MainWindow()
 {
@@ -381,16 +578,6 @@ MainWindow::MainWindow()
     
     m_primitiveCombo = new QComboBox();
     m_primitiveCombo->addItem("HexSphere");
-    //m_primitiveCombo->addItem("Icosphere"); // Not working fully yet?
-    m_primitiveCombo->addItem("Cube");
-    m_primitiveCombo->addItem("Cube 2 (Split)");
-    m_primitiveCombo->addItem("Cube 3 (Weld)");
-    m_primitiveCombo->addItem("Cube Grid");
-    m_primitiveCombo->addItem("Hollow Cube");
-    m_primitiveCombo->addItem("Cube with Window");
-    m_primitiveCombo->addItem("Cube w/ Center Hole");
-    m_primitiveCombo->addItem("UV Sphere");
-    m_primitiveCombo->addItem("Low Poly Sphere");
     
     connect(m_primitiveCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPrimitiveChanged);
     genForm->addRow("Primitive:", m_primitiveCombo);
@@ -418,10 +605,49 @@ MainWindow::MainWindow()
     
     m_generateMeshBtn = new QPushButton("Generate Mesh");
     connect(m_generateMeshBtn, &QPushButton::clicked, this, &MainWindow::onGenerateMesh);
+
+    // Extrusion controls
+    m_extrudeProbSlider = new QSlider(Qt::Horizontal);
+    m_extrudeProbSlider->setRange(0, 100);
+    m_extrudeProbSlider->setValue(25);
+    m_extrudeProbLabel = new QLabel("25%");
+    connect(m_extrudeProbSlider, &QSlider::valueChanged, this, [this](int v){
+        m_extrudeProbLabel->setText(QString::number(v) + "%");
+    });
+    genForm->addRow("Random Faces:", m_extrudeProbLabel);
+    genForm->addRow(m_extrudeProbSlider);
+
+    m_extrudeDistSlider = new QSlider(Qt::Horizontal);
+    m_extrudeDistSlider->setRange(-200, 200); // -2.0 .. 2.0
+    m_extrudeDistSlider->setValue(20);
+    m_extrudeDistLabel = new QLabel("+0.20");
+    connect(m_extrudeDistSlider, &QSlider::valueChanged, this, [this](int v){
+        m_extrudeDistLabel->setText(QString::number(v / 100.0, 'f', 2));
+    });
+    genForm->addRow("Extrude Dist:", m_extrudeDistLabel);
+    genForm->addRow(m_extrudeDistSlider);
+
+    m_extrudeScaleSlider = new QSlider(Qt::Horizontal);
+    m_extrudeScaleSlider->setRange(10, 300); // 0.1 .. 3.0
+    m_extrudeScaleSlider->setValue(100);
+    m_extrudeScaleLabel = new QLabel("1.00x");
+    connect(m_extrudeScaleSlider, &QSlider::valueChanged, this, [this](int v){
+        m_extrudeScaleLabel->setText(QString::number(v / 100.0, 'f', 2) + "x");
+    });
+    genForm->addRow("Extrude Scale:", m_extrudeScaleLabel);
+    genForm->addRow(m_extrudeScaleSlider);
+
+    m_extrudeRemoveBase = new QCheckBox("Remove base faces");
+    m_extrudeRemoveBase->setChecked(false);
+    genForm->addRow(m_extrudeRemoveBase);
+
+    m_extrudeBtn = new QPushButton("Random Extrude");
+    connect(m_extrudeBtn, &QPushButton::clicked, this, &MainWindow::onExtrudeRandom);
     
     tabGenLayout->addWidget(new QLabel("<b>Mesh Generation:</b>"));
     tabGenLayout->addLayout(genForm);
     tabGenLayout->addWidget(m_generateMeshBtn);
+    tabGenLayout->addWidget(m_extrudeBtn);
     tabGenLayout->addStretch();
     
     tabs->addTab(tabGen, "3D Gen");
@@ -558,69 +784,12 @@ void MainWindow::onPrimitiveChanged(int index)
     QString p2 = "Param 2";
     QString p3 = "Param 3";
     
-    switch(index) {
-        case 0: // HexSphere
-            p1 = "Resolution (1-5)";
-            m_primParam1Slider->setRange(1, 5);m_primParam1Slider->setValue(2);
-            p2 = "Radius (0.1-5.0)";
-            m_primParam2Slider->setRange(1, 50);m_primParam2Slider->setValue(10);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 1: // Cube
-            p1 = "N/A"; m_primParam1Slider->setEnabled(false);
-            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 2: // Cube 2
-            p1 = "N/A"; m_primParam1Slider->setEnabled(false);
-            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 3: // Cube 3
-            p1 = "N/A"; m_primParam1Slider->setEnabled(false);
-            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 4: // Cube Grid
-            p1 = "Subdivisions (1-50)";
-            m_primParam1Slider->setRange(1, 50); m_primParam1Slider->setValue(10);
-            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 5: // Hollow Cube
-            p1 = "Subdivisions (3-50)";
-            m_primParam1Slider->setRange(3, 50); m_primParam1Slider->setValue(10);
-            p2 = "Hole Size %";
-            m_primParam2Slider->setRange(10, 90); m_primParam2Slider->setValue(50);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 6: // Cube with Window
-            p1 = "Subdivisions (3-50)";
-            m_primParam1Slider->setRange(3, 50); m_primParam1Slider->setValue(10);
-            p2 = "Window Scale %";
-            m_primParam2Slider->setRange(10, 90); m_primParam2Slider->setValue(40);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 7: // Cube w/ Center Hole
-            p1 = "Subdivisions (3-50)";
-            m_primParam1Slider->setRange(3, 50); m_primParam1Slider->setValue(10);
-            p2 = "Hole Cells";
-            m_primParam2Slider->setRange(1, 49); m_primParam2Slider->setValue(4);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 8: // UV Sphere
-            p1 = "Lat Div (3-100)";
-            m_primParam1Slider->setRange(3, 100); m_primParam1Slider->setValue(20);
-            p2 = "Lon Div (3-100)";
-            m_primParam2Slider->setRange(3, 100); m_primParam2Slider->setValue(20);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-        case 9: // Low Poly Sphere
-            p1 = "N/A"; m_primParam1Slider->setEnabled(false);
-            p2 = "N/A"; m_primParam2Slider->setEnabled(false);
-            p3 = "N/A"; m_primParam3Slider->setEnabled(false);
-            break;
-    }
+    Q_UNUSED(index);
+    p1 = "Resolution (1-5)";
+    m_primParam1Slider->setRange(1, 5);m_primParam1Slider->setValue(2);
+    p2 = "Radius (0.1-5.0)";
+    m_primParam2Slider->setRange(1, 50);m_primParam2Slider->setValue(10);
+    p3 = "N/A"; m_primParam3Slider->setEnabled(false);
     
     m_primParam1Label->setText(p1);
     m_primParam2Label->setText(p2);
@@ -644,63 +813,7 @@ void MainWindow::onPrimParam3Changed(int value)
 
 #include "GeomCreate.h"
 
-void MainWindow::onGenerateMesh()
-{
-    if (!m_meshViewer) return;
-    
-    int index = m_primitiveCombo->currentIndex();
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
-    
-    // Params
-    int p1 = m_primParam1Slider->value();
-    int p2 = m_primParam2Slider->value();
-    int p3 = m_primParam3Slider->value();
-    
-    switch(index) {
-        case 0: // HexSphere
-            GeomCreate::createHexSphere(p1, (float)p2 / 10.0f, vertices, indices);
-            break;
-        case 1: // Cube
-            GeomCreate::createCube(vertices, indices);
-            break;
-        case 2: // Cube 2
-            GeomCreate::createCube2(vertices, indices);
-            break;
-        case 3: // Cube 3
-            GeomCreate::createCube3(vertices, indices);
-            break;
-        case 4: // Cube Grid
-            GeomCreate::createCubeGrid(vertices, indices, p1);
-            break;
-        case 5: // Hollow Cube
-            GeomCreate::createHollowCube(vertices, indices, p1, (float)p2 / 100.0f);
-            break;
-        case 6: // Cube with Window
-            GeomCreate::createCubeWithSquareHole(vertices, indices, p1, (float)p2 / 100.0f);
-            break;
-        case 7: // Cube w/ Center Hole
-            {
-               // Ensure holeCells < N
-               int hole = std::min(p2, p1 - 1);
-               // Ensure parity matches for centering
-               // If (N - hole) is odd, adjust hole
-               if ((p1 - hole) % 2 != 0) {
-                   hole = std::max(1, hole - 1);
-               }
-               GeomCreate::createCubeCenterHole(vertices, indices, p1, hole);
-            }
-            break;
-        case 8: // UV Sphere
-            GeomCreate::createUVSphere(p1, p2, vertices, indices);
-            break;
-        case 9: // Low Poly Sphere
-            GeomCreate::createLowPolySphere(vertices, indices);
-            break;
-    }
-    
-    m_meshViewer->updateMesh(vertices, indices);
-}
+// (Old onGenerateMesh removed - see new implementation below)
 
 void MainWindow::onAngleChanged(int value)
 {
@@ -1134,5 +1247,98 @@ void MainWindow::onBackgroundColorClicked()
     QColor color = QColorDialog::getColor(Qt::white, this, "Select Background Color", QColorDialog::DontUseNativeDialog);
     if (color.isValid()) {
         m_squeegeeWindow->setBackgroundColor(color);
+    }
+}
+
+void MainWindow::onGenerateMesh()
+{
+    if (!m_meshViewer) return;
+
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+    
+    // Params (reuse UI sliders for resolution/radius)
+    const int   resolution = m_primParam1Slider->value();
+    const float radius     = m_primParam2Slider->value() / 10.0f;
+    
+    m_currentMesh.clear();
+
+    // 1) Построение hexasphere
+    auto allFaces = CgalMeshBuilder::buildHexSphereOriented(
+        m_currentMesh,
+        resolution,
+        radius,
+        CgalMeshBuilder::Point_3(0,0,0),
+        CgalMeshBuilder::Vector_3(0,1,0),
+        0.0
+    );
+
+    // Экструзию убрали, чтобы при смене радиуса грани оставались стык в стык.
+    m_currentMesh.collect_garbage();
+
+    // 3) Триангулируем копию для рендера, основную меш оставляем полигональной
+    CgalMeshBuilder::SurfaceMesh displayMesh = m_currentMesh;
+    CgalMeshBuilder::triangulateAll(displayMesh);
+
+    std::vector<CgalMeshBuilder::Vertex> tmp;
+    CgalMeshBuilder::toVertexIndexFlat(displayMesh, tmp, indices);
+    vertices.resize(tmp.size());
+    for(size_t i=0; i<tmp.size(); ++i) {
+        vertices[i].position = glm::vec4(tmp[i].pos[0], tmp[i].pos[1], tmp[i].pos[2], 1.0f);
+        vertices[i].normal   = glm::vec4(tmp[i].norm[0], tmp[i].norm[1], tmp[i].norm[2], 0.0f);
+        vertices[i].color    = glm::vec4(tmp[i].col[0], tmp[i].col[1], tmp[i].col[2], 1.0f);
+    }
+
+    m_lastVertices = vertices;
+    m_lastIndices = indices;
+    m_meshViewer->updateMesh(vertices, indices);
+}
+
+// ... (skipping unchanged methods) ...
+
+void MainWindow::onExtrudeRandom()
+{
+    // If we have a valid Cgal mesh (e.g. HexSphere), use it directly to keep polygons.
+    // Otherwise, rebuild from triangles (legacy behavior).
+    
+    bool usingPersistent = !m_currentMesh.is_empty();
+    CgalMeshBuilder::SurfaceMesh* targetMesh = nullptr;
+    CgalMeshBuilder::SurfaceMesh tempMesh; // Only used if rebuilding
+    
+    if (usingPersistent) {
+        targetMesh = &m_currentMesh;
+    } else {
+        if (m_lastVertices.empty() || m_lastIndices.empty()) return;
+        tempMesh = toSurfaceMesh(m_lastVertices, m_lastIndices);
+        PMP::stitch_borders(tempMesh);
+        mergeCoplanarPatches(tempMesh); 
+        targetMesh = &tempMesh;
+    }
+
+    const double prob = m_extrudeProbSlider->value() / 100.0;
+    const double dist = m_extrudeDistSlider->value() / 100.0;
+    const double scale = m_extrudeScaleSlider->value() / 100.0;
+
+    auto faces = CgalMeshBuilder::selectFacesRandom(*targetMesh, prob, 1337u);
+    if (!faces.empty()) {
+        CgalMeshBuilder::extrudeFaces_collectBoth(*targetMesh, faces, dist, scale);
+        
+        // For display, we need a triangulated copy, BUT we want to keep the main mesh polygonal if possible.
+        // However, the requested flow is: modifying *this* mesh.
+        // If we just triangulate 'targetMesh', future extrusions will be on triangles again.
+        // So we strictly should COPY for display triangulation.
+        
+        CgalMeshBuilder::SurfaceMesh displayMesh = *targetMesh;
+        CgalMeshBuilder::triangulateAll(displayMesh);
+        
+        std::vector<CgalMeshBuilder::Vertex> tmp;
+        CgalMeshBuilder::toVertexIndexFlat(displayMesh, tmp, m_lastIndices);
+        m_lastVertices.resize(tmp.size());
+        for(size_t i=0; i<tmp.size(); ++i) {
+            m_lastVertices[i].position = glm::vec4(tmp[i].pos[0], tmp[i].pos[1], tmp[i].pos[2], 1.0f);
+            m_lastVertices[i].normal   = glm::vec4(tmp[i].norm[0], tmp[i].norm[1], tmp[i].norm[2], 0.0f);
+            m_lastVertices[i].color    = glm::vec4(tmp[i].col[0], tmp[i].col[1], tmp[i].col[2], 1.0f);
+        }
+        if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
     }
 }

@@ -16,6 +16,7 @@
 #include "SqueegeeWindow.h"
 #include "MeshViewerWidget.h"
 #include "Noise2D.h"
+#include "CgalMeshBuilder.h"
 
 class MainWindow : public QMainWindow
 {
@@ -65,6 +66,7 @@ private slots:
     void onPaintTrails();
     void onClearCanvas();
     void onBackgroundColorClicked();
+    void onExtrudeRandom();
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
@@ -150,10 +152,25 @@ protected:
     QSlider *m_primParam3Slider;
     QLabel *m_primParam3Label;
     QPushButton *m_generateMeshBtn;
+    QSlider *m_extrudeProbSlider;
+    QLabel  *m_extrudeProbLabel;
+    QSlider *m_extrudeDistSlider;
+    QLabel  *m_extrudeDistLabel;
+    QSlider *m_extrudeScaleSlider;
+    QLabel  *m_extrudeScaleLabel;
+    QCheckBox *m_extrudeRemoveBase;
+    QPushButton *m_extrudeBtn;
     
     void onPrimitiveChanged(int index);
     void onPrimParam1Changed(int value);
     void onPrimParam2Changed(int value);
     void onPrimParam3Changed(int value);
     void onGenerateMesh();
+
+    // Cached last generated mesh in app vertex/index format
+    std::vector<Vertex> m_lastVertices;
+    std::vector<uint32_t> m_lastIndices;
+    
+    // Persistent mesh for advanced operations
+    SurfaceMesh m_currentMesh;
 };

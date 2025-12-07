@@ -11,9 +11,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(OPENMESH_ROOT "/home/geotyper/CPP_lib/OpenMesh" CACHE PATH "Path to OpenMesh checkout/build")
-list(APPEND CMAKE_PREFIX_PATH "${OPENMESH_ROOT}/build" "${OPENMESH_ROOT}/build/Build")
-find_package(OpenMesh REQUIRED CONFIG)
 find_package(Boost REQUIRED)
 
 #--------------------------------- Find CGAL ---------------------------------#
@@ -34,6 +31,13 @@ set(PROJECT_SOURCES
     src/HelpStructures.h
     src/GeomCreate.h
     src/GeomCreate.cpp
+    src/CgalMeshBuilder.h
+    src/CgalMeshTypes.h
+    src/CgalMeshPrimitives.cpp
+    src/CgalMeshOperations.cpp
+    src/CgalMeshTriangulation.cpp
+    src/CgalMeshBuilderTentacles.h
+    src/CgalMeshBuilderTentacles.cpp
     resources.qrc
 )
 
@@ -45,17 +49,12 @@ target_link_libraries(ColorMoveArt2 PRIVATE
     Qt6::Widgets
     Qt6::OpenGL
     Qt6::OpenGLWidgets
-    OpenMeshCore
-    OpenMeshTools
     Boost::headers
+    CGAL::CGAL
 )
 
 target_include_directories(ColorMoveArt2 PRIVATE
     /home/geotyper/CPP_lib/glm
-)
-
-set_target_properties(ColorMoveArt2 PROPERTIES
-    BUILD_RPATH "${OPENMESH_ROOT}/build/Build/lib"
 )
 
 # Copy art_source to build directory

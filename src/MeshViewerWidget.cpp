@@ -8,14 +8,46 @@
 #include <QVector4D>
 #include <QtMath>
 #include <cmath>
+#include <array>
 #include <QDebug>
 #include <QOpenGLContext>
 #include <limits>
 #include <algorithm>
+#include <map>
 
 // We need boost geometry specifics here too if not fully in header
 namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
+
+namespace {
+using SurfaceMesh = CgalMeshTypes::SurfaceMesh;
+using FaceIndex = CgalMeshTypes::F;
+using VertexIndex = CgalMeshTypes::V;
+using Point_3 = CgalMeshTypes::Point_3;
+
+inline glm::vec3 toGlm(const Point_3& p) {
+    return glm::vec3(static_cast<float>(p.x()), static_cast<float>(p.y()), static_cast<float>(p.z()));
+}
+
+struct FaceData {
+    std::array<VertexIndex, 3> verts;
+    std::array<glm::vec3, 3> positions;
+};
+
+bool fetchFaceData(const SurfaceMesh& mesh, FaceIndex f, FaceData& out) {
+    if (f == SurfaceMesh::null_face()) return false;
+    auto h = mesh.halfedge(f);
+    if (h == SurfaceMesh::null_halfedge()) return false;
+    size_t i = 0;
+    for (auto v : mesh.vertices_around_face(h)) {
+        if (i >= 3) break;
+        out.verts[i] = v;
+        out.positions[i] = toGlm(mesh.point(v));
+        ++i;
+    }
+    return i == 3;
+}
+} // namespace
 
 MeshViewerWidget::MeshViewerWidget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -154,8 +186,9 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
     m_mesh.clear();
     m_vertices.clear();
     m_surfaceAgents.clear();
+    m_faceNormals.clear();
+    m_vertexNormals.clear();
     
-    // 1. Add Vertices to OpenMesh (deduplicating)
     struct VertexKey {
         long long x, y, z;
         bool operator<(const VertexKey& o) const {
@@ -166,20 +199,8 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
     };
     
     const float quant = 100000.0f;
-    std::map<VertexKey, MyMesh::VertexHandle> uniqueVertices;
-    std::vector<MyMesh::VertexHandle> indexToHandle;
-    // indexToHandle size based on max index in indices? Or do we assume vertices are indexed 0..N-1?
-    // The input 'vertices' is a list of unique vertices (usually), or raw list? 
-    // GeomCreate functions return 'outVertices' and 'outIndices'. 
-    // 'outIndices' refer to 'outVertices'.
-    
-    // Actually, GeomCreate functions generate vertices and indices.
-    // Ideally we just add them. 
-    // BUT, some generators (like hexsphere or low poly) might duplicate vertices for flat shading or seam texturing?
-    // OpenMesh needs shared vertices for connectivity. 
-    // So we MUST weld vertices based on position if we want agents to move across faces smoothly.
-    
-    indexToHandle.resize(vertices.size());
+    std::map<VertexKey, VertexIndex> uniqueVertices;
+    std::vector<VertexIndex> indexToHandle(vertices.size());
     
     for(size_t i = 0; i < vertices.size(); ++i) {
         const auto& v = vertices[i];
@@ -192,57 +213,50 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         if (it != uniqueVertices.end()) {
             indexToHandle[i] = it->second;
         } else {
-            // Note: VertexData uses glm::vec3, Vertex uses glm::vec4. 
-            MyMesh::VertexHandle vh = m_mesh.add_vertex(MyMesh::Point(v.position.x, v.position.y, v.position.z));
+            VertexIndex vh = m_mesh.add_vertex(Point_3(v.position.x, v.position.y, v.position.z));
             uniqueVertices[key] = vh;
             indexToHandle[i] = vh;
         }
     }
     
-    // 2. Add Faces
-    for(size_t i = 0; i < indices.size(); i += 3) {
-        if (i + 2 >= indices.size()) break;
+    for(size_t i = 0; i + 2 < indices.size(); i += 3) {
         uint32_t idx0 = indices[i];
         uint32_t idx1 = indices[i+1];
         uint32_t idx2 = indices[i+2];
         
-        std::vector<MyMesh::VertexHandle> face_vhandles;
-        auto vh0 = indexToHandle[idx0];
-        auto vh1 = indexToHandle[idx1];
-        auto vh2 = indexToHandle[idx2];
+        VertexIndex vh0 = indexToHandle[idx0];
+        VertexIndex vh1 = indexToHandle[idx1];
+        VertexIndex vh2 = indexToHandle[idx2];
 
-        // Skip degenerate triangles (duplicate vertices after welding)
         if (vh0 == vh1 || vh1 == vh2 || vh2 == vh0) continue;
 
-        face_vhandles.push_back(vh0);
-        face_vhandles.push_back(vh1);
-        face_vhandles.push_back(vh2);
-        auto fh = m_mesh.add_face(face_vhandles);
-        if (!fh.is_valid()) {
+        FaceIndex fh = m_mesh.add_face(vh0, vh1, vh2);
+        if (fh == SurfaceMesh::null_face()) {
             qDebug() << "Skipped invalid face (maybe non-manifold or duplicate edge)" << idx0 << idx1 << idx2;
         }
     }
     
-    m_mesh.request_face_normals();
-    m_mesh.request_vertex_normals();
-    m_mesh.update_normals();
-    
-    // 3. Build Rendering Buffer & R-Tree
     m_rtree.clear();
-    m_vertices.reserve(m_mesh.n_faces() * 3);
+    m_vertices.reserve(m_mesh.number_of_faces() * 3);
+    m_faceNormals.assign(m_mesh.number_of_faces(), glm::vec3(0.0f));
+    m_vertexNormals.assign(m_mesh.number_of_vertices(), glm::vec3(0.0f));
     
-    for (auto f_it = m_mesh.faces_begin(); f_it != m_mesh.faces_end(); ++f_it) {
-        auto fv_it = m_mesh.fv_iter(*f_it);
-        auto p0 = m_mesh.point(*fv_it);
-        auto p1 = m_mesh.point(*(++fv_it));
-        auto p2 = m_mesh.point(*(++fv_it));
+    for (auto f : m_mesh.faces()) {
+        if (m_mesh.is_removed(f)) continue;
+        FaceData fd;
+        if (!fetchFaceData(m_mesh, f, fd)) continue;
         
-        glm::vec3 v0(p0[0], p0[1], p0[2]);
-        glm::vec3 v1(p1[0], p1[1], p1[2]);
-        glm::vec3 v2(p2[0], p2[1], p2[2]);
+        glm::vec3 v0 = fd.positions[0];
+        glm::vec3 v1 = fd.positions[1];
+        glm::vec3 v2 = fd.positions[2];
         
-            glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0)); // Flat shading normal
-            if (!std::isfinite(n.x) || !std::isfinite(n.y) || !std::isfinite(n.z)) continue;
+        glm::vec3 n = -glm::normalize(glm::cross(v1 - v0, v2 - v0)); // Flip normal to face outward
+        if (!std::isfinite(n.x) || !std::isfinite(n.y) || !std::isfinite(n.z)) continue;
+        
+        m_faceNormals[f.idx()] = n;
+        m_vertexNormals[fd.verts[0].idx()] += n;
+        m_vertexNormals[fd.verts[1].idx()] += n;
+        m_vertexNormals[fd.verts[2].idx()] += n;
         
         m_vertices.push_back({v0, n});
         m_vertices.push_back({v1, n});
@@ -256,7 +270,13 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         float maxZ = std::max({v0.z, v1.z, v2.z});
         
         BoostBox box(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
-        m_rtree.insert(std::make_pair(box, f_it->idx()));
+        m_rtree.insert(std::make_pair(box, f.idx()));
+    }
+    
+    for (auto& n : m_vertexNormals) {
+        float len2 = glm::dot(n, n);
+        if (len2 > 1e-12f) n = glm::normalize(n);
+        else n = glm::vec3(0.0f, 1.0f, 0.0f);
     }
     
     m_vertexCount = static_cast<int>(m_vertices.size());
@@ -365,17 +385,12 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     
     for (const auto &val : result) {
         int f_idx = val.second;
-        OpenMesh::FaceHandle f(f_idx);
-        
-        auto fv = m_mesh.fv_range(f);
-        auto it = fv.begin();
-        auto p0 = m_mesh.point(*it);
-        auto p1 = m_mesh.point(*(++it));
-        auto p2 = m_mesh.point(*(++it));
-        
-        glm::vec3 v0(p0[0], p0[1], p0[2]);
-        glm::vec3 v1(p1[0], p1[1], p1[2]);
-        glm::vec3 v2(p2[0], p2[1], p2[2]);
+        FaceIndex f(f_idx);
+        FaceData fd;
+        if (!fetchFaceData(m_mesh, f, fd)) continue;
+        glm::vec3 v0 = fd.positions[0];
+        glm::vec3 v1 = fd.positions[1];
+        glm::vec3 v2 = fd.positions[2];
         
         float t, u, v;
         if (rayTriangleIntersect(rayOrigWorld, rayDirWorld, v0, v1, v2, t, u, v)) {
@@ -385,8 +400,7 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
                 newAgent.face = f;
                 newAgent.bary = glm::vec3(1.0f - u - v, u, v);
                 
-                // Calculate random tangent
-                glm::vec3 n = glm::normalize(glm::cross(v1-v0, v2-v0));
+                glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
                 
                 // Random vector not parallel to n
                 float rx = (float)std::rand() / RAND_MAX - 0.5f;
@@ -469,24 +483,21 @@ void MeshViewerWidget::updateAgents() {
                  break; 
             }
 
-            if (!agent.face.is_valid()) {
+            if (agent.face == SurfaceMesh::null_face()) {
                 qDebug() << "Agent" << agentId << "has invalid face!";
                 break;
             }
 
-            auto fv = m_mesh.fv_range(agent.face);
-            auto it = fv.begin();
-            // Safety check for degenerate faces
-            if (it == fv.end()) { qDebug() << "Agent" << agentId << "degenerate face 0"; agent.face = OpenMesh::FaceHandle(); break; }
-            auto p0 = m_mesh.point(*it);
-            if (++it == fv.end()) { qDebug() << "Agent" << agentId << "degenerate face 1"; agent.face = OpenMesh::FaceHandle(); break; }
-            auto p1 = m_mesh.point(*it);
-            if (++it == fv.end()) { qDebug() << "Agent" << agentId << "degenerate face 2"; agent.face = OpenMesh::FaceHandle(); break; }
-            auto p2 = m_mesh.point(*it);
+            FaceData fd;
+            if (!fetchFaceData(m_mesh, agent.face, fd)) {
+                qDebug() << "Agent" << agentId << "degenerate face";
+                agent.face = SurfaceMesh::null_face();
+                break;
+            }
             
-            glm::vec3 v0(p0[0], p0[1], p0[2]);
-            glm::vec3 v1(p1[0], p1[1], p1[2]);
-            glm::vec3 v2(p2[0], p2[1], p2[2]);
+            glm::vec3 v0 = fd.positions[0];
+            glm::vec3 v1 = fd.positions[1];
+            glm::vec3 v2 = fd.positions[2];
             
             glm::vec3 faceNormal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
             glm::vec3 baryVel = solveBarycentricVelocity(agent.worldVelocity, v0, v1, v2);
@@ -535,44 +546,34 @@ void MeshViewerWidget::updateAgents() {
             remainingTime -= minT;
             
             if (hitIndex != -1) {
-                // Determine edge indices
-                auto fv_it2 = m_mesh.fv_iter(agent.face);
-                auto vh0 = *fv_it2;
-                auto vh1 = *(++fv_it2);
-                auto vh2 = *(++fv_it2);
+                VertexIndex va, vb;
+                if (hitIndex == 0) { va = fd.verts[1]; vb = fd.verts[2]; } 
+                if (hitIndex == 1) { va = fd.verts[2]; vb = fd.verts[0]; } 
+                if (hitIndex == 2) { va = fd.verts[0]; vb = fd.verts[1]; } 
                 
-                MyMesh::VertexHandle va, vb;
-                // Correct logic for OpenMesh fv_iter order matches bary order?
-                // bary[0] -> v0, bary[1] -> v1, bary[2] -> v2.
-                // If bary[0] hits 0, we are on edge v1-v2.
-                if (hitIndex == 0) { va = vh1; vb = vh2; } 
-                if (hitIndex == 1) { va = vh2; vb = vh0; } 
-                if (hitIndex == 2) { va = vh0; vb = vh1; } 
-                
-                // Robust edge traversal: find the undirected edge and pick the opposite face even if winding differs.
-                OpenMesh::HalfedgeHandle heForward = m_mesh.find_halfedge(va, vb);
-                OpenMesh::HalfedgeHandle heBackward = m_mesh.find_halfedge(vb, va);
-                OpenMesh::FaceHandle f0, f1;
-                if (heForward.is_valid()) f0 = m_mesh.face_handle(heForward);
-                if (heBackward.is_valid()) f1 = m_mesh.face_handle(heBackward);
+                SurfaceMesh::Face_index nextFace = SurfaceMesh::null_face();
+                auto hStart = m_mesh.halfedge(agent.face);
+                for (auto he : m_mesh.halfedges_around_face(hStart)) {
+                    auto from = m_mesh.source(he);
+                    auto to = m_mesh.target(he);
+                    if ((from == va && to == vb) || (from == vb && to == va)) {
+                        auto heUse = (from == va && to == vb) ? he : m_mesh.opposite(he);
+                        nextFace = m_mesh.face(m_mesh.opposite(heUse));
+                        break;
+                    }
+                }
 
-                OpenMesh::FaceHandle nextFace;
-                if (f0 == agent.face && f1.is_valid()) nextFace = f1;
-                else if (f1 == agent.face && f0.is_valid()) nextFace = f0;
-                else if (f0.is_valid() && f1.is_valid()) nextFace = (f0 == agent.face) ? f1 : f0;
-
-                if (nextFace.is_valid()) {
+                if (nextFace != SurfaceMesh::null_face() && !m_mesh.is_removed(nextFace)) {
                     agent.face = nextFace;
 
-                    // Recompute physics on new face
-                    auto nfv = m_mesh.fv_range(agent.face);
-                    auto nit = nfv.begin();
-                    auto np0 = m_mesh.point(*nit);
-                    auto np1 = m_mesh.point(*(++nit));
-                    auto np2 = m_mesh.point(*(++nit));
-                    glm::vec3 nv0(np0[0], np0[1], np0[2]);
-                    glm::vec3 nv1(np1[0], np1[1], np1[2]);
-                    glm::vec3 nv2(np2[0], np2[1], np2[2]);
+                    FaceData nd;
+                    if (!fetchFaceData(m_mesh, agent.face, nd)) {
+                        agent.face = SurfaceMesh::null_face();
+                        break;
+                    }
+                    glm::vec3 nv0 = nd.positions[0];
+                    glm::vec3 nv1 = nd.positions[1];
+                    glm::vec3 nv2 = nd.positions[2];
                     
                     glm::vec3 ne1 = nv1 - nv0;
                     glm::vec3 ne2 = nv2 - nv0;
@@ -598,7 +599,7 @@ void MeshViewerWidget::updateAgents() {
                     // Rotate velocity across the hinge to preserve direction across the edge.
                     auto vaPos = m_mesh.point(va);
                     auto vbPos = m_mesh.point(vb);
-                    glm::vec3 edgeDir = glm::normalize(glm::vec3(vbPos[0] - vaPos[0], vbPos[1] - vaPos[1], vbPos[2] - vaPos[2]));
+                    glm::vec3 edgeDir = glm::normalize(toGlm(vbPos) - toGlm(vaPos));
 
                     glm::vec3 newNormal = glm::normalize(glm::cross(ne1, ne2));
                     float cosAng = std::clamp(glm::dot(faceNormal, newNormal), -1.0f, 1.0f);
@@ -625,15 +626,12 @@ void MeshViewerWidget::updateAgents() {
 }
 
 glm::vec3 MeshViewerWidget::getAgentWorldPos(const SurfaceAgent &agent) {
-    if (!agent.face.is_valid()) return glm::vec3(0.0f);
-    auto fv = m_mesh.fv_range(agent.face);
-    auto it = fv.begin();
-    auto p0 = m_mesh.point(*it);
-    auto p1 = m_mesh.point(*(++it));
-    auto p2 = m_mesh.point(*(++it));
-    glm::vec3 v0(p0[0], p0[1], p0[2]);
-    glm::vec3 v1(p1[0], p1[1], p1[2]);
-    glm::vec3 v2(p2[0], p2[1], p2[2]);
+    if (agent.face == SurfaceMesh::null_face()) return glm::vec3(0.0f);
+    FaceData fd;
+    if (!fetchFaceData(m_mesh, agent.face, fd)) return glm::vec3(0.0f);
+    glm::vec3 v0 = fd.positions[0];
+    glm::vec3 v1 = fd.positions[1];
+    glm::vec3 v2 = fd.positions[2];
     return v0 * agent.bary.x + v1 * agent.bary.y + v2 * agent.bary.z;
 }
 
@@ -674,18 +672,17 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
 
     auto computeNormal = [&](const SurfaceAgent& agentRef, const glm::vec3& fallbackPos) -> glm::vec3 {
         glm::vec3 normal = glm::normalize(fallbackPos); // fallback
-        if (agentRef.face.is_valid()) {
-            auto fv_norm_it = m_mesh.fv_iter(agentRef.face);
-            auto np0 = m_mesh.normal(*fv_norm_it);
-            auto np1 = m_mesh.normal(*(++fv_norm_it));
-            auto np2 = m_mesh.normal(*(++fv_norm_it));
-            glm::vec3 nv0(np0[0], np0[1], np0[2]);
-            glm::vec3 nv1(np1[0], np1[1], np1[2]);
-            glm::vec3 nv2(np2[0], np2[1], np2[2]);
-            glm::vec3 bary = agentRef.bary;
-            normal = nv0 * bary.x + nv1 * bary.y + nv2 * bary.z;
-            if (!std::isfinite(normal.x) || !std::isfinite(normal.y) || !std::isfinite(normal.z) || glm::dot(normal, normal) < 1e-10f) {
-                normal = glm::normalize(fallbackPos);
+        if (agentRef.face != SurfaceMesh::null_face()) {
+            FaceData fd;
+            if (fetchFaceData(m_mesh, agentRef.face, fd)) {
+                glm::vec3 nv0 = m_vertexNormals[fd.verts[0].idx()];
+                glm::vec3 nv1 = m_vertexNormals[fd.verts[1].idx()];
+                glm::vec3 nv2 = m_vertexNormals[fd.verts[2].idx()];
+                glm::vec3 bary = agentRef.bary;
+                normal = nv0 * bary.x + nv1 * bary.y + nv2 * bary.z;
+                if (!std::isfinite(normal.x) || !std::isfinite(normal.y) || !std::isfinite(normal.z) || glm::dot(normal, normal) < 1e-10f) {
+                    normal = glm::normalize(fallbackPos);
+                }
             }
         }
         // Rotate normal with the same model transform as the 3D view.

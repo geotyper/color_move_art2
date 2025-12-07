@@ -12,14 +12,7 @@
 #include <QKeyEvent>
 #include "HelpStructures.h"
 
-// ... existing includes ...
-
-
-
-#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
-
-#include <OpenMesh/Core/IO/MeshIO.hh> // New include
-#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh> // Already present, but instruction had it again. Keeping it as is.
+#include "CgalMeshTypes.h"
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
@@ -42,10 +35,12 @@ typedef bg::model::box<BoostPoint> BoostBox;
 // We store int index because FaceHandle is not trivially movable/copyable across all versions or simpler to just debug with int
 typedef std::pair<BoostBox, int> BoostValue;
 
-typedef OpenMesh::TriMesh_ArrayKernelT<> MyMesh;
+using SurfaceMesh = CgalMeshTypes::SurfaceMesh;
+using FaceIndex  = CgalMeshTypes::F;
+using VertexIndex = CgalMeshTypes::V;
 
 struct SurfaceAgent {
-    OpenMesh::FaceHandle face;
+    FaceIndex face = SurfaceMesh::null_face();
     glm::vec3 bary; // u, v, w
     glm::vec3 worldVelocity; // Tangent vector in World Space
     float speed; // Scalar speed
@@ -102,8 +97,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    // using Mesh = OpenMesh::TriMesh_ArrayKernelT<>; // Removed as per instruction
-
     // struct Vertex { // Renamed to VertexData and moved
     //     QVector3D position;
     //     QVector3D normal;
@@ -132,7 +125,9 @@ private:
     glm::vec3 m_lightDir = glm::normalize(glm::vec3(0.3f, 0.7f, 0.4f));
     float m_cameraDistance = 5.0f; // Modified value
     
-    MyMesh m_mesh; // New member
+    SurfaceMesh m_mesh; // New member
+    std::vector<glm::vec3> m_faceNormals;
+    std::vector<glm::vec3> m_vertexNormals;
     std::vector<SurfaceAgent> m_surfaceAgents; // New member
     int m_agentLifetime = 1000;
     bool m_agentsPaused = false;
