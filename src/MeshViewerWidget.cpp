@@ -9,6 +9,7 @@
 #include <QtMath>
 #include <cmath>
 #include <QDebug>
+#include <QOpenGLContext>
 #include <limits>
 #include <algorithm>
 
@@ -65,16 +66,19 @@ void MeshViewerWidget::initializeGL()
     if (!m_program.link())
         qDebug() << "Link error:" << m_program.log();
         
-    // Create Sphere
-    buildSphere();
-    
-    // VAO/VBO
+    // Create VAO/VBO first so buildSphere (which calls updateMesh) works
     m_vao.create();
     m_vao.bind();
     
     m_vbo.create();
     m_vbo.bind();
-    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(VertexData));
+    // No allocate yet, updateMesh will do it
+    
+    // Create Sphere
+    buildSphere(); 
+    
+    // VBO was released by updateMesh, so we must rebind it for setAttributeBuffer!
+    m_vbo.bind();
     
     // Position (Loc 0)
     m_program.enableAttributeArray(0);
@@ -87,7 +91,7 @@ void MeshViewerWidget::initializeGL()
     m_vao.release();
     
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE); // Debug: Disable culling to see if winding is wrong
 }
 
 void MeshViewerWidget::resizeGL(int w, int h)
@@ -146,6 +150,7 @@ void MeshViewerWidget::paintGL()
 
 void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
 {
+    qDebug() << "updateMesh called with" << vertices.size() << "vertices and" << indices.size() << "indices";
     m_mesh.clear();
     m_vertices.clear();
     m_surfaceAgents.clear();
@@ -243,13 +248,26 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
     }
     
     m_vertexCount = static_cast<int>(m_vertices.size());
+    qDebug() << "updateMesh finished. Generated" << m_vertexCount << "render vertices.";
     
     // Update VBO
-    makeCurrent();
-    m_vbo.bind();
-    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(VertexData));
-    m_vbo.release();
-    doneCurrent();
+    QOpenGLContext* ctx = context();
+    const bool needsMakeCurrent = ctx && QOpenGLContext::currentContext() != ctx;
+    if (needsMakeCurrent) {
+        makeCurrent();
+    }
+
+    if (QOpenGLContext::currentContext() == ctx) {
+        m_vbo.bind();
+        m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(VertexData));
+        m_vbo.release();
+    } else {
+        qWarning() << "updateMesh: no current GL context, skipping VBO upload";
+    }
+
+    if (needsMakeCurrent) {
+        doneCurrent();
+    }
     
     update();
 }
