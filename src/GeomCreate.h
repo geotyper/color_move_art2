@@ -1,0 +1,46 @@
+#pragma once
+
+#include <vulkan/vulkan.h>
+#include <vector>
+#include <glm/glm.hpp>
+#include "HelpStructures.h"
+#define GLM_ENABLE_EXPERIMENTAL
+
+class GeomCreate {
+public:
+    // === Sphere Generators ===
+
+    // UV Sphere (latitude-longitude grid)
+    static void createUVSphere(uint32_t latDiv, uint32_t lonDiv,
+                               std::vector<Vertex>& outVertices,
+                               std::vector<uint32_t>& outIndices);
+
+    // Icosphere (based on subdivided icosahedron)
+    static void createIcosphere(uint32_t subdivisions,
+                                std::vector<Vertex>& outVertices,
+                                std::vector<uint32_t>& outIndices);
+
+    // Hardcoded low-poly sphere for testing
+    static void createLowPolySphere(
+        std::vector<Vertex>& outVertices,
+        std::vector<uint32_t>& outIndices);
+
+    static VkVertexInputBindingDescription getBindingDescription2();
+    static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions2();
+
+    static void createCube(std::vector<Vertex> &outVertices, std::vector<uint32_t> &outIndices);
+    static void createCube2(std::vector<Vertex> &outVertices, std::vector<uint32_t> &outIndices);
+    static void createCube3(std::vector<Vertex> &outVertices, std::vector<uint32_t> &outIndices);
+    static void createCubeGrid(std::vector<Vertex> &outVertices, std::vector<uint32_t> &outIndices, int N);
+    static void createHollowCube(std::vector<Vertex> &outVertices, std::vector<uint32_t> &outIndices, int N, float holeSize);
+    static void createCubeWithSquareHole(std::vector<Vertex> &outVertices, std::vector<uint32_t> &outIndices, int N, float holeScale);
+    static void createCubeCenterHole(std::vector<Vertex> &outVertices, std::vector<uint32_t> &outIndices, int N, int holeCells);
+
+    // Creates a hexsphere (dual of subdivided icosahedron)
+    // resolution: number of subdivisions
+    // radius: sphere radius
+    // center: center position (usually 0,0,0)
+    // up: up vector for orientation
+    // seamRotate: rotation around up vector
+    static void createHexSphere(int resolution, float radius, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices);
+};

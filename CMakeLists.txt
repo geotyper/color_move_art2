@@ -27,6 +27,9 @@ set(PROJECT_SOURCES
     src/AgentProjectionWindow.cpp
     src/AgentProjectionWindow.h
     src/Noise2D.h
+    src/HelpStructures.h
+    src/GeomCreate.h
+    src/GeomCreate.cpp
     resources.qrc
 )
 

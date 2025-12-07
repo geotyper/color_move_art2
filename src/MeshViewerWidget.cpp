@@ -1,4 +1,5 @@
 #include "MeshViewerWidget.h"
+#include "GeomCreate.h"
 #include <QMatrix4x4>
 #include <QMouseEvent>
 #include <QRandomGenerator>
@@ -149,61 +150,80 @@ void MeshViewerWidget::buildSphere()
     m_vertices.clear();
     m_surfaceAgents.clear();
     
-    constexpr float pi = 3.14159265359f;
-    const int slices = 32;
-    const int stacks = 32;
-    const float radius = 1.0f;
+    // Generate HexSphere geometry
+    // Resolution = 2, Radius = 1.0f
+    std::vector<Vertex> rawVertices;
+    std::vector<uint32_t> rawIndices;
+    GeomCreate::createHexSphere(2, 1.0f, rawVertices, rawIndices);
     
-    // 1. Create Vertices
-    MyMesh::VertexHandle v_north = m_mesh.add_vertex(MyMesh::Point(0, 0, radius));
+    // Convert to VertexData format for VBO
+    // (Vertex struct in GeomCreate matches VertexData conceptually, but maybe field names/types match?)
+    // Checking HelpStructures.h: Vertex has vec4 position, vec4 normal, vec4 color
+    // MeshViewerWidget::VertexData has vec3 position, vec3 normal.
+    // Need to convert.
+
+    m_vertices.reserve(rawIndices.size()); // We will unpack indices to triangles for GL_TRIANGLES
     
-    // Rings
-    std::vector<std::vector<MyMesh::VertexHandle>> rings;
-    for (int i = 1; i < stacks; ++i) { // Stacks 1 to N-1
-        float lat = pi * (-0.5f + (float)i / stacks);
-        float z = std::sin(lat);
-        float zr = std::cos(lat);
+    // Also Populate OpenMesh for agent simulation logic
+    // The HexSphere generator outputs a triangulated fan for each hex face.
+    // We need to rebuild an OpenMesh from this for the agents to work (raycast, neighbors).
+    // Or, we can just feed the triangles into OpenMesh.
+    
+    // 1. Add Vertices to OpenMesh (deduplicating)
+    // The HexSphere generator outputs duplicated vertices at face boundaries (since each hexagon generates its own perimeter).
+    // We must weld them to ensure valid OpenMesh topology.
+    
+    struct VertexKey {
+        long long x, y, z;
+        bool operator<(const VertexKey& o) const {
+            if (x != o.x) return x < o.x;
+            if (y != o.y) return y < o.y;
+            return z < o.z;
+        }
+    };
+    
+    // Multiplier for quantization (e.g., 5 decimals precision)
+    const float quant = 100000.0f;
+    
+    std::map<VertexKey, MyMesh::VertexHandle> uniqueVertices;
+    std::vector<MyMesh::VertexHandle> indexToHandle;
+    indexToHandle.resize(rawVertices.size());
+    
+    for(size_t i = 0; i < rawVertices.size(); ++i) {
+        const auto& v = rawVertices[i];
+        VertexKey key;
+        key.x = static_cast<long long>(std::round(v.position.x * quant));
+        key.y = static_cast<long long>(std::round(v.position.y * quant));
+        key.z = static_cast<long long>(std::round(v.position.z * quant));
         
-        std::vector<MyMesh::VertexHandle> ring;
-        for (int j = 0; j < slices; ++j) {
-            float lng = 2 * pi * (float)j / slices;
-            float x = zr * std::cos(lng);
-            float y = zr * std::sin(lng);
-            ring.push_back(m_mesh.add_vertex(MyMesh::Point(x * radius, y * radius, z * radius)));
-        }
-        rings.push_back(ring);
-    }
-    
-    MyMesh::VertexHandle v_south = m_mesh.add_vertex(MyMesh::Point(0, 0, -radius));
-    
-    // 2. Create Faces
-    // Top Cap
-    for (int i = 0; i < slices; ++i) {
-        m_mesh.add_face(v_north, rings.back()[i], rings.back()[(i + 1) % slices]);
-    }
-    
-    // Middle
-    for (int i = 0; i < stacks - 2; ++i) {
-        for (int j = 0; j < slices; ++j) {
-            MyMesh::VertexHandle next_j = rings[i][(j + 1) % slices];
-            MyMesh::VertexHandle next_row_j = rings[i + 1][j];
-            MyMesh::VertexHandle next_row_next_j = rings[i + 1][(j + 1) % slices];
-            
-            // CCW: Current, Right, Up
-            m_mesh.add_face(rings[i][j], next_j, next_row_j);
-            m_mesh.add_face(next_j, next_row_next_j, next_row_j);
+        auto it = uniqueVertices.find(key);
+        if (it != uniqueVertices.end()) {
+            indexToHandle[i] = it->second;
+        } else {
+            MyMesh::VertexHandle vh = m_mesh.add_vertex(MyMesh::Point(v.position.x, v.position.y, v.position.z));
+            uniqueVertices[key] = vh;
+            indexToHandle[i] = vh;
         }
     }
     
-    // Bottom Cap
-    for (int i = 0; i < slices; ++i) {
-        m_mesh.add_face(rings[0][i], v_south, rings[0][(i + 1) % slices]);
+    // 2. Add Faces to OpenMesh using unique handles
+    for(size_t i = 0; i < rawIndices.size(); i += 3) {
+        uint32_t idx0 = rawIndices[i];
+        uint32_t idx1 = rawIndices[i+1];
+        uint32_t idx2 = rawIndices[i+2];
+        
+        std::vector<MyMesh::VertexHandle> face_vhandles;
+        face_vhandles.push_back(indexToHandle[idx0]);
+        face_vhandles.push_back(indexToHandle[idx1]);
+        face_vhandles.push_back(indexToHandle[idx2]);
+        m_mesh.add_face(face_vhandles);
     }
     
     m_mesh.request_face_normals();
     m_mesh.update_normals();
     
-    // 3. Build Rendering Data
+    // 3. Build m_vertices for Rendering (and R-Tree)
+    // We can reuse the same logic as the old buildSphere: iterate mesh faces
     m_rtree.clear();
     
     for (auto f_it = m_mesh.faces_begin(); f_it != m_mesh.faces_end(); ++f_it) {
@@ -216,6 +236,9 @@ void MeshViewerWidget::buildSphere()
         glm::vec3 v0(p0[0], p0[1], p0[2]);
         glm::vec3 v1(p1[0], p1[1], p1[2]);
         glm::vec3 v2(p2[0], p2[1], p2[2]);
+        
+        // Use Face Normal for flat shading look, or vertex normals?
+        // Old code calculated face normal.
         glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
         
         m_vertices.push_back({v0, n});
