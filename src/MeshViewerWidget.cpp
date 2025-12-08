@@ -650,8 +650,8 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
        qDebug() << "Agent[0] World" << getAgentWorldPos(m_surfaceAgents[0]).x << getAgentWorldPos(m_surfaceAgents[0]).y << getAgentWorldPos(m_surfaceAgents[0]).z;
     }
 
-    // Use MeshViewer's own aspect ratio to match the 3D view exactly
-    float aspect = width() > 0 ? (float)width() / (float)height() : 1.0f;
+    // Use caller-provided viewport size to match AgentProjectionWindow
+    float aspect = viewWidth > 0 ? (float)viewWidth / (float)viewHeight : 1.0f;
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
     
     glm::mat4 mv = view * model;
@@ -705,9 +705,13 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         AgentRenderInfo info;
         info.screenPos = project(pos);
         info.color = agent.color;
-        info.isVisible = isVisible(pos);
-        info.layer = agent.layer;
         glm::vec3 normalWorld = computeNormal(agent, pos);
+        
+        // Backface culling: Check if normal points towards camera (View Space +Z)
+        bool isFrontFacing = normalWorld.z > -0.1f; // Small bias to prevent popping
+        info.isVisible = isVisible(pos) && isFrontFacing;
+        
+        info.layer = agent.layer;
         info.headBrightness = lambert(normalWorld);
         
         std::vector<QVector2D> currentSegment;

@@ -46,7 +46,7 @@ void AgentProjectionWindow::resizeEvent(QResizeEvent *event)
 {
     if (width() > 0 && height() > 0) {
         m_canvas = QImage(size(), QImage::Format_ARGB32_Premultiplied);
-        m_canvas.fill(Qt::black);
+        m_canvas.fill(QColor::fromRgbF(0.2f, 0.2f, 0.25f));
     }
     QWidget::resizeEvent(event);
 }
@@ -78,24 +78,44 @@ void AgentProjectionWindow::updateAgents()
     // m_meshViewer->updateAgents(); // Handled by MeshViewerWidget's timer
     
     // Render Step
-    m_canvas.fill(Qt::black);
+    m_canvas.fill(QColor::fromRgbF(0.2f, 0.2f, 0.25f));
     QPainter painter(&m_canvas);
+    painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setPen(Qt::NoPen);
     
-    auto projected = m_meshViewer->getProjectedAgents(width(), height());
+    int viewW = m_meshViewer->width();
+    int viewH = m_meshViewer->height();
+    if (viewW <= 0 || viewH <= 0) {
+        update();
+        return;
+    }
+    auto projected = m_meshViewer->getProjectedAgents(viewW, viewH);
+    const float scale = std::min(width()  / float(viewW),
+                                 height() / float(viewH));
+    const float ox = 0.5f * (width()  - viewW * scale);
+    const float oy = 0.5f * (height() - viewH * scale);
     
     for (const auto &p : projected) {
         // Draw Trail Segments
         QColor trailColor = p.color;
-        trailColor.setAlpha(150);
+        // Apply brightness factor per point if provided
         painter.setPen(QPen(trailColor, 1));
         painter.setBrush(Qt::NoBrush);
         
-        for (const auto &segment : p.trailSegments) {
+        for (size_t si = 0; si < p.trailSegments.size(); ++si) {
+            const auto &segment = p.trailSegments[si];
+            const auto &bright  = (si < p.trailBrightness.size()) ? p.trailBrightness[si] : std::vector<float>();
             if (segment.size() > 1) {
                 QPolygonF poly;
-                for (const auto &tp : segment) {
-                    poly << QPointF(tp.x(), height() - tp.y());
+                for (size_t ti = 0; ti < segment.size(); ++ti) {
+                    const auto &tp = segment[ti];
+                    float b = (ti < bright.size()) ? bright[ti] : 1.0f;
+                    QColor segCol = trailColor;
+                    float alpha = 0.55f + 0.45f * b;
+                    segCol.setAlphaF(std::clamp(alpha, 0.0f, 1.0f));
+                    painter.setPen(QPen(segCol, 1));
+                    poly << QPointF(ox + tp.x() * scale,
+                                     height() - (oy + tp.y() * scale));
                 }
                 painter.drawPolyline(poly);
             }
@@ -104,8 +124,13 @@ void AgentProjectionWindow::updateAgents()
         // Draw Head
         if (p.isVisible) {
             painter.setPen(Qt::NoPen);
-            painter.setBrush(p.color);
-            painter.drawEllipse(QPointF(p.screenPos.x(), height() - p.screenPos.y()), 2, 2);
+            QColor head = p.color;
+            // Softer shadow falloff: keep a higher minimum
+            float alpha = 0.6f + 0.4f * std::clamp(p.headBrightness, 0.0f, 1.0f);
+            head.setAlphaF(alpha);
+            painter.setBrush(head);
+            painter.drawEllipse(QPointF(ox + p.screenPos.x() * scale,
+                                        height() - (oy + p.screenPos.y() * scale)), 2, 2);
         }
     }
     

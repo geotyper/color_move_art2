@@ -214,6 +214,126 @@ src/AgentProjectionWindow.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.s
 .PHONY : src/AgentProjectionWindow.cpp.s
 
+src/CgalMeshBuilderTentacles.o: src/CgalMeshBuilderTentacles.cpp.o
+.PHONY : src/CgalMeshBuilderTentacles.o
+
+# target to build an object file
+src/CgalMeshBuilderTentacles.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o
+.PHONY : src/CgalMeshBuilderTentacles.cpp.o
+
+src/CgalMeshBuilderTentacles.i: src/CgalMeshBuilderTentacles.cpp.i
+.PHONY : src/CgalMeshBuilderTentacles.i
+
+# target to preprocess a source file
+src/CgalMeshBuilderTentacles.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.i
+.PHONY : src/CgalMeshBuilderTentacles.cpp.i
+
+src/CgalMeshBuilderTentacles.s: src/CgalMeshBuilderTentacles.cpp.s
+.PHONY : src/CgalMeshBuilderTentacles.s
+
+# target to generate assembly for a file
+src/CgalMeshBuilderTentacles.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.s
+.PHONY : src/CgalMeshBuilderTentacles.cpp.s
+
+src/CgalMeshOperations.o: src/CgalMeshOperations.cpp.o
+.PHONY : src/CgalMeshOperations.o
+
+# target to build an object file
+src/CgalMeshOperations.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o
+.PHONY : src/CgalMeshOperations.cpp.o
+
+src/CgalMeshOperations.i: src/CgalMeshOperations.cpp.i
+.PHONY : src/CgalMeshOperations.i
+
+# target to preprocess a source file
+src/CgalMeshOperations.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.i
+.PHONY : src/CgalMeshOperations.cpp.i
+
+src/CgalMeshOperations.s: src/CgalMeshOperations.cpp.s
+.PHONY : src/CgalMeshOperations.s
+
+# target to generate assembly for a file
+src/CgalMeshOperations.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.s
+.PHONY : src/CgalMeshOperations.cpp.s
+
+src/CgalMeshPrimitives.o: src/CgalMeshPrimitives.cpp.o
+.PHONY : src/CgalMeshPrimitives.o
+
+# target to build an object file
+src/CgalMeshPrimitives.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o
+.PHONY : src/CgalMeshPrimitives.cpp.o
+
+src/CgalMeshPrimitives.i: src/CgalMeshPrimitives.cpp.i
+.PHONY : src/CgalMeshPrimitives.i
+
+# target to preprocess a source file
+src/CgalMeshPrimitives.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.i
+.PHONY : src/CgalMeshPrimitives.cpp.i
+
+src/CgalMeshPrimitives.s: src/CgalMeshPrimitives.cpp.s
+.PHONY : src/CgalMeshPrimitives.s
+
+# target to generate assembly for a file
+src/CgalMeshPrimitives.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.s
+.PHONY : src/CgalMeshPrimitives.cpp.s
+
+src/CgalMeshTriangulation.o: src/CgalMeshTriangulation.cpp.o
+.PHONY : src/CgalMeshTriangulation.o
+
+# target to build an object file
+src/CgalMeshTriangulation.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o
+.PHONY : src/CgalMeshTriangulation.cpp.o
+
+src/CgalMeshTriangulation.i: src/CgalMeshTriangulation.cpp.i
+.PHONY : src/CgalMeshTriangulation.i
+
+# target to preprocess a source file
+src/CgalMeshTriangulation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.i
+.PHONY : src/CgalMeshTriangulation.cpp.i
+
+src/CgalMeshTriangulation.s: src/CgalMeshTriangulation.cpp.s
+.PHONY : src/CgalMeshTriangulation.s
+
+# target to generate assembly for a file
+src/CgalMeshTriangulation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.s
+.PHONY : src/CgalMeshTriangulation.cpp.s
+
+src/GeomCreate.o: src/GeomCreate.cpp.o
+.PHONY : src/GeomCreate.o
+
+# target to build an object file
+src/GeomCreate.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o
+.PHONY : src/GeomCreate.cpp.o
+
+src/GeomCreate.i: src/GeomCreate.cpp.i
+.PHONY : src/GeomCreate.i
+
+# target to preprocess a source file
+src/GeomCreate.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.i
+.PHONY : src/GeomCreate.cpp.i
+
+src/GeomCreate.s: src/GeomCreate.cpp.s
+.PHONY : src/GeomCreate.s
+
+# target to generate assembly for a file
+src/GeomCreate.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ColorMoveArt2.dir/build.make CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.s
+.PHONY : src/GeomCreate.cpp.s
+
 src/MainWindow.o: src/MainWindow.cpp.o
 .PHONY : src/MainWindow.o
 
@@ -329,6 +449,21 @@ help:
 	@echo "... src/AgentProjectionWindow.o"
 	@echo "... src/AgentProjectionWindow.i"
 	@echo "... src/AgentProjectionWindow.s"
+	@echo "... src/CgalMeshBuilderTentacles.o"
+	@echo "... src/CgalMeshBuilderTentacles.i"
+	@echo "... src/CgalMeshBuilderTentacles.s"
+	@echo "... src/CgalMeshOperations.o"
+	@echo "... src/CgalMeshOperations.i"
+	@echo "... src/CgalMeshOperations.s"
+	@echo "... src/CgalMeshPrimitives.o"
+	@echo "... src/CgalMeshPrimitives.i"
+	@echo "... src/CgalMeshPrimitives.s"
+	@echo "... src/CgalMeshTriangulation.o"
+	@echo "... src/CgalMeshTriangulation.i"
+	@echo "... src/CgalMeshTriangulation.s"
+	@echo "... src/GeomCreate.o"
+	@echo "... src/GeomCreate.i"
+	@echo "... src/GeomCreate.s"
 	@echo "... src/MainWindow.o"
 	@echo "... src/MainWindow.i"
 	@echo "... src/MainWindow.s"

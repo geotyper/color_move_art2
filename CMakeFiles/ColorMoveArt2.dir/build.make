@@ -168,10 +168,80 @@ CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/geotyper/my_projects/CPP/color_move_art2/src/AgentProjectionWindow.cpp -o CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.s
 
+CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o: CMakeFiles/ColorMoveArt2.dir/flags.make
+CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o: src/GeomCreate.cpp
+CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o: CMakeFiles/ColorMoveArt2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o -MF CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o.d -o CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o -c /home/geotyper/my_projects/CPP/color_move_art2/src/GeomCreate.cpp
+
+CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/geotyper/my_projects/CPP/color_move_art2/src/GeomCreate.cpp > CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.i
+
+CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/geotyper/my_projects/CPP/color_move_art2/src/GeomCreate.cpp -o CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.s
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o: CMakeFiles/ColorMoveArt2.dir/flags.make
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o: src/CgalMeshPrimitives.cpp
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o: CMakeFiles/ColorMoveArt2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o -MF CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o.d -o CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o -c /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshPrimitives.cpp
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshPrimitives.cpp > CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.i
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshPrimitives.cpp -o CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.s
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o: CMakeFiles/ColorMoveArt2.dir/flags.make
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o: src/CgalMeshOperations.cpp
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o: CMakeFiles/ColorMoveArt2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o -MF CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o.d -o CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o -c /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshOperations.cpp
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshOperations.cpp > CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.i
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshOperations.cpp -o CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.s
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o: CMakeFiles/ColorMoveArt2.dir/flags.make
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o: src/CgalMeshTriangulation.cpp
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o: CMakeFiles/ColorMoveArt2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o -MF CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o.d -o CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o -c /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshTriangulation.cpp
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshTriangulation.cpp > CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.i
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshTriangulation.cpp -o CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.s
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o: CMakeFiles/ColorMoveArt2.dir/flags.make
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o: src/CgalMeshBuilderTentacles.cpp
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o: CMakeFiles/ColorMoveArt2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o -MF CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o.d -o CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o -c /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshBuilderTentacles.cpp
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshBuilderTentacles.cpp > CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.i
+
+CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshBuilderTentacles.cpp -o CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.s
+
 CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o: CMakeFiles/ColorMoveArt2.dir/flags.make
 CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o: ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp
 CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o: CMakeFiles/ColorMoveArt2.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o -MF CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o.d -o CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o -c /home/geotyper/my_projects/CPP/color_move_art2/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp
 
 CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.i: cmake_force
@@ -190,6 +260,11 @@ ColorMoveArt2_OBJECTS = \
 "CMakeFiles/ColorMoveArt2.dir/src/SqueegeeWindow.cpp.o" \
 "CMakeFiles/ColorMoveArt2.dir/src/MeshViewerWidget.cpp.o" \
 "CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.o" \
+"CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o" \
+"CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o" \
+"CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o" \
+"CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o" \
+"CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o" \
 "CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o"
 
 # External object files for target ColorMoveArt2
@@ -201,19 +276,25 @@ ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/MainWindow.cpp.o
 ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/SqueegeeWindow.cpp.o
 ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/MeshViewerWidget.cpp.o
 ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/AgentProjectionWindow.cpp.o
+ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/GeomCreate.cpp.o
+ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/CgalMeshPrimitives.cpp.o
+ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/CgalMeshOperations.cpp.o
+ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/CgalMeshTriangulation.cpp.o
+ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/src/CgalMeshBuilderTentacles.cpp.o
 ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/ColorMoveArt2_autogen/EWIEGA46WW/qrc_resources.cpp.o
 ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/build.make
 ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libQt6OpenGLWidgets.so.6.2.4
-ColorMoveArt2: /home/geotyper/CPP_lib/OpenMesh/build/Build/lib/libOpenMeshTools.so.11.0
 ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libQt6Widgets.so.6.2.4
 ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libQt6OpenGL.so.6.2.4
 ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libQt6Gui.so.6.2.4
 ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libQt6Core.so.6.2.4
 ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libGLX.so
 ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libOpenGL.so
-ColorMoveArt2: /home/geotyper/CPP_lib/OpenMesh/build/Build/lib/libOpenMeshCore.so.11.0
+ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libgmpxx.so
+ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libmpfr.so
+ColorMoveArt2: /usr/lib/x86_64-linux-gnu/libgmp.so
 ColorMoveArt2: CMakeFiles/ColorMoveArt2.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable ColorMoveArt2"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/geotyper/my_projects/CPP/color_move_art2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable ColorMoveArt2"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ColorMoveArt2.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -14,11 +14,42 @@
 # EXTERNAL cache entries
 ########################
 
+//Activate the debug messages of the script FindBoost
+Boost_DEBUG:BOOL=OFF
+
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0
 
 //Path to a file.
 Boost_INCLUDE_DIR:PATH=/usr/include
+
+//Link with static Boost libraries
+CGAL_Boost_USE_STATIC_LIBS:BOOL=OFF
+
+//Setting for advanced users that what to change the default number
+// types used in filtered kernels. Some options might not be working
+// depending on how you configured your build.
+CGAL_CMAKE_EXACT_NT_BACKEND:STRING=Default
+
+//Display memory and real time usage at end of CTest test outputs
+CGAL_CTEST_DISPLAY_MEM_AND_TIME:BOOL=OFF
+
+//Activate the CGAL developers mode. See https://github.com/CGAL/cgal/wiki/CGAL_DEV_MODE
+CGAL_DEV_MODE:BOOL=OFF
+
+//The directory containing a CMake configuration file for CGAL.
+CGAL_DIR:PATH=/home/geotyper/CPP_lib/CGAL-6.0.1
+
+//Build the testing tree.
+CGAL_ENABLE_TESTING:BOOL=OFF
+
+//If set, the ctest command will not skip the tests of the draw
+// functions.
+CGAL_TEST_DRAW_FUNCTIONS:BOOL=OFF
+
+//Use CGAL with GMPXX: use C++ classes of GNU MP instead of CGAL
+// wrappers
+CGAL_WITH_GMPXX:BOOL=ON
 
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
@@ -198,6 +229,29 @@ ColorMoveArt2_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 ColorMoveArt2_SOURCE_DIR:STATIC=/home/geotyper/my_projects/CPP/color_move_art2
 
+//The directory containing the GMPXX include files
+GMPXX_INCLUDE_DIR:PATH=/usr/include
+
+//Path to the GMPXX library
+GMPXX_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libgmpxx.so
+
+//The directory containing the GMP header files
+GMP_INCLUDE_DIR:PATH=/usr/include/x86_64-linux-gnu
+
+//Path to the Debug GMP library
+GMP_LIBRARY_DEBUG:FILEPATH=/usr/lib/x86_64-linux-gnu/libgmp.so
+
+//Path to the Release GMP library
+GMP_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/libgmp.so
+
+//The directory containing the MPFR header files
+MPFR_INCLUDE_DIR:PATH=/usr/include
+
+//Path to the MPFR library
+MPFR_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libmpfr.so
+
+MPFR_LIBRARIES_DIR:FILEPATH=/usr/lib/x86_64-linux-gnu
+
 //Path to a file.
 OPENGL_EGL_INCLUDE_DIR:PATH=/usr/include
 
@@ -303,8 +357,18 @@ pkgcfg_lib_PKG_XKB_xkbcommon:FILEPATH=/usr/lib/x86_64-linux-gnu/libxkbcommon.so
 # INTERNAL cache entries
 ########################
 
+//ADVANCED property for variable: Boost_DEBUG
+Boost_DEBUG-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_DIR
 Boost_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CGAL_Boost_USE_STATIC_LIBS
+CGAL_Boost_USE_STATIC_LIBS-ADVANCED:INTERNAL=1
+//STRINGS property for variable: CGAL_CMAKE_EXACT_NT_BACKEND
+CGAL_CMAKE_EXACT_NT_BACKEND-STRINGS:INTERNAL=GMP_BACKEND;GMPXX_BACKEND;BOOST_GMP_BACKEND;BOOST_BACKEND;LEDA_BACKEND;MP_FLOAT_BACKEND;Default
+//CGAL library is configured to use GMP
+CGAL_USE_GMP:INTERNAL=TRUE
+//CGAL library is configured to use MPFR
+CGAL_USE_MPFR:INTERNAL=TRUE
 //ADVANCED property for variable: CMAKE_ADDR2LINE
 CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_AR
@@ -439,7 +503,11 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding Boost
-FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[/usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake][c ][v1.74.0()]
+FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[/usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake][c ][v1.74.0(1.72)]
+//Details about finding GMP
+FIND_PACKAGE_MESSAGE_DETAILS_GMP:INTERNAL=[/usr/lib/x86_64-linux-gnu/libgmp.so][/usr/include/x86_64-linux-gnu][v()]
+//Details about finding MPFR
+FIND_PACKAGE_MESSAGE_DETAILS_MPFR:INTERNAL=[/usr/lib/x86_64-linux-gnu/libmpfr.so][/usr/include][v()]
 //Details about finding OpenGL
 FIND_PACKAGE_MESSAGE_DETAILS_OpenGL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libOpenGL.so][/usr/lib/x86_64-linux-gnu/libGLX.so][/usr/include][c ][v()]
 //Details about finding Threads

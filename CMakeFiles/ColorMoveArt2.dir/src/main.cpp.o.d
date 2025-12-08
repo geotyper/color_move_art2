@@ -458,100 +458,159 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qbasictimer.h \
  /usr/include/c++/11/deque /usr/include/c++/11/bits/stl_deque.h \
  /usr/include/c++/11/bits/deque.tcc \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/System/config.h \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/System/compiler.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/System/OpenMeshDLLMacros.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/TriConnectivity.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/PolyConnectivity.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/ArrayKernel.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/GenProg.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/ArrayItems.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/Handles.hh \
- /usr/include/c++/11/ostream /usr/include/c++/11/ios \
- /usr/include/c++/11/bits/basic_ios.h \
- /usr/include/c++/11/bits/locale_facets.h /usr/include/c++/11/cwctype \
- /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
- /usr/include/x86_64-linux-gnu/c++/11/bits/ctype_base.h \
- /usr/include/x86_64-linux-gnu/c++/11/bits/ctype_inline.h \
- /usr/include/c++/11/bits/locale_facets.tcc \
- /usr/include/c++/11/bits/basic_ios.tcc \
- /usr/include/c++/11/bits/ostream.tcc \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/BaseKernel.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/PropertyContainer.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/Property.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/BaseProperty.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/StoreRestore.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/SR_binary.hh \
- /usr/include/c++/11/sstream /usr/include/c++/11/istream \
- /usr/include/c++/11/bits/istream.tcc \
- /usr/include/c++/11/bits/sstream.tcc \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/SR_binary_spec.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Geometry/VectorT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Geometry/Vector11T.hh \
+ /home/geotyper/my_projects/CPP/color_move_art2/src/HelpStructures.h \
+ /home/geotyper/CPP_lib/glm/glm/glm.hpp \
+ /home/geotyper/CPP_lib/glm/glm/detail/_fixes.hpp \
+ /home/geotyper/CPP_lib/glm/glm/detail/setup.hpp \
  /usr/include/c++/11/cassert \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/Status.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/SR_types.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/SR_rbo.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/System/omstream.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/System/mostream.hh \
- /usr/include/c++/11/mutex /usr/include/c++/11/bits/std_mutex.h \
- /usr/include/c++/11/bits/unique_lock.h \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/typename.hh \
- /usr/include/c++/11/iostream \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/SR_binary_vector_of_bool.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/SR_store.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/ArrayKernelT_impl.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/SmartRange.hh \
- /usr/include/c++/11/set /usr/include/c++/11/bits/stl_set.h \
- /usr/include/c++/11/bits/stl_multiset.h \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/SmartHandles.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/PolyConnectivity_inline_impl.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/IteratorsT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/CirculatorsT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/Traits.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/Attributes.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/FinalMeshItemsT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/vector_traits.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/AttribKernelT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/TriMeshT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/PolyMeshT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Geometry/MathDefs.hh \
- /usr/include/c++/11/cfloat \
+ /home/geotyper/CPP_lib/glm/glm/detail/../simd/platform.h \
+ /usr/include/c++/11/climits /usr/include/c++/11/cfloat \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/Tags.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/PolyMeshT_impl.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Geometry/LoopSchemeMaskT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/SingletonT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/SingletonT_impl.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/vector_cast.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Mesh/TriMeshT_impl.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/MeshIO.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/IOManager.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/Options.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/reader/BaseReader.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/importer/BaseImporter.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/writer/BaseWriter.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/exporter/BaseExporter.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/importer/ImporterT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/color_cast.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/exporter/ExporterT.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/Predicates.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/PropertyManager.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/HandleToPropHandle.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/OMFormat.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/Utils/Endian.hh \
- /home/geotyper/CPP_lib/OpenMesh/src/OpenMesh/Core/IO/OMFormatT_impl.hh \
- /usr/include/c++/11/iomanip /usr/include/c++/11/locale \
- /usr/include/c++/11/bits/locale_facets_nonio.h \
- /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h \
- /usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h \
- /usr/include/libintl.h /usr/include/c++/11/bits/codecvt.h \
- /usr/include/c++/11/bits/locale_facets_nonio.tcc \
- /usr/include/c++/11/bits/locale_conv.h \
- /usr/include/c++/11/bits/quoted_string.h /usr/include/boost/geometry.hpp \
- /usr/include/boost/geometry/geometry.hpp /usr/include/boost/config.hpp \
- /usr/include/boost/config/user.hpp \
+ /home/geotyper/CPP_lib/glm/glm/fwd.hpp \
+ /home/geotyper/CPP_lib/glm/glm/detail/qualifier.hpp \
+ /home/geotyper/CPP_lib/glm/glm/detail/setup.hpp \
+ /home/geotyper/CPP_lib/glm/glm/vec2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec2.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/./compute_vector_relational.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/./setup.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_float2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_float2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_double2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_double2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_int2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_int2_sized.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../ext/scalar_int_sized.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../ext/../detail/setup.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint2_sized.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../ext/scalar_uint_sized.hpp \
+ /home/geotyper/CPP_lib/glm/glm/vec3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec3.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/compute_vector_decl.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/_vectorize.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_float3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_float3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_double3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_double3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_int3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_int3_sized.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint3_sized.hpp \
+ /home/geotyper/CPP_lib/glm/glm/vec4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec4.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_float4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_float4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_double4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_double4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/setup.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_int4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_int4_sized.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint4_sized.hpp \
+ /home/geotyper/CPP_lib/glm/glm/mat2x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/matrix_double2x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_mat2x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_mat2x2.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../matrix.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../detail/setup.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat2x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double2x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat2x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat2x3.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double2x3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float2x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float2x3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat2x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double2x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat2x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat2x4.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double2x4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float2x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float2x4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat3x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x2.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat3x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x3.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../common.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/_fixes.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/func_common.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../vector_relational.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../detail/setup.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../detail/func_vector_relational.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/compute_common.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/setup.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/type_vec1.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/type_vec1.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat3x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x4.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat4x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x2.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat4x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x3.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x3.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x3_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat4x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x4.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../geometric.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/func_geometric.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../exponential.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../detail/func_exponential.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x4.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x4_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../detail/func_matrix.inl \
+ /home/geotyper/CPP_lib/glm/glm/./ext/matrix_double2x2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/matrix_float2x2.hpp \
+ /home/geotyper/CPP_lib/glm/glm/./ext/matrix_float2x2_precision.hpp \
+ /home/geotyper/CPP_lib/glm/glm/trigonometric.hpp \
+ /home/geotyper/CPP_lib/glm/glm/detail/func_trigonometric.inl \
+ /home/geotyper/CPP_lib/glm/glm/packing.hpp \
+ /home/geotyper/CPP_lib/glm/glm/detail/func_packing.inl \
+ /home/geotyper/CPP_lib/glm/glm/detail/type_half.hpp \
+ /home/geotyper/CPP_lib/glm/glm/detail/type_half.inl \
+ /home/geotyper/CPP_lib/glm/glm/integer.hpp \
+ /home/geotyper/CPP_lib/glm/glm/detail/func_integer.inl \
+ /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshTypes.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Exact_predicates_inexact_constructions_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Simple_cartesian.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Cartesian_base.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/basic.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/config.h \
+ /usr/include/boost/config.hpp /usr/include/boost/config/user.hpp \
  /usr/include/boost/config/detail/select_compiler_config.hpp \
  /usr/include/boost/config/compiler/gcc.hpp \
  /usr/include/boost/config/detail/select_stdlib_config.hpp \
@@ -569,30 +628,214 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/config/detail/posix_features.hpp \
  /usr/include/boost/config/detail/suffix.hpp \
  /usr/include/boost/config/helper_macros.hpp \
- /usr/include/boost/geometry/core/closure.hpp \
- /usr/include/boost/mpl/assert.hpp /usr/include/boost/mpl/not.hpp \
- /usr/include/boost/mpl/bool.hpp /usr/include/boost/mpl/bool_fwd.hpp \
+ /usr/include/boost/version.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/version.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/version_macros.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/version_checker.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Installation/internal/enable_third_party_libraries.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/export/CGAL.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/export/helpers.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/functional.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/auto_link/CGAL.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/auto_link/auto_link.h \
+ /usr/include/boost/predef.h /usr/include/boost/predef/language.h \
+ /usr/include/boost/predef/language/stdc.h \
+ /usr/include/boost/predef/version_number.h \
+ /usr/include/boost/predef/make.h /usr/include/boost/predef/detail/test.h \
+ /usr/include/boost/predef/language/stdcpp.h \
+ /usr/include/boost/predef/language/objc.h \
+ /usr/include/boost/predef/language/cuda.h \
+ /usr/include/boost/predef/architecture.h \
+ /usr/include/boost/predef/architecture/alpha.h \
+ /usr/include/boost/predef/architecture/arm.h \
+ /usr/include/boost/predef/architecture/blackfin.h \
+ /usr/include/boost/predef/architecture/convex.h \
+ /usr/include/boost/predef/architecture/ia64.h \
+ /usr/include/boost/predef/architecture/m68k.h \
+ /usr/include/boost/predef/architecture/mips.h \
+ /usr/include/boost/predef/architecture/parisc.h \
+ /usr/include/boost/predef/architecture/ppc.h \
+ /usr/include/boost/predef/architecture/ptx.h \
+ /usr/include/boost/predef/architecture/pyramid.h \
+ /usr/include/boost/predef/architecture/riscv.h \
+ /usr/include/boost/predef/architecture/rs6k.h \
+ /usr/include/boost/predef/architecture/sparc.h \
+ /usr/include/boost/predef/architecture/superh.h \
+ /usr/include/boost/predef/architecture/sys370.h \
+ /usr/include/boost/predef/architecture/sys390.h \
+ /usr/include/boost/predef/architecture/x86.h \
+ /usr/include/boost/predef/architecture/x86/32.h \
+ /usr/include/boost/predef/architecture/x86/64.h \
+ /usr/include/boost/predef/architecture/z.h \
+ /usr/include/boost/predef/compiler.h \
+ /usr/include/boost/predef/compiler/borland.h \
+ /usr/include/boost/predef/compiler/clang.h \
+ /usr/include/boost/predef/compiler/comeau.h \
+ /usr/include/boost/predef/compiler/compaq.h \
+ /usr/include/boost/predef/compiler/diab.h \
+ /usr/include/boost/predef/compiler/digitalmars.h \
+ /usr/include/boost/predef/compiler/dignus.h \
+ /usr/include/boost/predef/compiler/edg.h \
+ /usr/include/boost/predef/compiler/ekopath.h \
+ /usr/include/boost/predef/compiler/gcc_xml.h \
+ /usr/include/boost/predef/compiler/gcc.h \
+ /usr/include/boost/predef/detail/comp_detected.h \
+ /usr/include/boost/predef/compiler/greenhills.h \
+ /usr/include/boost/predef/compiler/hp_acc.h \
+ /usr/include/boost/predef/compiler/iar.h \
+ /usr/include/boost/predef/compiler/ibm.h \
+ /usr/include/boost/predef/compiler/intel.h \
+ /usr/include/boost/predef/compiler/kai.h \
+ /usr/include/boost/predef/compiler/llvm.h \
+ /usr/include/boost/predef/compiler/metaware.h \
+ /usr/include/boost/predef/compiler/metrowerks.h \
+ /usr/include/boost/predef/compiler/microtec.h \
+ /usr/include/boost/predef/compiler/mpw.h \
+ /usr/include/boost/predef/compiler/nvcc.h \
+ /usr/include/boost/predef/compiler/palm.h \
+ /usr/include/boost/predef/compiler/pgi.h \
+ /usr/include/boost/predef/compiler/sgi_mipspro.h \
+ /usr/include/boost/predef/compiler/sunpro.h \
+ /usr/include/boost/predef/compiler/tendra.h \
+ /usr/include/boost/predef/compiler/visualc.h \
+ /usr/include/boost/predef/compiler/watcom.h \
+ /usr/include/boost/predef/library.h \
+ /usr/include/boost/predef/library/c.h \
+ /usr/include/boost/predef/library/c/_prefix.h \
+ /usr/include/boost/predef/detail/_cassert.h \
+ /usr/include/boost/predef/library/c/cloudabi.h \
+ /usr/include/boost/predef/library/c/gnu.h \
+ /usr/include/boost/predef/library/c/uc.h \
+ /usr/include/boost/predef/library/c/vms.h \
+ /usr/include/boost/predef/library/c/zos.h \
+ /usr/include/boost/predef/library/std.h \
+ /usr/include/boost/predef/library/std/_prefix.h \
+ /usr/include/boost/predef/detail/_exception.h \
+ /usr/include/boost/predef/library/std/cxx.h \
+ /usr/include/boost/predef/library/std/dinkumware.h \
+ /usr/include/boost/predef/library/std/libcomo.h \
+ /usr/include/boost/predef/library/std/modena.h \
+ /usr/include/boost/predef/library/std/msl.h \
+ /usr/include/boost/predef/library/std/roguewave.h \
+ /usr/include/boost/predef/library/std/sgi.h \
+ /usr/include/boost/predef/library/std/stdcpp3.h \
+ /usr/include/boost/predef/library/std/stlport.h \
+ /usr/include/boost/predef/library/std/vacpp.h \
+ /usr/include/boost/predef/os.h /usr/include/boost/predef/os/aix.h \
+ /usr/include/boost/predef/os/amigaos.h \
+ /usr/include/boost/predef/os/beos.h /usr/include/boost/predef/os/bsd.h \
+ /usr/include/boost/predef/os/macos.h /usr/include/boost/predef/os/ios.h \
+ /usr/include/boost/predef/os/bsd/bsdi.h \
+ /usr/include/boost/predef/os/bsd/dragonfly.h \
+ /usr/include/boost/predef/os/bsd/free.h \
+ /usr/include/boost/predef/os/bsd/open.h \
+ /usr/include/boost/predef/os/bsd/net.h \
+ /usr/include/boost/predef/os/cygwin.h \
+ /usr/include/boost/predef/os/haiku.h /usr/include/boost/predef/os/hpux.h \
+ /usr/include/boost/predef/os/irix.h /usr/include/boost/predef/os/linux.h \
+ /usr/include/boost/predef/detail/os_detected.h \
+ /usr/include/boost/predef/os/os400.h \
+ /usr/include/boost/predef/os/qnxnto.h \
+ /usr/include/boost/predef/os/solaris.h \
+ /usr/include/boost/predef/os/unix.h /usr/include/boost/predef/os/vms.h \
+ /usr/include/boost/predef/os/windows.h /usr/include/boost/predef/other.h \
+ /usr/include/boost/predef/other/endian.h \
+ /usr/include/boost/predef/platform/android.h \
+ /usr/include/boost/predef/platform.h \
+ /usr/include/boost/predef/platform/cloudabi.h \
+ /usr/include/boost/predef/platform/mingw.h \
+ /usr/include/boost/predef/platform/mingw32.h \
+ /usr/include/boost/predef/platform/mingw64.h \
+ /usr/include/boost/predef/platform/windows_uwp.h \
+ /usr/include/boost/predef/platform/windows_desktop.h \
+ /usr/include/boost/predef/platform/windows_phone.h \
+ /usr/include/boost/predef/platform/windows_server.h \
+ /usr/include/boost/predef/platform/windows_store.h \
+ /usr/include/boost/predef/platform/windows_system.h \
+ /usr/include/boost/predef/platform/windows_runtime.h \
+ /usr/include/boost/predef/platform/ios.h \
+ /usr/include/boost/predef/hardware.h \
+ /usr/include/boost/predef/hardware/simd.h \
+ /usr/include/boost/predef/hardware/simd/x86.h \
+ /usr/include/boost/predef/hardware/simd/x86/versions.h \
+ /usr/include/boost/predef/hardware/simd/x86_amd.h \
+ /usr/include/boost/predef/hardware/simd/x86_amd/versions.h \
+ /usr/include/boost/predef/hardware/simd/arm.h \
+ /usr/include/boost/predef/hardware/simd/arm/versions.h \
+ /usr/include/boost/predef/hardware/simd/ppc.h \
+ /usr/include/boost/predef/hardware/simd/ppc/versions.h \
+ /usr/include/boost/predef/version.h /usr/include/c++/11/unordered_set \
+ /usr/include/c++/11/bits/unordered_set.h /usr/include/c++/11/thread \
+ /usr/include/c++/11/bits/std_thread.h \
+ /usr/include/c++/11/bits/this_thread_sleep.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/license/lgpl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/license.h \
+ /usr/include/c++/11/fstream /usr/include/c++/11/istream \
+ /usr/include/c++/11/ios /usr/include/c++/11/bits/basic_ios.h \
+ /usr/include/c++/11/bits/locale_facets.h /usr/include/c++/11/cwctype \
+ /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/ctype_base.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/ctype_inline.h \
+ /usr/include/c++/11/bits/locale_facets.tcc \
+ /usr/include/c++/11/bits/basic_ios.tcc /usr/include/c++/11/ostream \
+ /usr/include/c++/11/bits/ostream.tcc \
+ /usr/include/c++/11/bits/istream.tcc /usr/include/c++/11/bits/codecvt.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
+ /usr/include/c++/11/bits/fstream.tcc /usr/include/c++/11/iostream \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/assertions.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Uncertain.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/enum.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/Same_uncertainty.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Origin.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Origin_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Profile_counter.h \
+ /usr/include/c++/11/sstream /usr/include/c++/11/bits/sstream.tcc \
+ /usr/include/c++/11/iomanip /usr/include/c++/11/locale \
+ /usr/include/c++/11/bits/locale_facets_nonio.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h \
+ /usr/include/libintl.h /usr/include/c++/11/bits/locale_facets_nonio.tcc \
+ /usr/include/c++/11/bits/locale_conv.h \
+ /usr/include/c++/11/bits/quoted_string.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/disable_warnings.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/enable_warnings.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/assertions_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/assertions_behaviour.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/exceptions.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/tags.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/io_tags.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/number_type_basic.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/number_type_config.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Quotient_fwd.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/mpl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Coercion_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/iterator/transform_iterator.hpp \
+ /usr/include/boost/iterator/transform_iterator.hpp \
+ /usr/include/boost/iterator/detail/enable_if.hpp \
+ /usr/include/boost/detail/workaround.hpp \
+ /usr/include/boost/config/workaround.hpp \
+ /usr/include/boost/mpl/identity.hpp \
+ /usr/include/boost/mpl/aux_/na_spec.hpp \
+ /usr/include/boost/mpl/lambda_fwd.hpp \
+ /usr/include/boost/mpl/void_fwd.hpp \
  /usr/include/boost/mpl/aux_/adl_barrier.hpp \
  /usr/include/boost/mpl/aux_/config/adl.hpp \
  /usr/include/boost/mpl/aux_/config/msvc.hpp \
  /usr/include/boost/mpl/aux_/config/intel.hpp \
  /usr/include/boost/mpl/aux_/config/gcc.hpp \
  /usr/include/boost/mpl/aux_/config/workaround.hpp \
- /usr/include/boost/detail/workaround.hpp \
- /usr/include/boost/config/workaround.hpp \
+ /usr/include/boost/mpl/aux_/na.hpp /usr/include/boost/mpl/bool.hpp \
+ /usr/include/boost/mpl/bool_fwd.hpp \
  /usr/include/boost/mpl/integral_c_tag.hpp \
  /usr/include/boost/mpl/aux_/config/static_constant.hpp \
- /usr/include/boost/mpl/aux_/nttp_decl.hpp \
- /usr/include/boost/mpl/aux_/config/nttp.hpp \
- /usr/include/boost/mpl/aux_/nested_type_wknd.hpp \
- /usr/include/boost/mpl/aux_/na_spec.hpp \
- /usr/include/boost/mpl/lambda_fwd.hpp \
- /usr/include/boost/mpl/void_fwd.hpp /usr/include/boost/mpl/aux_/na.hpp \
  /usr/include/boost/mpl/aux_/na_fwd.hpp \
  /usr/include/boost/mpl/aux_/config/ctps.hpp \
  /usr/include/boost/mpl/aux_/config/lambda.hpp \
  /usr/include/boost/mpl/aux_/config/ttp.hpp \
  /usr/include/boost/mpl/int.hpp /usr/include/boost/mpl/int_fwd.hpp \
+ /usr/include/boost/mpl/aux_/nttp_decl.hpp \
+ /usr/include/boost/mpl/aux_/config/nttp.hpp \
  /usr/include/boost/mpl/aux_/integral_wrapper.hpp \
  /usr/include/boost/mpl/aux_/static_cast.hpp \
  /usr/include/boost/preprocessor/cat.hpp \
@@ -650,19 +893,87 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/mpl/aux_/config/eti.hpp \
  /usr/include/boost/mpl/aux_/config/overload_resolution.hpp \
  /usr/include/boost/mpl/aux_/lambda_support.hpp \
+ /usr/include/boost/iterator/detail/config_def.hpp \
+ /usr/include/boost/iterator/detail/config_undef.hpp \
+ /usr/include/boost/iterator/iterator_adaptor.hpp \
+ /usr/include/boost/static_assert.hpp \
+ /usr/include/boost/core/use_default.hpp \
+ /usr/include/boost/iterator/iterator_categories.hpp \
+ /usr/include/boost/mpl/eval_if.hpp /usr/include/boost/mpl/if.hpp \
  /usr/include/boost/mpl/aux_/value_wknd.hpp \
  /usr/include/boost/mpl/aux_/config/integral.hpp \
+ /usr/include/boost/mpl/placeholders.hpp /usr/include/boost/mpl/arg.hpp \
+ /usr/include/boost/mpl/arg_fwd.hpp \
+ /usr/include/boost/mpl/aux_/na_assert.hpp \
+ /usr/include/boost/mpl/assert.hpp /usr/include/boost/mpl/not.hpp \
+ /usr/include/boost/mpl/aux_/nested_type_wknd.hpp \
  /usr/include/boost/mpl/aux_/yes_no.hpp \
  /usr/include/boost/mpl/aux_/config/arrays.hpp \
  /usr/include/boost/mpl/aux_/config/gpu.hpp \
  /usr/include/boost/mpl/aux_/config/pp_counter.hpp \
- /usr/include/boost/mpl/size_t.hpp /usr/include/boost/mpl/size_t_fwd.hpp \
- /usr/include/boost/range/value_type.hpp \
- /usr/include/boost/range/config.hpp \
- /usr/include/boost/range/iterator.hpp \
- /usr/include/boost/range/range_fwd.hpp \
- /usr/include/boost/range/mutable_iterator.hpp \
- /usr/include/boost/range/detail/extract_optional_type.hpp \
+ /usr/include/boost/mpl/aux_/arity_spec.hpp \
+ /usr/include/boost/mpl/aux_/arg_typedef.hpp \
+ /usr/include/boost/mpl/aux_/config/use_preprocessed.hpp \
+ /usr/include/boost/mpl/aux_/include_preprocessed.hpp \
+ /usr/include/boost/mpl/aux_/config/compiler.hpp \
+ /usr/include/boost/preprocessor/stringize.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/arg.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/placeholders.hpp \
+ /usr/include/boost/type_traits/is_convertible.hpp \
+ /usr/include/boost/type_traits/intrinsics.hpp \
+ /usr/include/boost/type_traits/detail/config.hpp \
+ /usr/include/boost/type_traits/integral_constant.hpp \
+ /usr/include/boost/type_traits/is_complete.hpp \
+ /usr/include/boost/type_traits/declval.hpp \
+ /usr/include/boost/type_traits/add_rvalue_reference.hpp \
+ /usr/include/boost/type_traits/is_void.hpp \
+ /usr/include/boost/type_traits/is_reference.hpp \
+ /usr/include/boost/type_traits/is_lvalue_reference.hpp \
+ /usr/include/boost/type_traits/is_rvalue_reference.hpp \
+ /usr/include/boost/type_traits/remove_reference.hpp \
+ /usr/include/boost/type_traits/is_function.hpp \
+ /usr/include/boost/type_traits/detail/is_function_cxx_11.hpp \
+ /usr/include/boost/type_traits/detail/yes_no_type.hpp \
+ /usr/include/boost/type_traits/is_array.hpp \
+ /usr/include/boost/type_traits/is_arithmetic.hpp \
+ /usr/include/boost/type_traits/is_integral.hpp \
+ /usr/include/boost/type_traits/is_floating_point.hpp \
+ /usr/include/boost/type_traits/is_abstract.hpp \
+ /usr/include/boost/type_traits/add_lvalue_reference.hpp \
+ /usr/include/boost/type_traits/add_reference.hpp \
+ /usr/include/boost/iterator/iterator_facade.hpp \
+ /usr/include/boost/iterator/interoperable.hpp \
+ /usr/include/boost/mpl/or.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/or.hpp \
+ /usr/include/boost/iterator/iterator_traits.hpp \
+ /usr/include/boost/iterator/detail/facade_iterator_category.hpp \
+ /usr/include/boost/mpl/and.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/and.hpp \
+ /usr/include/boost/type_traits/is_same.hpp \
+ /usr/include/boost/type_traits/is_const.hpp \
+ /usr/include/boost/detail/indirect_traits.hpp \
+ /usr/include/boost/type_traits/is_pointer.hpp \
+ /usr/include/boost/type_traits/is_class.hpp \
+ /usr/include/boost/type_traits/is_volatile.hpp \
+ /usr/include/boost/type_traits/is_member_function_pointer.hpp \
+ /usr/include/boost/type_traits/detail/is_member_function_pointer_cxx_11.hpp \
+ /usr/include/boost/type_traits/is_member_pointer.hpp \
+ /usr/include/boost/type_traits/remove_cv.hpp \
+ /usr/include/boost/type_traits/remove_pointer.hpp \
+ /usr/include/boost/detail/select_type.hpp \
+ /usr/include/boost/core/addressof.hpp \
+ /usr/include/boost/type_traits/add_const.hpp \
+ /usr/include/boost/type_traits/add_pointer.hpp \
+ /usr/include/boost/type_traits/remove_const.hpp \
+ /usr/include/boost/type_traits/is_pod.hpp \
+ /usr/include/boost/type_traits/is_scalar.hpp \
+ /usr/include/boost/type_traits/is_enum.hpp \
+ /usr/include/boost/mpl/always.hpp \
+ /usr/include/boost/mpl/aux_/preprocessor/default_params.hpp \
+ /usr/include/boost/mpl/apply.hpp /usr/include/boost/mpl/apply_fwd.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/apply_fwd.hpp \
+ /usr/include/boost/mpl/apply_wrap.hpp \
+ /usr/include/boost/mpl/aux_/has_apply.hpp \
  /usr/include/boost/mpl/has_xxx.hpp \
  /usr/include/boost/mpl/aux_/type_wrapper.hpp \
  /usr/include/boost/mpl/aux_/config/has_xxx.hpp \
@@ -672,99 +983,250 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/preprocessor/array/size.hpp \
  /usr/include/boost/preprocessor/repetition/enum_params.hpp \
  /usr/include/boost/preprocessor/repetition/enum_trailing_params.hpp \
- /usr/include/boost/type_traits/remove_reference.hpp \
- /usr/include/boost/iterator/iterator_traits.hpp \
- /usr/include/boost/range/detail/msvc_has_iterator_workaround.hpp \
- /usr/include/boost/range/const_iterator.hpp \
- /usr/include/boost/type_traits/remove_const.hpp \
- /usr/include/boost/type_traits/is_const.hpp \
- /usr/include/boost/type_traits/integral_constant.hpp \
- /usr/include/boost/mpl/eval_if.hpp /usr/include/boost/mpl/if.hpp \
- /usr/include/boost/geometry/core/ring_type.hpp \
- /usr/include/boost/geometry/core/tag.hpp \
- /usr/include/boost/geometry/core/tags.hpp \
- /usr/include/boost/geometry/util/bare_type.hpp \
- /usr/include/boost/type_traits/remove_pointer.hpp \
- /usr/include/boost/geometry/core/coordinate_dimension.hpp \
- /usr/include/boost/static_assert.hpp \
- /usr/include/boost/geometry/core/point_type.hpp \
- /usr/include/boost/geometry/core/coordinate_system.hpp \
- /usr/include/boost/geometry/core/coordinate_type.hpp \
- /usr/include/boost/geometry/util/promote_floating_point.hpp \
- /usr/include/boost/type_traits/is_integral.hpp \
- /usr/include/boost/geometry/core/cs.hpp \
- /usr/include/boost/geometry/core/interior_type.hpp \
- /usr/include/boost/geometry/core/point_order.hpp \
- /usr/include/boost/geometry/core/tag_cast.hpp \
- /usr/include/boost/type_traits/is_base_of.hpp \
- /usr/include/boost/type_traits/is_base_and_derived.hpp \
- /usr/include/boost/type_traits/intrinsics.hpp \
- /usr/include/boost/type_traits/detail/config.hpp \
- /usr/include/boost/version.hpp \
- /usr/include/boost/type_traits/remove_cv.hpp \
- /usr/include/boost/type_traits/is_same.hpp \
- /usr/include/boost/type_traits/is_class.hpp \
- /usr/include/boost/geometry/core/access.hpp \
- /usr/include/boost/core/ignore_unused.hpp \
- /usr/include/boost/type_traits/is_pointer.hpp \
- /usr/include/boost/geometry/core/exterior_ring.hpp \
- /usr/include/boost/geometry/util/add_const_if_c.hpp \
- /usr/include/boost/geometry/core/interior_rings.hpp \
- /usr/include/boost/geometry/core/radian_access.hpp \
- /usr/include/boost/numeric/conversion/cast.hpp \
- /usr/include/boost/type.hpp \
- /usr/include/boost/numeric/conversion/converter.hpp \
- /usr/include/boost/numeric/conversion/conversion_traits.hpp \
- /usr/include/boost/numeric/conversion/detail/conversion_traits.hpp \
- /usr/include/boost/type_traits/is_arithmetic.hpp \
- /usr/include/boost/type_traits/is_floating_point.hpp \
- /usr/include/boost/numeric/conversion/detail/meta.hpp \
- /usr/include/boost/mpl/equal_to.hpp \
- /usr/include/boost/mpl/aux_/comparison_op.hpp \
- /usr/include/boost/mpl/aux_/numeric_op.hpp \
- /usr/include/boost/mpl/numeric_cast.hpp \
- /usr/include/boost/mpl/apply_wrap.hpp \
- /usr/include/boost/mpl/aux_/has_apply.hpp \
  /usr/include/boost/mpl/aux_/config/has_apply.hpp \
  /usr/include/boost/mpl/aux_/msvc_never_true.hpp \
- /usr/include/boost/mpl/aux_/config/use_preprocessed.hpp \
- /usr/include/boost/mpl/aux_/include_preprocessed.hpp \
- /usr/include/boost/mpl/aux_/config/compiler.hpp \
- /usr/include/boost/preprocessor/stringize.hpp \
  /usr/include/boost/mpl/aux_/preprocessed/gcc/apply_wrap.hpp \
- /usr/include/boost/mpl/tag.hpp /usr/include/boost/mpl/void.hpp \
+ /usr/include/boost/mpl/lambda.hpp /usr/include/boost/mpl/bind.hpp \
+ /usr/include/boost/mpl/bind_fwd.hpp \
+ /usr/include/boost/mpl/aux_/config/bind.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/bind_fwd.hpp \
+ /usr/include/boost/mpl/next.hpp /usr/include/boost/mpl/next_prior.hpp \
+ /usr/include/boost/mpl/aux_/common_name_wknd.hpp \
+ /usr/include/boost/mpl/protect.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/bind.hpp \
+ /usr/include/boost/mpl/aux_/full_lambda.hpp \
+ /usr/include/boost/mpl/quote.hpp /usr/include/boost/mpl/void.hpp \
+ /usr/include/boost/mpl/aux_/has_type.hpp \
+ /usr/include/boost/mpl/aux_/config/bcc.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/quote.hpp \
+ /usr/include/boost/mpl/aux_/template_arity.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/template_arity.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/full_lambda.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/apply.hpp \
+ /usr/include/boost/type_traits/function_traits.hpp \
+ /usr/include/boost/utility/result_of.hpp \
+ /usr/include/boost/preprocessor/iteration/iterate.hpp \
+ /usr/include/boost/preprocessor/slot/slot.hpp \
+ /usr/include/boost/preprocessor/slot/detail/def.hpp \
+ /usr/include/boost/preprocessor/repetition/enum_binary_params.hpp \
+ /usr/include/boost/preprocessor/repetition/enum_shifted_params.hpp \
+ /usr/include/boost/preprocessor/facilities/intercept.hpp \
+ /usr/include/boost/type_traits/conditional.hpp \
+ /usr/include/boost/type_traits/type_identity.hpp \
+ /usr/include/boost/core/enable_if.hpp \
+ /usr/include/boost/preprocessor/iteration/detail/iter/forward1.hpp \
+ /usr/include/boost/preprocessor/iteration/detail/bounds/lower1.hpp \
+ /usr/include/boost/preprocessor/slot/detail/shared.hpp \
+ /usr/include/boost/preprocessor/iteration/detail/bounds/upper1.hpp \
+ /usr/include/boost/utility/detail/result_of_iterate.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Algebraic_structure_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/type_traits.h \
+ /usr/include/boost/type_traits/is_base_and_derived.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/use.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Real_embeddable_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Fraction_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Rational_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/is_convertible.h \
+ /usr/include/gmpxx.h /usr/include/x86_64-linux-gnu/gmp.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Scalar_factor_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Algebraic_extension_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Needs_parens_as_product.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/io.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/Color.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/array.h \
+ /usr/include/boost/functional/hash.hpp \
+ /usr/include/boost/container_hash/hash.hpp \
+ /usr/include/boost/container_hash/hash_fwd.hpp \
+ /usr/include/boost/container_hash/detail/hash_float.hpp \
+ /usr/include/boost/container_hash/detail/float_functions.hpp \
+ /usr/include/boost/config/no_tr1/cmath.hpp \
+ /usr/include/boost/container_hash/detail/limits.hpp \
+ /usr/include/boost/limits.hpp /usr/include/boost/integer/static_log2.hpp \
+ /usr/include/boost/integer_fwd.hpp /usr/include/boost/cstdint.hpp \
+ /usr/include/boost/assert.hpp /usr/include/c++/11/typeindex \
+ /usr/include/boost/container_hash/extensions.hpp \
+ /usr/include/boost/detail/container_fwd.hpp /usr/include/c++/11/set \
+ /usr/include/c++/11/bits/stl_set.h \
+ /usr/include/c++/11/bits/stl_multiset.h /usr/include/c++/11/bitset \
+ /usr/include/c++/11/complex \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/utils_classes.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/utils.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/FPU.h \
+ /usr/include/c++/11/fenv.h /usr/include/fenv.h \
+ /usr/include/x86_64-linux-gnu/bits/fenv.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/xmmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/mmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/mm_malloc.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/emmintrin.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/test_FPU_rounding_mode_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/float.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/double.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/number_utils.h \
+ /usr/include/c++/11/math.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/long_double.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Interval_nt.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Interval_traits.h \
+ /usr/include/boost/operators.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/int.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Modular_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Modular_arithmetic/Residue_type.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/tss.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/long_long.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/gmpxx.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/mpz_class.h \
+ /usr/include/mpfr.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/gmpxx_coercion_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Residue.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Quotient.h \
+ /usr/include/boost/multiprecision/cpp_int.hpp \
+ /usr/include/boost/multiprecision/number.hpp \
+ /usr/include/boost/mpl/max.hpp /usr/include/boost/mpl/min_max.hpp \
+ /usr/include/boost/mpl/less.hpp \
+ /usr/include/boost/mpl/aux_/comparison_op.hpp \
+ /usr/include/boost/mpl/aux_/numeric_op.hpp \
+ /usr/include/boost/mpl/numeric_cast.hpp /usr/include/boost/mpl/tag.hpp \
  /usr/include/boost/mpl/aux_/has_tag.hpp \
  /usr/include/boost/mpl/aux_/numeric_cast_utils.hpp \
  /usr/include/boost/mpl/aux_/config/forwarding.hpp \
  /usr/include/boost/mpl/aux_/msvc_eti_base.hpp \
  /usr/include/boost/mpl/aux_/is_msvc_eti_arg.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/equal_to.hpp \
- /usr/include/boost/mpl/and.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/and.hpp \
- /usr/include/boost/mpl/identity.hpp \
- /usr/include/boost/numeric/conversion/detail/int_float_mixture.hpp \
- /usr/include/boost/limits.hpp \
- /usr/include/boost/numeric/conversion/int_float_mixture_enum.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/less.hpp \
+ /usr/include/boost/mpl/plus.hpp \
+ /usr/include/boost/mpl/aux_/arithmetic_op.hpp \
  /usr/include/boost/mpl/integral_c.hpp \
  /usr/include/boost/mpl/integral_c_fwd.hpp \
+ /usr/include/boost/mpl/aux_/largest_int.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/plus.hpp \
+ /usr/include/boost/mpl/find_if.hpp \
+ /usr/include/boost/mpl/aux_/find_if_pred.hpp \
+ /usr/include/boost/mpl/aux_/iter_apply.hpp \
+ /usr/include/boost/mpl/deref.hpp \
+ /usr/include/boost/mpl/aux_/msvc_type.hpp \
+ /usr/include/boost/mpl/iter_fold_if.hpp \
+ /usr/include/boost/mpl/begin_end.hpp \
+ /usr/include/boost/mpl/begin_end_fwd.hpp \
+ /usr/include/boost/mpl/aux_/begin_end_impl.hpp \
+ /usr/include/boost/mpl/sequence_tag_fwd.hpp \
+ /usr/include/boost/mpl/aux_/has_begin.hpp \
+ /usr/include/boost/mpl/aux_/traits_lambda_spec.hpp \
+ /usr/include/boost/mpl/sequence_tag.hpp \
+ /usr/include/boost/mpl/logical.hpp /usr/include/boost/mpl/pair.hpp \
+ /usr/include/boost/mpl/aux_/iter_fold_if_impl.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/iter_fold_if_impl.hpp \
+ /usr/include/boost/type_traits/is_signed.hpp \
+ /usr/include/boost/type_traits/is_unsigned.hpp \
+ /usr/include/boost/type_traits/is_complex.hpp \
+ /usr/include/boost/type_traits/make_unsigned.hpp \
+ /usr/include/boost/type_traits/add_volatile.hpp \
+ /usr/include/boost/throw_exception.hpp \
+ /usr/include/boost/assert/source_location.hpp \
+ /usr/include/boost/current_function.hpp \
+ /usr/include/boost/exception/exception.hpp \
+ /usr/include/boost/multiprecision/detail/precision.hpp \
+ /usr/include/boost/multiprecision/traits/is_variable_precision.hpp \
+ /usr/include/boost/multiprecision/detail/number_base.hpp \
+ /usr/include/boost/utility/enable_if.hpp /usr/include/boost/core/nvp.hpp \
+ /usr/include/boost/type_traits/is_constructible.hpp \
+ /usr/include/boost/type_traits/is_destructible.hpp \
+ /usr/include/boost/type_traits/is_default_constructible.hpp \
+ /usr/include/boost/type_traits/decay.hpp \
+ /usr/include/boost/type_traits/remove_bounds.hpp \
+ /usr/include/boost/type_traits/remove_extent.hpp \
+ /usr/include/boost/math/tools/complex.hpp \
+ /usr/include/boost/lexical_cast.hpp \
+ /usr/include/boost/range/iterator_range_core.hpp \
+ /usr/include/boost/range/functions.hpp \
+ /usr/include/boost/range/begin.hpp /usr/include/boost/range/config.hpp \
+ /usr/include/boost/range/iterator.hpp \
+ /usr/include/boost/range/range_fwd.hpp \
+ /usr/include/boost/range/mutable_iterator.hpp \
+ /usr/include/boost/range/detail/extract_optional_type.hpp \
+ /usr/include/boost/range/detail/msvc_has_iterator_workaround.hpp \
+ /usr/include/boost/range/const_iterator.hpp \
+ /usr/include/boost/range/end.hpp \
+ /usr/include/boost/range/detail/implementation_help.hpp \
+ /usr/include/boost/range/detail/common.hpp \
+ /usr/include/boost/range/detail/sfinae.hpp \
+ /usr/include/boost/range/size.hpp /usr/include/boost/range/size_type.hpp \
+ /usr/include/boost/range/difference_type.hpp \
+ /usr/include/boost/range/has_range_iterator.hpp \
+ /usr/include/boost/range/concepts.hpp \
+ /usr/include/boost/concept_check.hpp \
+ /usr/include/boost/concept/assert.hpp \
+ /usr/include/boost/concept/detail/general.hpp \
+ /usr/include/boost/concept/detail/backward_compatibility.hpp \
+ /usr/include/boost/concept/detail/has_constraints.hpp \
+ /usr/include/boost/type_traits/conversion_traits.hpp \
+ /usr/include/boost/concept/usage.hpp \
+ /usr/include/boost/concept/detail/concept_def.hpp \
+ /usr/include/boost/preprocessor/seq/for_each_i.hpp \
+ /usr/include/boost/preprocessor/repetition/for.hpp \
+ /usr/include/boost/preprocessor/repetition/detail/for.hpp \
+ /usr/include/boost/preprocessor/seq/seq.hpp \
+ /usr/include/boost/preprocessor/seq/elem.hpp \
+ /usr/include/boost/preprocessor/seq/size.hpp \
+ /usr/include/boost/preprocessor/seq/detail/is_empty.hpp \
+ /usr/include/boost/preprocessor/seq/enum.hpp \
+ /usr/include/boost/concept/detail/concept_undef.hpp \
+ /usr/include/boost/iterator/iterator_concepts.hpp \
+ /usr/include/boost/range/value_type.hpp \
+ /usr/include/boost/range/detail/misc_concept.hpp \
+ /usr/include/boost/range/detail/has_member_size.hpp \
+ /usr/include/boost/utility.hpp \
+ /usr/include/boost/utility/base_from_member.hpp \
+ /usr/include/boost/preprocessor/repetition/repeat_from_to.hpp \
+ /usr/include/boost/utility/binary.hpp \
+ /usr/include/boost/preprocessor/control/deduce_d.hpp \
+ /usr/include/boost/preprocessor/seq/cat.hpp \
+ /usr/include/boost/preprocessor/seq/fold_left.hpp \
+ /usr/include/boost/preprocessor/seq/transform.hpp \
+ /usr/include/boost/preprocessor/arithmetic/mod.hpp \
+ /usr/include/boost/preprocessor/arithmetic/detail/div_base.hpp \
+ /usr/include/boost/preprocessor/comparison/less_equal.hpp \
+ /usr/include/boost/preprocessor/logical/not.hpp \
+ /usr/include/boost/utility/identity_type.hpp \
+ /usr/include/boost/core/checked_delete.hpp \
+ /usr/include/boost/core/noncopyable.hpp \
+ /usr/include/boost/range/distance.hpp \
+ /usr/include/boost/iterator/distance.hpp \
+ /usr/include/boost/range/empty.hpp /usr/include/boost/range/rbegin.hpp \
+ /usr/include/boost/range/reverse_iterator.hpp \
+ /usr/include/boost/iterator/reverse_iterator.hpp \
+ /usr/include/boost/range/rend.hpp \
+ /usr/include/boost/range/algorithm/equal.hpp \
+ /usr/include/boost/range/detail/safe_bool.hpp \
+ /usr/include/boost/next_prior.hpp \
+ /usr/include/boost/type_traits/has_plus.hpp \
+ /usr/include/boost/type_traits/detail/has_binary_operator.hpp \
+ /usr/include/boost/type_traits/make_void.hpp \
+ /usr/include/boost/type_traits/has_plus_assign.hpp \
+ /usr/include/boost/type_traits/has_minus.hpp \
+ /usr/include/boost/type_traits/has_minus_assign.hpp \
+ /usr/include/boost/iterator/advance.hpp \
+ /usr/include/boost/lexical_cast/bad_lexical_cast.hpp \
+ /usr/include/boost/lexical_cast/try_lexical_convert.hpp \
+ /usr/include/boost/lexical_cast/detail/is_character.hpp \
+ /usr/include/boost/lexical_cast/detail/converter_numeric.hpp \
+ /usr/include/boost/type_traits/is_base_of.hpp \
+ /usr/include/boost/type_traits/is_float.hpp \
+ /usr/include/boost/numeric/conversion/cast.hpp \
+ /usr/include/boost/type.hpp \
+ /usr/include/boost/numeric/conversion/converter.hpp \
+ /usr/include/boost/numeric/conversion/conversion_traits.hpp \
+ /usr/include/boost/numeric/conversion/detail/conversion_traits.hpp \
+ /usr/include/boost/numeric/conversion/detail/meta.hpp \
+ /usr/include/boost/mpl/equal_to.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/equal_to.hpp \
+ /usr/include/boost/numeric/conversion/detail/int_float_mixture.hpp \
+ /usr/include/boost/numeric/conversion/int_float_mixture_enum.hpp \
  /usr/include/boost/numeric/conversion/detail/sign_mixture.hpp \
  /usr/include/boost/numeric/conversion/sign_mixture_enum.hpp \
  /usr/include/boost/numeric/conversion/detail/udt_builtin_mixture.hpp \
  /usr/include/boost/numeric/conversion/udt_builtin_mixture_enum.hpp \
  /usr/include/boost/numeric/conversion/detail/is_subranged.hpp \
  /usr/include/boost/mpl/multiplies.hpp /usr/include/boost/mpl/times.hpp \
- /usr/include/boost/mpl/aux_/arithmetic_op.hpp \
- /usr/include/boost/mpl/aux_/largest_int.hpp \
  /usr/include/boost/mpl/aux_/preprocessed/gcc/times.hpp \
- /usr/include/boost/mpl/aux_/preprocessor/default_params.hpp \
- /usr/include/boost/mpl/less.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/less.hpp \
  /usr/include/boost/numeric/conversion/converter_policies.hpp \
- /usr/include/boost/config/no_tr1/cmath.hpp \
- /usr/include/boost/throw_exception.hpp \
- /usr/include/boost/assert/source_location.hpp \
- /usr/include/boost/current_function.hpp /usr/include/boost/cstdint.hpp \
- /usr/include/boost/exception/exception.hpp \
  /usr/include/boost/numeric/conversion/detail/converter.hpp \
  /usr/include/boost/numeric/conversion/bounds.hpp \
  /usr/include/boost/numeric/conversion/detail/bounds.hpp \
@@ -772,17 +1234,29 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/numeric/conversion/detail/numeric_cast_traits.hpp \
  /usr/include/boost/numeric/conversion/detail/preprocessed/numeric_cast_traits_common.hpp \
  /usr/include/boost/numeric/conversion/detail/preprocessed/numeric_cast_traits_long_long.hpp \
- /usr/include/boost/geometry/util/math.hpp \
- /usr/include/boost/math/constants/constants.hpp \
+ /usr/include/boost/lexical_cast/detail/converter_lexical.hpp \
+ /usr/include/boost/type_traits/has_left_shift.hpp \
+ /usr/include/boost/type_traits/has_right_shift.hpp \
+ /usr/include/boost/detail/lcast_precision.hpp \
+ /usr/include/boost/integer_traits.hpp \
+ /usr/include/boost/lexical_cast/detail/widest_char.hpp \
+ /usr/include/boost/array.hpp /usr/include/boost/swap.hpp \
+ /usr/include/boost/core/swap.hpp \
+ /usr/include/boost/container/container_fwd.hpp \
+ /usr/include/boost/container/detail/std_fwd.hpp \
+ /usr/include/boost/move/detail/std_ns_begin.hpp \
+ /usr/include/boost/move/detail/std_ns_end.hpp \
+ /usr/include/boost/lexical_cast/detail/converter_lexical_streams.hpp \
+ /usr/include/boost/lexical_cast/detail/lcast_char_constants.hpp \
+ /usr/include/boost/lexical_cast/detail/lcast_unsigned_converters.hpp \
+ /usr/include/boost/noncopyable.hpp \
+ /usr/include/boost/lexical_cast/detail/inf_nan.hpp \
+ /usr/include/boost/math/special_functions/sign.hpp \
  /usr/include/boost/math/tools/config.hpp \
- /usr/include/boost/predef/architecture/x86.h \
- /usr/include/boost/predef/architecture/x86/32.h \
- /usr/include/boost/predef/version_number.h \
- /usr/include/boost/predef/make.h /usr/include/boost/predef/detail/test.h \
- /usr/include/boost/predef/architecture/x86/64.h \
- /usr/include/c++/11/climits /usr/include/boost/math/tools/user.hpp \
- /usr/include/boost/math/tools/cxx03_warn.hpp \
- /usr/include/boost/config/pragma_message.hpp \
+ /usr/include/boost/math/tools/user.hpp \
+ /usr/include/boost/math/special_functions/math_fwd.hpp \
+ /usr/include/boost/math/special_functions/detail/round_fwd.hpp \
+ /usr/include/boost/math/tools/promotion.hpp \
  /usr/include/boost/math/policies/policy.hpp \
  /usr/include/boost/mpl/list.hpp /usr/include/boost/mpl/limits/list.hpp \
  /usr/include/boost/mpl/list/list20.hpp \
@@ -791,8 +1265,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/mpl/long_fwd.hpp \
  /usr/include/boost/mpl/list/aux_/push_front.hpp \
  /usr/include/boost/mpl/push_front_fwd.hpp \
- /usr/include/boost/mpl/next.hpp /usr/include/boost/mpl/next_prior.hpp \
- /usr/include/boost/mpl/aux_/common_name_wknd.hpp \
  /usr/include/boost/mpl/list/aux_/item.hpp \
  /usr/include/boost/mpl/list/aux_/tag.hpp \
  /usr/include/boost/mpl/list/aux_/pop_front.hpp \
@@ -810,11 +1282,8 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/mpl/list/aux_/empty.hpp \
  /usr/include/boost/mpl/empty_fwd.hpp \
  /usr/include/boost/mpl/list/aux_/begin_end.hpp \
- /usr/include/boost/mpl/begin_end_fwd.hpp \
  /usr/include/boost/mpl/list/aux_/iterator.hpp \
  /usr/include/boost/mpl/iterator_tags.hpp \
- /usr/include/boost/mpl/deref.hpp \
- /usr/include/boost/mpl/aux_/msvc_type.hpp \
  /usr/include/boost/mpl/aux_/lambda_spec.hpp \
  /usr/include/boost/mpl/list/aux_/include_preprocessed.hpp \
  /usr/include/boost/mpl/list/aux_/preprocessed/plain/list10.hpp \
@@ -822,48 +1291,10 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/mpl/aux_/preprocessed/gcc/list.hpp \
  /usr/include/boost/mpl/contains.hpp \
  /usr/include/boost/mpl/contains_fwd.hpp \
- /usr/include/boost/mpl/sequence_tag.hpp \
- /usr/include/boost/mpl/sequence_tag_fwd.hpp \
- /usr/include/boost/mpl/aux_/has_begin.hpp \
  /usr/include/boost/mpl/aux_/contains_impl.hpp \
- /usr/include/boost/mpl/begin_end.hpp \
- /usr/include/boost/mpl/aux_/begin_end_impl.hpp \
- /usr/include/boost/mpl/aux_/traits_lambda_spec.hpp \
- /usr/include/boost/mpl/find.hpp /usr/include/boost/mpl/find_if.hpp \
- /usr/include/boost/mpl/aux_/find_if_pred.hpp \
- /usr/include/boost/mpl/aux_/iter_apply.hpp \
- /usr/include/boost/mpl/apply.hpp /usr/include/boost/mpl/apply_fwd.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/apply_fwd.hpp \
- /usr/include/boost/mpl/placeholders.hpp /usr/include/boost/mpl/arg.hpp \
- /usr/include/boost/mpl/arg_fwd.hpp \
- /usr/include/boost/mpl/aux_/na_assert.hpp \
- /usr/include/boost/mpl/aux_/arity_spec.hpp \
- /usr/include/boost/mpl/aux_/arg_typedef.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/arg.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/placeholders.hpp \
- /usr/include/boost/mpl/lambda.hpp /usr/include/boost/mpl/bind.hpp \
- /usr/include/boost/mpl/bind_fwd.hpp \
- /usr/include/boost/mpl/aux_/config/bind.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/bind_fwd.hpp \
- /usr/include/boost/mpl/protect.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/bind.hpp \
- /usr/include/boost/mpl/aux_/full_lambda.hpp \
- /usr/include/boost/mpl/quote.hpp \
- /usr/include/boost/mpl/aux_/has_type.hpp \
- /usr/include/boost/mpl/aux_/config/bcc.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/quote.hpp \
- /usr/include/boost/mpl/aux_/template_arity.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/template_arity.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/full_lambda.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/apply.hpp \
- /usr/include/boost/mpl/iter_fold_if.hpp \
- /usr/include/boost/mpl/logical.hpp /usr/include/boost/mpl/or.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/or.hpp \
- /usr/include/boost/mpl/always.hpp /usr/include/boost/mpl/pair.hpp \
- /usr/include/boost/mpl/aux_/iter_fold_if_impl.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/iter_fold_if_impl.hpp \
- /usr/include/boost/mpl/same_as.hpp /usr/include/boost/mpl/remove_if.hpp \
- /usr/include/boost/mpl/fold.hpp /usr/include/boost/mpl/O1_size.hpp \
+ /usr/include/boost/mpl/find.hpp /usr/include/boost/mpl/same_as.hpp \
+ /usr/include/boost/mpl/remove_if.hpp /usr/include/boost/mpl/fold.hpp \
+ /usr/include/boost/mpl/O1_size.hpp \
  /usr/include/boost/mpl/aux_/O1_size_impl.hpp \
  /usr/include/boost/mpl/aux_/has_size.hpp \
  /usr/include/boost/mpl/aux_/fold_impl.hpp \
@@ -902,8 +1333,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/mpl/vector/aux_/clear.hpp \
  /usr/include/boost/mpl/vector/aux_/vector0.hpp \
  /usr/include/boost/mpl/vector/aux_/iterator.hpp \
- /usr/include/boost/mpl/plus.hpp \
- /usr/include/boost/mpl/aux_/preprocessed/gcc/plus.hpp \
  /usr/include/boost/mpl/minus.hpp \
  /usr/include/boost/mpl/aux_/preprocessed/gcc/minus.hpp \
  /usr/include/boost/mpl/advance_fwd.hpp \
@@ -937,176 +1366,1042 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/mpl/aux_/preprocessed/gcc/less_equal.hpp \
  /usr/include/boost/mpl/greater_equal.hpp \
  /usr/include/boost/mpl/aux_/preprocessed/gcc/greater_equal.hpp \
- /usr/include/boost/assert.hpp /usr/include/c++/11/math.h \
- /usr/include/boost/math/tools/precision.hpp \
- /usr/include/boost/math/tools/convert_from_string.hpp \
- /usr/include/boost/type_traits/is_constructible.hpp \
- /usr/include/boost/type_traits/is_destructible.hpp \
- /usr/include/boost/type_traits/is_complete.hpp \
- /usr/include/boost/type_traits/declval.hpp \
- /usr/include/boost/type_traits/add_rvalue_reference.hpp \
- /usr/include/boost/type_traits/is_void.hpp \
- /usr/include/boost/type_traits/is_reference.hpp \
- /usr/include/boost/type_traits/is_lvalue_reference.hpp \
- /usr/include/boost/type_traits/is_rvalue_reference.hpp \
- /usr/include/boost/type_traits/is_function.hpp \
- /usr/include/boost/type_traits/detail/is_function_cxx_11.hpp \
- /usr/include/boost/type_traits/detail/yes_no_type.hpp \
- /usr/include/boost/type_traits/is_default_constructible.hpp \
- /usr/include/boost/type_traits/conditional.hpp \
- /usr/include/boost/lexical_cast.hpp \
- /usr/include/boost/range/iterator_range_core.hpp \
- /usr/include/boost/iterator/iterator_facade.hpp \
- /usr/include/boost/iterator/interoperable.hpp \
- /usr/include/boost/type_traits/is_convertible.hpp \
- /usr/include/boost/type_traits/is_array.hpp \
- /usr/include/boost/type_traits/is_abstract.hpp \
- /usr/include/boost/type_traits/add_lvalue_reference.hpp \
- /usr/include/boost/type_traits/add_reference.hpp \
- /usr/include/boost/iterator/detail/config_def.hpp \
- /usr/include/boost/iterator/detail/config_undef.hpp \
- /usr/include/boost/iterator/iterator_categories.hpp \
- /usr/include/boost/iterator/detail/facade_iterator_category.hpp \
- /usr/include/boost/core/use_default.hpp \
- /usr/include/boost/detail/indirect_traits.hpp \
- /usr/include/boost/type_traits/is_volatile.hpp \
- /usr/include/boost/type_traits/is_member_function_pointer.hpp \
- /usr/include/boost/type_traits/detail/is_member_function_pointer_cxx_11.hpp \
- /usr/include/boost/type_traits/is_member_pointer.hpp \
- /usr/include/boost/detail/select_type.hpp \
- /usr/include/boost/iterator/detail/enable_if.hpp \
- /usr/include/boost/core/addressof.hpp \
- /usr/include/boost/type_traits/add_const.hpp \
- /usr/include/boost/type_traits/add_pointer.hpp \
- /usr/include/boost/type_traits/is_pod.hpp \
- /usr/include/boost/type_traits/is_scalar.hpp \
- /usr/include/boost/type_traits/is_enum.hpp \
- /usr/include/boost/range/functions.hpp \
- /usr/include/boost/range/begin.hpp /usr/include/boost/range/end.hpp \
- /usr/include/boost/range/detail/implementation_help.hpp \
- /usr/include/boost/range/detail/common.hpp \
- /usr/include/boost/range/detail/sfinae.hpp \
- /usr/include/boost/range/size.hpp /usr/include/boost/range/size_type.hpp \
- /usr/include/boost/range/difference_type.hpp \
- /usr/include/boost/range/has_range_iterator.hpp \
- /usr/include/boost/utility/enable_if.hpp \
- /usr/include/boost/core/enable_if.hpp \
- /usr/include/boost/range/concepts.hpp \
- /usr/include/boost/concept_check.hpp \
- /usr/include/boost/concept/assert.hpp \
- /usr/include/boost/concept/detail/general.hpp \
- /usr/include/boost/concept/detail/backward_compatibility.hpp \
- /usr/include/boost/concept/detail/has_constraints.hpp \
- /usr/include/boost/type_traits/conversion_traits.hpp \
- /usr/include/boost/concept/usage.hpp \
- /usr/include/boost/concept/detail/concept_def.hpp \
- /usr/include/boost/preprocessor/seq/for_each_i.hpp \
- /usr/include/boost/preprocessor/repetition/for.hpp \
- /usr/include/boost/preprocessor/repetition/detail/for.hpp \
- /usr/include/boost/preprocessor/seq/seq.hpp \
- /usr/include/boost/preprocessor/seq/elem.hpp \
- /usr/include/boost/preprocessor/seq/size.hpp \
- /usr/include/boost/preprocessor/seq/detail/is_empty.hpp \
- /usr/include/boost/preprocessor/seq/enum.hpp \
- /usr/include/boost/concept/detail/concept_undef.hpp \
- /usr/include/boost/iterator/iterator_concepts.hpp \
- /usr/include/boost/range/detail/misc_concept.hpp \
- /usr/include/boost/type_traits/make_unsigned.hpp \
- /usr/include/boost/type_traits/is_signed.hpp \
- /usr/include/boost/type_traits/is_unsigned.hpp \
- /usr/include/boost/type_traits/add_volatile.hpp \
- /usr/include/boost/range/detail/has_member_size.hpp \
- /usr/include/boost/utility.hpp \
- /usr/include/boost/utility/base_from_member.hpp \
- /usr/include/boost/preprocessor/repetition/enum_binary_params.hpp \
- /usr/include/boost/preprocessor/repetition/repeat_from_to.hpp \
- /usr/include/boost/utility/binary.hpp \
- /usr/include/boost/preprocessor/control/deduce_d.hpp \
- /usr/include/boost/preprocessor/seq/cat.hpp \
- /usr/include/boost/preprocessor/seq/fold_left.hpp \
- /usr/include/boost/preprocessor/seq/transform.hpp \
- /usr/include/boost/preprocessor/arithmetic/mod.hpp \
- /usr/include/boost/preprocessor/arithmetic/detail/div_base.hpp \
- /usr/include/boost/preprocessor/comparison/less_equal.hpp \
- /usr/include/boost/preprocessor/logical/not.hpp \
- /usr/include/boost/utility/identity_type.hpp \
- /usr/include/boost/type_traits/function_traits.hpp \
- /usr/include/boost/core/checked_delete.hpp \
- /usr/include/boost/core/noncopyable.hpp \
- /usr/include/boost/range/distance.hpp \
- /usr/include/boost/iterator/distance.hpp \
- /usr/include/boost/range/empty.hpp /usr/include/boost/range/rbegin.hpp \
- /usr/include/boost/range/reverse_iterator.hpp \
- /usr/include/boost/iterator/reverse_iterator.hpp \
- /usr/include/boost/iterator/iterator_adaptor.hpp \
- /usr/include/boost/range/rend.hpp \
- /usr/include/boost/range/algorithm/equal.hpp \
- /usr/include/boost/range/detail/safe_bool.hpp \
- /usr/include/boost/next_prior.hpp \
- /usr/include/boost/type_traits/has_plus.hpp \
- /usr/include/boost/type_traits/detail/has_binary_operator.hpp \
- /usr/include/boost/type_traits/make_void.hpp \
- /usr/include/boost/type_traits/has_plus_assign.hpp \
- /usr/include/boost/type_traits/has_minus.hpp \
- /usr/include/boost/type_traits/has_minus_assign.hpp \
- /usr/include/boost/iterator/advance.hpp \
- /usr/include/boost/lexical_cast/bad_lexical_cast.hpp \
- /usr/include/boost/lexical_cast/try_lexical_convert.hpp \
- /usr/include/boost/type_traits/type_identity.hpp \
- /usr/include/boost/lexical_cast/detail/is_character.hpp \
- /usr/include/boost/lexical_cast/detail/converter_numeric.hpp \
- /usr/include/boost/type_traits/is_float.hpp \
- /usr/include/boost/lexical_cast/detail/converter_lexical.hpp \
- /usr/include/boost/type_traits/has_left_shift.hpp \
- /usr/include/boost/type_traits/has_right_shift.hpp \
- /usr/include/boost/detail/lcast_precision.hpp \
- /usr/include/boost/integer_traits.hpp \
- /usr/include/boost/lexical_cast/detail/widest_char.hpp \
- /usr/include/boost/array.hpp /usr/include/boost/swap.hpp \
- /usr/include/boost/core/swap.hpp \
- /usr/include/boost/container/container_fwd.hpp \
- /usr/include/boost/container/detail/std_fwd.hpp \
- /usr/include/boost/move/detail/std_ns_begin.hpp \
- /usr/include/boost/move/detail/std_ns_end.hpp \
- /usr/include/boost/lexical_cast/detail/converter_lexical_streams.hpp \
- /usr/include/boost/lexical_cast/detail/lcast_char_constants.hpp \
- /usr/include/boost/lexical_cast/detail/lcast_unsigned_converters.hpp \
- /usr/include/boost/noncopyable.hpp \
- /usr/include/boost/lexical_cast/detail/inf_nan.hpp \
- /usr/include/boost/math/special_functions/sign.hpp \
- /usr/include/boost/math/special_functions/math_fwd.hpp \
- /usr/include/boost/math/special_functions/detail/round_fwd.hpp \
- /usr/include/boost/math/tools/promotion.hpp \
- /usr/include/boost/config/no_tr1/complex.hpp /usr/include/c++/11/complex \
+ /usr/include/boost/config/no_tr1/complex.hpp \
  /usr/include/boost/math/special_functions/detail/fp_traits.hpp \
- /usr/include/boost/predef/other/endian.h \
- /usr/include/boost/predef/library/c/gnu.h \
- /usr/include/boost/predef/library/c/_prefix.h \
- /usr/include/boost/predef/detail/_cassert.h \
- /usr/include/boost/predef/os/macos.h /usr/include/boost/predef/os/ios.h \
- /usr/include/boost/predef/os/bsd.h \
- /usr/include/boost/predef/os/bsd/bsdi.h \
- /usr/include/boost/predef/os/bsd/dragonfly.h \
- /usr/include/boost/predef/os/bsd/free.h \
- /usr/include/boost/predef/os/bsd/open.h \
- /usr/include/boost/predef/os/bsd/net.h \
- /usr/include/boost/predef/platform/android.h \
  /usr/include/boost/math/special_functions/fpclassify.hpp \
  /usr/include/boost/math/tools/real_cast.hpp \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/quadmath.h \
- /usr/include/boost/integer.hpp /usr/include/boost/integer_fwd.hpp \
+ /usr/include/boost/integer.hpp \
  /usr/include/boost/detail/basic_pointerbuf.hpp \
+ /usr/include/boost/multiprecision/detail/digits.hpp \
+ /usr/include/boost/multiprecision/detail/generic_interconvert.hpp \
+ /usr/include/boost/multiprecision/detail/default_ops.hpp \
+ /usr/include/boost/math/policies/error_handling.hpp \
+ /usr/include/boost/math/tools/precision.hpp \
+ /usr/include/boost/math/special_functions/next.hpp \
+ /usr/include/boost/math/special_functions/trunc.hpp \
+ /usr/include/boost/math/special_functions/hypot.hpp \
+ /usr/include/boost/mpl/front.hpp \
+ /usr/include/boost/mpl/aux_/front_impl.hpp \
+ /usr/include/boost/multiprecision/detail/functions/constants.hpp \
+ /usr/include/boost/multiprecision/detail/functions/pow.hpp \
+ /usr/include/boost/multiprecision/detail/functions/trig.hpp \
+ /usr/include/boost/multiprecision/detail/no_et_ops.hpp \
+ /usr/include/boost/multiprecision/detail/et_ops.hpp \
+ /usr/include/boost/multiprecision/detail/min_max.hpp \
+ /usr/include/boost/multiprecision/traits/is_backend.hpp \
+ /usr/include/boost/multiprecision/detail/number_compare.hpp \
+ /usr/include/boost/multiprecision/traits/is_restricted_conversion.hpp \
+ /usr/include/boost/multiprecision/traits/explicit_conversion.hpp \
+ /usr/include/boost/multiprecision/detail/ublas_interop.hpp \
+ /usr/include/boost/multiprecision/detail/integer_ops.hpp \
+ /usr/include/boost/multiprecision/detail/rebind.hpp \
+ /usr/include/boost/core/empty_value.hpp \
+ /usr/include/boost/multiprecision/cpp_int/cpp_int_config.hpp \
+ /usr/include/boost/multiprecision/rational_adaptor.hpp \
+ /usr/include/boost/functional/hash_fwd.hpp \
+ /usr/include/boost/rational.hpp /usr/include/boost/call_traits.hpp \
+ /usr/include/boost/detail/call_traits.hpp \
+ /usr/include/boost/integer/common_factor_rt.hpp \
+ /usr/include/boost/multiprecision/traits/is_byte_container.hpp \
+ /usr/include/boost/integer/static_min_max.hpp \
+ /usr/include/boost/type_traits/common_type.hpp \
+ /usr/include/boost/type_traits/detail/mp_defer.hpp \
+ /usr/include/boost/type_traits/make_signed.hpp \
+ /usr/include/boost/multiprecision/cpp_int/checked.hpp \
+ /usr/include/boost/multiprecision/detail/constexpr.hpp \
+ /usr/include/boost/multiprecision/cpp_int/value_pack.hpp \
+ /usr/include/boost/multiprecision/cpp_int/comparison.hpp \
+ /usr/include/boost/multiprecision/cpp_int/add.hpp \
+ /usr/include/boost/multiprecision/cpp_int/multiply.hpp \
+ /usr/include/boost/multiprecision/integer.hpp \
+ /usr/include/boost/multiprecision/detail/bitscan.hpp \
+ /usr/include/boost/multiprecision/cpp_int/divide.hpp \
+ /usr/include/boost/multiprecision/cpp_int/bitwise.hpp \
+ /usr/include/boost/multiprecision/cpp_int/misc.hpp \
+ /usr/include/boost/multiprecision/cpp_int/limits.hpp \
+ /usr/include/boost/multiprecision/cpp_int/literals.hpp \
+ /usr/include/boost/multiprecision/cpp_int/serialize.hpp \
+ /usr/include/boost/multiprecision/cpp_int/import_export.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/mpq_class.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/GMPXX_arithmetic_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Arithmetic_kernel/Arithmetic_kernel_base.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Get_arithmetic_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/number_utils_classes.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/kernel_basic.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/kernel_config.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/kernel_assertions.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/aff_transformation_tags.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/aff_transformation_tags_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Object.h \
+ /usr/include/boost/any.hpp /usr/include/boost/type_index.hpp \
+ /usr/include/boost/type_index/stl_type_index.hpp \
+ /usr/include/boost/type_index/type_index_facade.hpp \
+ /usr/include/boost/core/demangle.hpp /usr/include/c++/11/cxxabi.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/cxxabi_tweaks.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel_traits_fwd.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/basic_classes.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Bbox_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Dimension.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Bbox_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/representation_tags.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/global_functions.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/global_functions_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/user_classes.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/Return_base_tag.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Weighted_point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Vector_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Direction_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Iso_rectangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Circle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Conic_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/Conic_misc.h \
+ /usr/include/boost/math/special_functions/cbrt.hpp \
+ /usr/include/boost/math/tools/rational.hpp \
+ /usr/include/boost/math/tools/detail/polynomial_horner3_20.hpp \
+ /usr/include/boost/math/tools/detail/rational_horner3_20.hpp \
+ /usr/include/boost/mpl/divides.hpp \
+ /usr/include/boost/mpl/aux_/preprocessed/gcc/divides.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Aff_transformation_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Weighted_point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Vector_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Direction_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Iso_cuboid_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Circle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Aff_transformation_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/global_functions_internal_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/global_functions_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/global_functions_internal_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/hash_functions.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Weighted_point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Handle_for.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/memory.h \
+ /usr/include/boost/tuple/tuple.hpp /usr/include/boost/ref.hpp \
+ /usr/include/boost/core/ref.hpp \
+ /usr/include/boost/tuple/detail/tuple_basic.hpp \
+ /usr/include/boost/type_traits/cv_traits.hpp \
+ /usr/include/boost/type_traits/add_cv.hpp \
+ /usr/include/boost/type_traits/remove_volatile.hpp \
+ /usr/include/boost/utility/swap.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Vector_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/constant.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Direction_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/predicates/kernel_ftC2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/algorithm.h \
+ /usr/include/boost/random/random_number_generator.hpp \
+ /usr/include/boost/random/uniform_int_distribution.hpp \
+ /usr/include/boost/random/detail/config.hpp \
+ /usr/include/boost/random/detail/operators.hpp \
+ /usr/include/boost/random/detail/uniform_int_float.hpp \
+ /usr/include/boost/random/detail/generator_bits.hpp \
+ /usr/include/boost/random/detail/disable_warnings.hpp \
+ /usr/include/boost/random/detail/enable_warnings.hpp \
+ /usr/include/boost/random/detail/signed_unsigned_tools.hpp \
+ /usr/include/boost/random/traits.hpp /usr/include/boost/random.hpp \
+ /usr/include/boost/random/additive_combine.hpp \
+ /usr/include/boost/random/detail/seed.hpp \
+ /usr/include/boost/random/linear_congruential.hpp \
+ /usr/include/boost/random/detail/const_mod.hpp \
+ /usr/include/boost/random/detail/large_arithmetic.hpp \
+ /usr/include/boost/random/detail/integer_log2.hpp \
+ /usr/include/boost/integer/integer_log2.hpp \
+ /usr/include/boost/random/detail/seed_impl.hpp \
+ /usr/include/boost/integer/integer_mask.hpp \
+ /usr/include/boost/random/discard_block.hpp \
+ /usr/include/boost/random/independent_bits.hpp \
+ /usr/include/boost/random/inversive_congruential.hpp \
+ /usr/include/boost/random/lagged_fibonacci.hpp \
+ /usr/include/boost/random/uniform_01.hpp \
+ /usr/include/boost/random/detail/ptr_helper.hpp \
+ /usr/include/boost/random/detail/generator_seed_seq.hpp \
+ /usr/include/boost/random/linear_feedback_shift.hpp \
+ /usr/include/boost/random/mersenne_twister.hpp \
+ /usr/include/boost/random/detail/polynomial.hpp \
+ /usr/include/boost/random/ranlux.hpp \
+ /usr/include/boost/random/subtract_with_carry.hpp \
+ /usr/include/boost/random/shuffle_order.hpp \
+ /usr/include/boost/random/shuffle_output.hpp \
+ /usr/include/boost/random/taus88.hpp \
+ /usr/include/boost/random/xor_combine.hpp \
+ /usr/include/boost/random/generate_canonical.hpp \
+ /usr/include/boost/random/seed_seq.hpp \
+ /usr/include/boost/random/variate_generator.hpp \
+ /usr/include/boost/random/bernoulli_distribution.hpp \
+ /usr/include/boost/random/beta_distribution.hpp \
+ /usr/include/boost/random/gamma_distribution.hpp \
+ /usr/include/boost/random/exponential_distribution.hpp \
+ /usr/include/boost/random/detail/int_float_pair.hpp \
+ /usr/include/boost/random/binomial_distribution.hpp \
+ /usr/include/boost/random/cauchy_distribution.hpp \
+ /usr/include/boost/random/chi_squared_distribution.hpp \
+ /usr/include/boost/random/discrete_distribution.hpp \
+ /usr/include/boost/random/detail/vector_io.hpp \
+ /usr/include/boost/io/ios_state.hpp /usr/include/boost/io_fwd.hpp \
+ /usr/include/boost/random/extreme_value_distribution.hpp \
+ /usr/include/boost/random/fisher_f_distribution.hpp \
+ /usr/include/boost/random/geometric_distribution.hpp \
+ /usr/include/boost/random/hyperexponential_distribution.hpp \
+ /usr/include/boost/type_traits/has_pre_increment.hpp \
+ /usr/include/boost/type_traits/detail/has_prefix_operator.hpp \
+ /usr/include/boost/random/laplace_distribution.hpp \
+ /usr/include/boost/random/lognormal_distribution.hpp \
+ /usr/include/boost/random/normal_distribution.hpp \
+ /usr/include/boost/random/negative_binomial_distribution.hpp \
+ /usr/include/boost/random/poisson_distribution.hpp \
+ /usr/include/boost/random/non_central_chi_squared_distribution.hpp \
+ /usr/include/boost/random/uniform_real_distribution.hpp \
+ /usr/include/boost/random/piecewise_constant_distribution.hpp \
+ /usr/include/boost/random/uniform_real.hpp \
+ /usr/include/boost/random/piecewise_linear_distribution.hpp \
+ /usr/include/boost/random/student_t_distribution.hpp \
+ /usr/include/boost/random/triangle_distribution.hpp \
+ /usr/include/boost/random/uniform_int.hpp \
+ /usr/include/boost/random/uniform_on_sphere.hpp \
+ /usr/include/boost/random/uniform_smallint.hpp \
+ /usr/include/boost/random/weibull_distribution.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/predicates/sign_of_determinant.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/determinant.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/constructions/kernel_ftC2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/predicates_on_points_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Circle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Iso_rectangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Aff_transformation_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Handle_for_virtual.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Aff_transformation_rep_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Translation_rep_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Rotation_rep_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/rational_rotation.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Scaling_rep_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Reflection_rep_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Data_accessor_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/ConicCPA2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/predicates_on_directions_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/basic_constructions_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/point_constructions_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/line_constructions_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/ft_constructions_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Weighted_point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Vector_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Direction_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/predicates/kernel_ftC3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/constructions/kernel_ftC3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/solve_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/solve.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/plane_constructions_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Iso_cuboid_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/predicates_on_points_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Circle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Aff_transformation_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Aff_transformation_rep_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Translation_rep_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Scaling_rep_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/predicates_on_planes_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/basic_constructions_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/point_constructions_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/ft_constructions_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/function_objects.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/function_objects.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/squared_distance_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Point_2_Point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Point_2_Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/internal/squared_distance_utils_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/wmult.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/Wutils.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Point_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Point_2_Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Point_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Segment_2_Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Segment_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Segment_2_Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Segment_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Ray_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Ray_2_Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Ray_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Line_2_Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Line_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_2/Triangle_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/squared_distance_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Point_3_Point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Point_3_Weighted_point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Point_3_Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/internal/squared_distance_utils_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Point_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Point_3_Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Point_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Point_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Point_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Weighted_point_3_Weighted_point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Segment_3_Segment_3.h \
+ /usr/include/boost/algorithm/clamp.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Segment_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Segment_3_Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Segment_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Ray_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Ray_3_Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Ray_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Line_3_Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Line_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Triangle_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Distance_3/Plane_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/intersection_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Bbox_2_Circle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Circle_2_Iso_rectangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersection_traits_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersection_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Bbox_2_Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Iso_rectangle_2_Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Bbox_2_Point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Iso_rectangle_2_Point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Bbox_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Iso_rectangle_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Circle_2_Circle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Circle_2_Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Circle_2_Point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Circle_2_Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Circle_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Circle_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Iso_rectangle_2_Iso_rectangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Iso_rectangle_2_Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Iso_rectangle_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Segment_2_Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/predicates_on_points_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Line_2_Line_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Line_2_Point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Line_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Line_2_Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Line_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/internal/Straight_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Point_2_Point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Point_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Point_2_Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Point_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Ray_2_Ray_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Ray_2_Segment_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Ray_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Segment_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/Triangle_2_Triangle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/internal/Triangle_2_Triangle_2_do_intersect_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_2/internal/Triangle_2_Triangle_2_intersection_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/intersection_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Bbox_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersection_traits_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Iso_cuboid_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Iso_cuboid_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Iso_cuboid_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Iso_cuboid_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Line_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Line_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Segment_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Plane_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Plane_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Plane_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/intersections.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/utility.h \
+ /usr/include/boost/none.hpp /usr/include/boost/none_t.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Point_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Point_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Ray_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Segment_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Ray_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Sphere_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Sphere_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Bbox_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Bbox_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Triangle_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Iso_cuboid_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Iso_cuboid_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Line_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Line_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Ray_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Ray_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Segment_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Segment_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Tetrahedron_3_Bounded_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Segment_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Sphere_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Tetrahedron_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Triangle_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Iso_cuboid_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Line_3_Line_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Line_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Line_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Line_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Plane_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Plane_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Line_3_Point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Point_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Point_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Line_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Ray_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Ray_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Ray_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Line_3_Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Segment_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Segment_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Line_3_Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Sphere_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Line_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Tetrahedron_3_Unbounded_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Tetrahedron_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/tetrahedron_lines_intersections_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Line_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Line_3_Triangle_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Plane_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Plane_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Plane_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Plane_3_Plane_3_Plane_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Plane_3_Plane_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/rank.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Plane_3_Plane_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Plane_3_Point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Point_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Point_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Plane_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Ray_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Ray_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Plane_3_Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Segment_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Segment_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Plane_3_Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Sphere_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Sphere_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Plane_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Tetrahedron_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Plane_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Plane_3_Triangle_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Point_3_Point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Point_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Point_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Point_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Ray_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Point_3_Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Segment_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Segment_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Point_3_Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Sphere_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Sphere_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Point_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Tetrahedron_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Point_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Triangle_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Point_3_Triangle_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Ray_3_Ray_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Ray_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Ray_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Ray_3_Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Segment_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Segment_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Ray_3_Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Sphere_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Ray_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Tetrahedron_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Ray_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Ray_3_Triangle_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Segment_3_Segment_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Segment_3_Segment_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Segment_3_Segment_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Segment_3_Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Segment_3_Sphere_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Segment_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Segment_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Segment_3_Tetrahedron_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Segment_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Segment_3_Triangle_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Sphere_3_Sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Sphere_3_Sphere_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Sphere_3_Sphere_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Sphere_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Sphere_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Sphere_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Tetrahedron_3_Tetrahedron_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Tetrahedron_3_Tetrahedron_3_do_intersect.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Tetrahedron_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Tetrahedron_3_Triangle_3_intersection.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/Triangle_3_Triangle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Intersections_3/internal/Triangle_3_Triangle_3_intersection.h \
+ /usr/include/boost/container/flat_set.hpp \
+ /usr/include/boost/container/detail/config_begin.hpp \
+ /usr/include/boost/container/detail/workaround.hpp \
+ /usr/include/boost/container/allocator_traits.hpp \
+ /usr/include/boost/container/detail/mpl.hpp \
+ /usr/include/boost/move/detail/type_traits.hpp \
+ /usr/include/boost/move/detail/config_begin.hpp \
+ /usr/include/boost/move/detail/workaround.hpp \
+ /usr/include/boost/move/detail/meta_utils.hpp \
+ /usr/include/boost/move/detail/meta_utils_core.hpp \
+ /usr/include/boost/move/detail/config_end.hpp \
+ /usr/include/boost/intrusive/detail/mpl.hpp \
+ /usr/include/boost/intrusive/detail/config_begin.hpp \
+ /usr/include/boost/intrusive/detail/config_end.hpp \
+ /usr/include/boost/container/detail/config_end.hpp \
+ /usr/include/boost/container/detail/type_traits.hpp \
+ /usr/include/boost/container/detail/placement_new.hpp \
+ /usr/include/boost/intrusive/pointer_traits.hpp \
+ /usr/include/boost/intrusive/detail/workaround.hpp \
+ /usr/include/boost/intrusive/pointer_rebind.hpp \
+ /usr/include/boost/move/detail/pointer_element.hpp \
+ /usr/include/boost/move/utility_core.hpp \
+ /usr/include/boost/move/core.hpp \
+ /usr/include/boost/intrusive/detail/has_member_function_callable_with.hpp \
+ /usr/include/boost/move/detail/fwd_macros.hpp \
+ /usr/include/boost/container/new_allocator.hpp \
+ /usr/include/boost/container/throw_exception.hpp \
+ /usr/include/boost/container/detail/flat_tree.hpp \
+ /usr/include/boost/container/detail/pair.hpp \
+ /usr/include/boost/container/detail/variadic_templates_tools.hpp \
+ /usr/include/boost/move/adl_move_swap.hpp \
+ /usr/include/boost/intrusive/detail/minimal_pair_header.hpp \
+ /usr/include/boost/container/vector.hpp \
+ /usr/include/boost/container/options.hpp \
+ /usr/include/boost/intrusive/pack_options.hpp \
+ /usr/include/boost/container/detail/advanced_insert_int.hpp \
+ /usr/include/boost/container/detail/copy_move_algo.hpp \
+ /usr/include/boost/container/detail/iterator.hpp \
+ /usr/include/boost/intrusive/detail/iterator.hpp \
+ /usr/include/boost/intrusive/detail/std_fwd.hpp \
+ /usr/include/boost/move/detail/iterator_traits.hpp \
+ /usr/include/boost/move/detail/iterator_to_raw_pointer.hpp \
+ /usr/include/boost/move/detail/to_raw_pointer.hpp \
+ /usr/include/boost/container/detail/construct_in_place.hpp \
+ /usr/include/boost/container/detail/iterators.hpp \
+ /usr/include/boost/container/detail/value_init.hpp \
+ /usr/include/boost/intrusive/detail/reverse_iterator.hpp \
+ /usr/include/boost/move/iterator.hpp \
+ /usr/include/boost/core/no_exceptions_support.hpp \
+ /usr/include/boost/container/detail/destroyers.hpp \
+ /usr/include/boost/container/detail/version_type.hpp \
+ /usr/include/boost/container/detail/algorithm.hpp \
+ /usr/include/boost/intrusive/detail/algorithm.hpp \
+ /usr/include/boost/container/detail/alloc_helpers.hpp \
+ /usr/include/boost/container/detail/allocation_type.hpp \
+ /usr/include/boost/container/detail/next_capacity.hpp \
+ /usr/include/boost/container/detail/min_max.hpp \
+ /usr/include/boost/container/detail/value_functors.hpp \
+ /usr/include/boost/move/traits.hpp \
+ /usr/include/boost/move/detail/move_helpers.hpp \
+ /usr/include/boost/move/algo/adaptive_merge.hpp \
+ /usr/include/boost/move/algo/detail/adaptive_sort_merge.hpp \
+ /usr/include/boost/move/detail/reverse_iterator.hpp \
+ /usr/include/boost/move/algo/move.hpp \
+ /usr/include/boost/move/algo/detail/merge.hpp \
+ /usr/include/boost/move/algo/detail/basic_op.hpp \
+ /usr/include/boost/move/detail/destruct_n.hpp \
+ /usr/include/boost/move/algo/predicate.hpp \
+ /usr/include/boost/move/algo/detail/insertion_sort.hpp \
+ /usr/include/boost/move/detail/placement_new.hpp \
+ /usr/include/boost/move/algo/detail/merge_sort.hpp \
+ /usr/include/boost/move/algo/detail/heap_sort.hpp \
+ /usr/include/boost/move/algo/detail/is_sorted.hpp \
+ /usr/include/boost/move/algo/unique.hpp \
+ /usr/include/boost/move/algo/detail/set_difference.hpp \
+ /usr/include/boost/container/detail/is_sorted.hpp \
+ /usr/include/boost/container/detail/is_contiguous_container.hpp \
+ /usr/include/boost/container/detail/is_container.hpp \
+ /usr/include/boost/move/make_unique.hpp \
+ /usr/include/boost/move/unique_ptr.hpp \
+ /usr/include/boost/move/detail/unique_ptr_meta_utils.hpp \
+ /usr/include/boost/move/default_delete.hpp \
+ /usr/include/boost/move/algo/adaptive_sort.hpp \
+ /usr/include/boost/move/algo/detail/pdqsort.hpp \
+ /usr/include/boost/intrusive/detail/minimal_less_equal_header.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/Type_equality_wrapper.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/interface_macros.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel_fwd.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_predicate.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian_converter.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian_converter_fwd.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/NT_converter.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Enum_converter.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel/Type_mapper.h \
+ /usr/include/boost/mpl/transform.hpp \
+ /usr/include/boost/mpl/pair_view.hpp \
+ /usr/include/boost/mpl/iterator_category.hpp \
+ /usr/include/boost/mpl/is_sequence.hpp /usr/include/boost/mpl/remove.hpp \
+ /usr/include/boost/preprocessor/repetition/enum.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Exact_kernel_selector.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Simple_homogeneous.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/Homogeneous_base.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/Aff_transformationH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/DirectionH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/predicates_on_directionsH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/PointH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/VectorH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Kernel_d/Cartesian_const_iterator_d.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/predicates_on_pointsH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/Iso_rectangleH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/LineH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/Weighted_point_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/Data_accessorH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/ConicHPA2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/Aff_transformationH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/DirectionH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/Iso_cuboidH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/PlaneH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/PointH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/Weighted_point_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/RayH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/SphereH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/predicates_on_pointsH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/VectorH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/basic_constructionsH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/distance_predicatesH2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/basic_constructionsH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/distance_predicatesH3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous/function_objects.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Number_types/internal/Exact_type_selector.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/MP_Float.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Sqrt_extension_type.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Interval_arithmetic.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension_fwd.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Algebraic_structure_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Real_embeddable_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Fraction_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Coercion_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Modular_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Scalar_factor_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Algebraic_extension_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Chinese_remainder_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Chinese_remainder_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/extended_euclidean_algorithm.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/io.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Get_arithmetic_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/convert_to_bfi.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/convert_to_bfi.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cache.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/function_objects.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Wang_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Sqrt_extension/Eigen_NumTraits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/MP_Float_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/MP_Float_arithmetic_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/cpp_float.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost_mp.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost_mp_type.h \
+ /usr/include/boost/multiprecision/gmp.hpp \
+ /usr/include/boost/multiprecision/debug_adaptor.hpp \
+ /usr/include/boost/multiprecision/traits/extract_exponent_type.hpp \
+ /usr/include/boost/multiprecision/detail/big_lanczos.hpp \
+ /usr/include/boost/math/bindings/detail/big_lanczos.hpp \
+ /usr/include/boost/math/special_functions/lanczos.hpp \
+ /usr/include/boost/math/tools/big_constant.hpp \
+ /usr/include/boost/math/special_functions/detail/lanczos_sse2.hpp \
+ /usr/include/boost/multiprecision/detail/atomic.hpp \
+ /usr/include/boost/math/special_functions/asinh.hpp \
+ /usr/include/boost/math/special_functions/sqrt1pm1.hpp \
+ /usr/include/boost/math/special_functions/log1p.hpp \
+ /usr/include/boost/math/tools/series.hpp \
+ /usr/include/boost/math/special_functions/expm1.hpp \
+ /usr/include/boost/math/constants/constants.hpp \
+ /usr/include/boost/math/tools/cxx03_warn.hpp \
+ /usr/include/boost/config/pragma_message.hpp \
+ /usr/include/boost/math/tools/convert_from_string.hpp \
  /usr/include/boost/utility/declval.hpp \
  /usr/include/boost/math/constants/calculate_constants.hpp \
- /usr/include/boost/math/special_functions/trunc.hpp \
- /usr/include/boost/math/policies/error_handling.hpp \
+ /usr/include/boost/math/special_functions/acosh.hpp \
+ /usr/include/boost/math/special_functions/atanh.hpp \
+ /usr/include/boost/math/special_functions/gamma.hpp \
+ /usr/include/boost/math/tools/fraction.hpp \
+ /usr/include/boost/math/special_functions/powm1.hpp \
+ /usr/include/boost/math/special_functions/detail/igamma_large.hpp \
+ /usr/include/boost/math/special_functions/detail/unchecked_factorial.hpp \
+ /usr/include/boost/math/special_functions/detail/lgamma_small.hpp \
+ /usr/include/boost/math/special_functions/bernoulli.hpp \
+ /usr/include/boost/math/special_functions/detail/unchecked_bernoulli.hpp \
+ /usr/include/boost/math/special_functions/detail/bernoulli_details.hpp \
+ /usr/include/boost/detail/lightweight_mutex.hpp \
+ /usr/include/boost/smart_ptr/detail/lightweight_mutex.hpp \
+ /usr/include/boost/smart_ptr/detail/lwm_std_mutex.hpp \
+ /usr/include/c++/11/mutex /usr/include/c++/11/bits/std_mutex.h \
+ /usr/include/c++/11/bits/unique_lock.h \
+ /usr/include/boost/math/tools/atomic.hpp \
+ /usr/include/boost/math/tools/toms748_solve.hpp \
+ /usr/include/boost/math/special_functions/polygamma.hpp \
+ /usr/include/boost/math/special_functions/factorials.hpp \
+ /usr/include/boost/math/special_functions/detail/polygamma.hpp \
+ /usr/include/boost/math/special_functions/zeta.hpp \
+ /usr/include/boost/math/special_functions/sin_pi.hpp \
+ /usr/include/boost/math/special_functions/digamma.hpp \
+ /usr/include/boost/math/special_functions/cos_pi.hpp \
+ /usr/include/boost/math/special_functions/pow.hpp \
+ /usr/include/boost/math/special_functions/trigamma.hpp \
+ /usr/include/boost/math/special_functions/detail/igamma_inverse.hpp \
+ /usr/include/boost/math/tools/tuple.hpp \
+ /usr/include/boost/math/tools/roots.hpp \
+ /usr/include/boost/math/special_functions/detail/gamma_inva.hpp \
+ /usr/include/boost/math/special_functions/erf.hpp \
+ /usr/include/boost/math/special_functions/detail/erf_inv.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/BOOST_MP_arithmetic_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE_arithmetic_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE_BigFloat.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE_coercion_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/CORE.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/CoreDefs.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/extLong.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Config.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/auto_link/CORE.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/export/CORE.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/MemoryPool.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/CoreAux.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/CoreAux_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/extLong_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/CoreDefs_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Timer.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Expr.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/BigFloat.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/BigFloatRep.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/BigRat.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/BigInt.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/RefCount.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/BigFloat_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/ExprRep.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Real.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/RealRep.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/BigFloat.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Real_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Filter.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/poly/Sturm.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/poly/Poly.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Promote.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/poly/Poly.tcc \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE/Expr_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Bigfloat_interval_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE_Expr.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE_BigInt.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/CORE_BigRat.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Gmpz.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Gmp_coercion_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/GMP/Gmpz_type.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/gmp.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/GMP/Gmpzf_type.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/GMP/Gmpfr_type.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/ipower.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/GMP/Gmpfr_type_static.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/GMP/Gmpq_type.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Gmpq.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Gmpzf.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/GMP_arithmetic_kernel.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Mpzf.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Homogeneous_converter.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Static_filters.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/tools.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Orientation_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Static_filter_error.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Orientation_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Collinear_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Equal_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Equal_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Compare_x_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Compare_y_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Is_degenerate_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Angle_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Do_intersect_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Do_intersect_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Coplanar_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Compare_y_at_x_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Side_of_oriented_circle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Side_of_oriented_sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Compare_squared_radius_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Compare_weighted_squared_radius_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Power_side_of_oriented_power_circle_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Power_side_of_oriented_power_sphere_3.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Filtered_kernel/internal/Static_filters/Compare_distance_3.h \
+ /usr/include/boost/type_traits.hpp \
+ /usr/include/boost/type_traits/aligned_storage.hpp \
+ /usr/include/boost/type_traits/alignment_of.hpp \
+ /usr/include/boost/type_traits/type_with_alignment.hpp \
+ /usr/include/boost/type_traits/conjunction.hpp \
+ /usr/include/boost/type_traits/copy_cv.hpp \
+ /usr/include/boost/type_traits/copy_cv_ref.hpp \
+ /usr/include/boost/type_traits/copy_reference.hpp \
+ /usr/include/boost/type_traits/disjunction.hpp \
+ /usr/include/boost/type_traits/enable_if.hpp \
+ /usr/include/boost/type_traits/extent.hpp \
+ /usr/include/boost/type_traits/floating_point_promotion.hpp \
+ /usr/include/boost/type_traits/has_bit_and.hpp \
+ /usr/include/boost/type_traits/has_bit_and_assign.hpp \
+ /usr/include/boost/type_traits/has_bit_or.hpp \
+ /usr/include/boost/type_traits/has_bit_or_assign.hpp \
+ /usr/include/boost/type_traits/has_bit_xor.hpp \
+ /usr/include/boost/type_traits/has_bit_xor_assign.hpp \
+ /usr/include/boost/type_traits/has_complement.hpp \
+ /usr/include/boost/type_traits/has_dereference.hpp \
+ /usr/include/boost/type_traits/has_divides.hpp \
+ /usr/include/boost/type_traits/has_divides_assign.hpp \
+ /usr/include/boost/type_traits/has_equal_to.hpp \
+ /usr/include/boost/type_traits/has_greater.hpp \
+ /usr/include/boost/type_traits/has_greater_equal.hpp \
+ /usr/include/boost/type_traits/has_left_shift_assign.hpp \
+ /usr/include/boost/type_traits/has_less.hpp \
+ /usr/include/boost/type_traits/has_less_equal.hpp \
+ /usr/include/boost/type_traits/has_logical_and.hpp \
+ /usr/include/boost/type_traits/has_logical_not.hpp \
+ /usr/include/boost/type_traits/has_logical_or.hpp \
+ /usr/include/boost/type_traits/has_modulus.hpp \
+ /usr/include/boost/type_traits/has_modulus_assign.hpp \
+ /usr/include/boost/type_traits/has_multiplies.hpp \
+ /usr/include/boost/type_traits/has_multiplies_assign.hpp \
+ /usr/include/boost/type_traits/has_negate.hpp \
+ /usr/include/boost/type_traits/has_new_operator.hpp \
+ /usr/include/boost/type_traits/has_not_equal_to.hpp \
+ /usr/include/boost/type_traits/has_nothrow_assign.hpp \
+ /usr/include/boost/type_traits/is_assignable.hpp \
+ /usr/include/boost/type_traits/has_nothrow_constructor.hpp \
+ /usr/include/boost/type_traits/has_nothrow_copy.hpp \
+ /usr/include/boost/type_traits/is_copy_constructible.hpp \
+ /usr/include/boost/type_traits/has_nothrow_destructor.hpp \
+ /usr/include/boost/type_traits/has_trivial_destructor.hpp \
+ /usr/include/boost/type_traits/has_post_decrement.hpp \
+ /usr/include/boost/type_traits/detail/has_postfix_operator.hpp \
+ /usr/include/boost/type_traits/has_post_increment.hpp \
+ /usr/include/boost/type_traits/has_pre_decrement.hpp \
+ /usr/include/boost/type_traits/has_right_shift_assign.hpp \
+ /usr/include/boost/type_traits/has_trivial_assign.hpp \
+ /usr/include/boost/type_traits/has_trivial_constructor.hpp \
+ /usr/include/boost/type_traits/has_trivial_copy.hpp \
+ /usr/include/boost/type_traits/has_trivial_move_assign.hpp \
+ /usr/include/boost/type_traits/has_trivial_move_constructor.hpp \
+ /usr/include/boost/type_traits/has_unary_minus.hpp \
+ /usr/include/boost/type_traits/has_unary_plus.hpp \
+ /usr/include/boost/type_traits/has_virtual_destructor.hpp \
+ /usr/include/boost/type_traits/is_compound.hpp \
  /usr/include/boost/type_traits/is_fundamental.hpp \
+ /usr/include/boost/type_traits/is_copy_assignable.hpp \
+ /usr/include/boost/type_traits/is_noncopyable.hpp \
+ /usr/include/boost/type_traits/is_empty.hpp \
+ /usr/include/boost/type_traits/is_final.hpp \
+ /usr/include/boost/type_traits/is_list_constructible.hpp \
+ /usr/include/boost/type_traits/is_member_object_pointer.hpp \
+ /usr/include/boost/type_traits/is_nothrow_move_assignable.hpp \
+ /usr/include/boost/type_traits/is_nothrow_move_constructible.hpp \
+ /usr/include/boost/type_traits/is_nothrow_swappable.hpp \
+ /usr/include/boost/type_traits/is_object.hpp \
+ /usr/include/boost/type_traits/is_polymorphic.hpp \
+ /usr/include/boost/type_traits/is_scoped_enum.hpp \
+ /usr/include/boost/type_traits/negation.hpp \
+ /usr/include/boost/type_traits/is_stateless.hpp \
+ /usr/include/boost/type_traits/is_trivially_copyable.hpp \
+ /usr/include/boost/type_traits/is_union.hpp \
+ /usr/include/boost/type_traits/is_unscoped_enum.hpp \
+ /usr/include/boost/type_traits/is_virtual_base_of.hpp \
+ /usr/include/boost/type_traits/rank.hpp \
+ /usr/include/boost/type_traits/remove_all_extents.hpp \
+ /usr/include/boost/type_traits/remove_cv_ref.hpp \
+ /usr/include/boost/type_traits/integral_promotion.hpp \
+ /usr/include/boost/type_traits/promote.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Converting_construction.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Cartesian/Is_trivial_construction.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/type_traits/is_iterator.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Triangulation_structural_filtering_traits.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Surface_mesh.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/license/Surface_mesh.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Surface_mesh/Surface_mesh_fwd.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Surface_mesh/Surface_mesh.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Surface_mesh/IO.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Surface_mesh/IO/3MF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/3MF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/3MF/read_3mf.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/3MF/write_3mf.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/helpers.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Container_helper.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Has_member.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/iterator.h \
+ /usr/include/boost/graph/graph_traits.hpp \
+ /usr/include/boost/pending/property.hpp \
+ /usr/include/boost/pending/detail/property.hpp \
+ /usr/include/boost/type_traits/same_traits.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Iterator_range.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/tuple.h \
+ /usr/include/boost/foreach.hpp /usr/include/boost/utility/addressof.hpp \
+ /usr/include/boost/foreach_fwd.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/circulator_bases.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/internal/helpers.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/iterator.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/circulator.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/property_map.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/value_type_traits.h \
+ /usr/include/boost/property_map/property_map.hpp \
+ /usr/include/boost/concept_archetype.hpp \
+ /usr/include/boost/property_map/vector_property_map.hpp \
+ /usr/include/boost/smart_ptr/shared_ptr.hpp \
+ /usr/include/boost/smart_ptr/detail/shared_count.hpp \
+ /usr/include/boost/smart_ptr/bad_weak_ptr.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_counted_base.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_has_gcc_intrinsics.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_has_sync_intrinsics.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_counted_base_gcc_atomic.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_typeinfo_.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_counted_impl.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_noexcept.hpp \
+ /usr/include/boost/checked_delete.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_disable_deprecated.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_convertible.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_nullptr_t.hpp \
+ /usr/include/boost/smart_ptr/detail/spinlock_pool.hpp \
+ /usr/include/boost/smart_ptr/detail/spinlock.hpp \
+ /usr/include/boost/smart_ptr/detail/spinlock_gcc_atomic.hpp \
+ /usr/include/boost/smart_ptr/detail/yield_k.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_thread_pause.hpp \
+ /usr/include/boost/smart_ptr/detail/sp_thread_sleep.hpp \
+ /usr/include/boost/smart_ptr/detail/operator_bool.hpp \
+ /usr/include/boost/smart_ptr/detail/local_sp_deleter.hpp \
+ /usr/include/boost/smart_ptr/detail/local_counted_base.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/iterator/counting_iterator.hpp \
+ /usr/include/boost/iterator/counting_iterator.hpp \
+ /usr/include/boost/detail/numeric_traits.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Default.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Named_function_parameters.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/STL_Extension/internal/mesh_option_classes.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/STL_Extension/internal/Has_features.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/STL_Extension/internal/parameters_interface.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/STL_Extension/internal/mesh_parameters_interface.h \
+ /usr/include/boost/iterator/function_output_iterator.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Surface_mesh/IO/OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF/Scanner_OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF/File_scanner_OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/binary_file_io.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF/File_header_OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF/File_header_extended_OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF/File_header_extended_OFF_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF/File_header_OFF_impl.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF/File_writer_OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OFF/generic_copy_OFF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/Generic_writer.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/named_params_helper.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/internal/initialized_index_maps_helpers.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/properties.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Dynamic_property_map.h \
+ /usr/include/boost/graph/properties.hpp \
+ /usr/include/boost/graph/property_maps/constant_property_map.hpp \
+ /usr/include/boost/graph/property_maps/null_property_map.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/Generic_facegraph_builder.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/Euler_operations.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/helpers.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/internal/Has_member_clear.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/Verbose_ostream.h \
+ /usr/include/boost/container/small_vector.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/Generic_facegraph_printer.h \
+ /usr/include/boost/container/flat_map.hpp \
+ /usr/include/boost/container/detail/container_or_allocator_rebind.hpp \
+ /usr/include/boost/container/detail/container_rebind.hpp \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Surface_mesh/IO/PLY.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/PLY.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/PLY/PLY_reader.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/PLY/PLY_writer.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/io.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/3MF.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/GOCAD.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/GOCAD.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/INP.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/OBJ.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OBJ.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OBJ/File_writer_wavefront.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/PLY.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/STL.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/STL.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/STL/STL_reader.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/VTK.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/VTK.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/VTK/VTK_reader.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/VTK/VTK_writer.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/WRL.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/VRML.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/VRML/File_writer_VRML_2.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/VRML/VRML_2_ostream.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/VRML/VRML_1_ostream.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OI.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OI/File_writer_inventor.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/OI/Inventor_ostream.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/IO/polygon_mesh_io.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/IO/polygon_mesh_io.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Surface_mesh/Properties.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/copy_face_graph.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/graph_traits_Surface_mesh.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/properties_Surface_mesh.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/properties_Surface_mesh_time_stamp.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/boost/graph/properties_Surface_mesh_features.h \
+ /home/geotyper/CPP_lib/CGAL-6.0.1/include/CGAL/Handle_hash_function.h \
+ /usr/include/boost/geometry.hpp /usr/include/boost/geometry/geometry.hpp \
+ /usr/include/boost/geometry/core/closure.hpp \
+ /usr/include/boost/mpl/size_t.hpp /usr/include/boost/mpl/size_t_fwd.hpp \
+ /usr/include/boost/geometry/core/ring_type.hpp \
+ /usr/include/boost/geometry/core/tag.hpp \
+ /usr/include/boost/geometry/core/tags.hpp \
+ /usr/include/boost/geometry/util/bare_type.hpp \
+ /usr/include/boost/geometry/core/coordinate_dimension.hpp \
+ /usr/include/boost/geometry/core/point_type.hpp \
+ /usr/include/boost/geometry/core/coordinate_system.hpp \
+ /usr/include/boost/geometry/core/coordinate_type.hpp \
+ /usr/include/boost/geometry/util/promote_floating_point.hpp \
+ /usr/include/boost/geometry/core/cs.hpp \
+ /usr/include/boost/geometry/core/interior_type.hpp \
+ /usr/include/boost/geometry/core/point_order.hpp \
+ /usr/include/boost/geometry/core/tag_cast.hpp \
+ /usr/include/boost/geometry/core/access.hpp \
+ /usr/include/boost/core/ignore_unused.hpp \
+ /usr/include/boost/geometry/core/exterior_ring.hpp \
+ /usr/include/boost/geometry/util/add_const_if_c.hpp \
+ /usr/include/boost/geometry/core/interior_rings.hpp \
+ /usr/include/boost/geometry/core/radian_access.hpp \
+ /usr/include/boost/geometry/util/math.hpp \
  /usr/include/boost/geometry/util/select_most_precise.hpp \
  /usr/include/boost/geometry/core/radius.hpp \
  /usr/include/boost/geometry/core/topological_dimension.hpp \
  /usr/include/boost/geometry/arithmetic/arithmetic.hpp \
- /usr/include/boost/call_traits.hpp \
- /usr/include/boost/detail/call_traits.hpp \
  /usr/include/boost/concept/requires.hpp \
  /usr/include/boost/preprocessor/seq/for_each.hpp \
  /usr/include/boost/geometry/geometries/concepts/point_concept.hpp \
@@ -1120,7 +2415,7 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/strategies/buffer.hpp \
  /usr/include/boost/geometry/strategies/centroid.hpp \
  /usr/include/boost/geometry/strategies/compare.hpp \
- /usr/include/boost/mpl/min.hpp /usr/include/boost/mpl/min_max.hpp \
+ /usr/include/boost/mpl/min.hpp \
  /usr/include/boost/geometry/strategies/convex_hull.hpp \
  /usr/include/boost/geometry/strategies/covered_by.hpp \
  /usr/include/boost/geometry/strategies/densify.hpp \
@@ -1140,10 +2435,8 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/variant/detail/config.hpp \
  /usr/include/boost/blank_fwd.hpp \
  /usr/include/boost/preprocessor/enum.hpp \
- /usr/include/boost/preprocessor/repetition/enum.hpp \
  /usr/include/boost/preprocessor/enum_params.hpp \
  /usr/include/boost/preprocessor/enum_shifted_params.hpp \
- /usr/include/boost/preprocessor/repetition/enum_shifted_params.hpp \
  /usr/include/boost/variant/detail/substitute_fwd.hpp \
  /usr/include/boost/geometry/geometries/concepts/box_concept.hpp \
  /usr/include/boost/geometry/geometries/concepts/linestring_concept.hpp \
@@ -1167,18 +2460,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/variant/apply_visitor.hpp \
  /usr/include/boost/variant/detail/apply_visitor_unary.hpp \
  /usr/include/boost/move/utility.hpp \
- /usr/include/boost/move/detail/config_begin.hpp \
- /usr/include/boost/move/detail/workaround.hpp \
- /usr/include/boost/move/utility_core.hpp \
- /usr/include/boost/move/core.hpp \
- /usr/include/boost/move/detail/config_end.hpp \
- /usr/include/boost/move/detail/meta_utils.hpp \
- /usr/include/boost/move/detail/meta_utils_core.hpp \
- /usr/include/boost/move/traits.hpp \
- /usr/include/boost/move/detail/type_traits.hpp \
- /usr/include/boost/type_traits/copy_cv_ref.hpp \
- /usr/include/boost/type_traits/copy_cv.hpp \
- /usr/include/boost/type_traits/copy_reference.hpp \
  /usr/include/boost/variant/detail/has_result_type.hpp \
  /usr/include/boost/variant/detail/apply_visitor_binary.hpp \
  /usr/include/boost/variant/detail/apply_visitor_delayed.hpp \
@@ -1190,8 +2471,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/algorithms/detail/interior_iterator.hpp \
  /usr/include/boost/geometry/algorithms/detail/convert_point_to_point.hpp \
  /usr/include/boost/geometry/geometries/variant.hpp \
- /usr/include/boost/mpl/front.hpp \
- /usr/include/boost/mpl/aux_/front_impl.hpp \
  /usr/include/boost/geometry/algorithms/clear.hpp \
  /usr/include/boost/geometry/util/is_inverse_spheroidal_coordinates.hpp \
  /usr/include/boost/geometry/strategies/side_info.hpp \
@@ -1199,17 +2478,8 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/arithmetic/determinant.hpp \
  /usr/include/boost/geometry/util/select_calculation_type.hpp \
  /usr/include/boost/geometry/policies/relate/tupled.hpp \
- /usr/include/boost/tuple/tuple.hpp /usr/include/boost/ref.hpp \
- /usr/include/boost/core/ref.hpp \
- /usr/include/boost/tuple/detail/tuple_basic.hpp \
- /usr/include/boost/type_traits/cv_traits.hpp \
- /usr/include/boost/type_traits/add_cv.hpp \
- /usr/include/boost/type_traits/remove_volatile.hpp \
- /usr/include/boost/utility/swap.hpp \
  /usr/include/boost/geometry/strategies/intersection_result.hpp \
  /usr/include/boost/geometry/policies/robustness/segment_ratio.hpp \
- /usr/include/boost/rational.hpp /usr/include/boost/operators.hpp \
- /usr/include/boost/integer/common_factor_rt.hpp \
  /usr/include/boost/geometry/strategies/side.hpp \
  /usr/include/boost/geometry/strategies/cartesian/intersection.hpp \
  /usr/include/boost/geometry/core/exception.hpp \
@@ -1270,7 +2540,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/strategies/spherical/area.hpp \
  /usr/include/boost/geometry/formulas/area_formulas.hpp \
  /usr/include/boost/geometry/formulas/flattening.hpp \
- /usr/include/boost/math/special_functions/hypot.hpp \
  /usr/include/boost/geometry/srs/sphere.hpp \
  /usr/include/boost/geometry/strategies/spherical/get_radius.hpp \
  /usr/include/boost/geometry/strategies/spherical/disjoint_box_box.hpp \
@@ -1375,17 +2644,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/algorithm/string/detail/classification.hpp \
  /usr/include/boost/algorithm/string/predicate_facade.hpp \
  /usr/include/boost/algorithm/string/case_conv.hpp \
- /usr/include/boost/iterator/transform_iterator.hpp \
- /usr/include/boost/utility/result_of.hpp \
- /usr/include/boost/preprocessor/iteration/iterate.hpp \
- /usr/include/boost/preprocessor/slot/slot.hpp \
- /usr/include/boost/preprocessor/slot/detail/def.hpp \
- /usr/include/boost/preprocessor/facilities/intercept.hpp \
- /usr/include/boost/preprocessor/iteration/detail/iter/forward1.hpp \
- /usr/include/boost/preprocessor/iteration/detail/bounds/lower1.hpp \
- /usr/include/boost/preprocessor/slot/detail/shared.hpp \
- /usr/include/boost/preprocessor/iteration/detail/bounds/upper1.hpp \
- /usr/include/boost/utility/detail/result_of_iterate.hpp \
  /usr/include/boost/algorithm/string/detail/case_conv.hpp \
  /usr/include/boost/algorithm/string/predicate.hpp \
  /usr/include/boost/algorithm/string/compare.hpp \
@@ -1404,19 +2662,7 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/function/detail/prologue.hpp \
  /usr/include/boost/config/no_tr1/functional.hpp \
  /usr/include/boost/function/function_base.hpp \
- /usr/include/boost/type_index.hpp \
- /usr/include/boost/type_index/stl_type_index.hpp \
- /usr/include/boost/type_index/type_index_facade.hpp \
- /usr/include/boost/container_hash/hash_fwd.hpp \
- /usr/include/boost/core/demangle.hpp /usr/include/c++/11/cxxabi.h \
- /usr/include/x86_64-linux-gnu/c++/11/bits/cxxabi_tweaks.h \
- /usr/include/boost/type_traits/has_trivial_copy.hpp \
- /usr/include/boost/type_traits/is_copy_constructible.hpp \
- /usr/include/boost/type_traits/has_trivial_destructor.hpp \
  /usr/include/boost/type_traits/composite_traits.hpp \
- /usr/include/boost/type_traits/is_union.hpp \
- /usr/include/boost/type_traits/alignment_of.hpp \
- /usr/include/boost/type_traits/enable_if.hpp \
  /usr/include/boost/function_equal.hpp \
  /usr/include/boost/function/function_fwd.hpp \
  /usr/include/boost/mem_fn.hpp /usr/include/boost/bind/mem_fn.hpp \
@@ -1427,7 +2673,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/function/detail/function_iterate.hpp \
  /usr/include/boost/function/detail/maybe_include.hpp \
  /usr/include/boost/function/function_template.hpp \
- /usr/include/boost/core/no_exceptions_support.hpp \
  /usr/include/boost/algorithm/string/detail/util.hpp \
  /usr/include/boost/algorithm/string/join.hpp \
  /usr/include/boost/algorithm/string/detail/sequence.hpp \
@@ -1453,7 +2698,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/strategies/cartesian/buffer_side_straight.hpp \
  /usr/include/boost/geometry/strategies/cartesian/centroid_average.hpp \
  /usr/include/boost/geometry/algorithms/detail/signed_size_type.hpp \
- /usr/include/boost/type_traits/make_signed.hpp \
  /usr/include/boost/geometry/strategies/cartesian/centroid_bashein_detmer.hpp \
  /usr/include/boost/geometry/strategies/cartesian/centroid_weighted_length.hpp \
  /usr/include/boost/geometry/algorithms/detail/distance/interface.hpp \
@@ -1497,10 +2741,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/mpl/set/aux_/preprocessed/plain/set20.hpp \
  /usr/include/boost/mpl/aux_/preprocessed/gcc/set.hpp \
  /usr/include/boost/geometry/util/transform_variant.hpp \
- /usr/include/boost/mpl/transform.hpp \
- /usr/include/boost/mpl/pair_view.hpp \
- /usr/include/boost/mpl/iterator_category.hpp \
- /usr/include/boost/mpl/is_sequence.hpp \
  /usr/include/boost/geometry/util/combine_if.hpp \
  /usr/include/boost/geometry/algorithms/detail/distance/default_strategies.hpp \
  /usr/include/boost/geometry/algorithms/detail/throw_on_empty_input.hpp \
@@ -1515,12 +2755,8 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/function_types/result_type.hpp \
  /usr/include/boost/blank.hpp \
  /usr/include/boost/detail/templated_streams.hpp \
- /usr/include/boost/type_traits/is_empty.hpp \
- /usr/include/boost/type_traits/is_stateless.hpp \
- /usr/include/boost/type_traits/has_trivial_constructor.hpp \
  /usr/include/boost/function_types/is_callable_builtin.hpp \
  /usr/include/boost/function_types/components.hpp \
- /usr/include/boost/mpl/remove.hpp \
  /usr/include/boost/function_types/config/config.hpp \
  /usr/include/boost/function_types/config/compiler.hpp \
  /usr/include/boost/function_types/config/cc_names.hpp \
@@ -1588,13 +2824,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/strategies/geographic/area.hpp \
  /usr/include/boost/geometry/formulas/authalic_radius_sqr.hpp \
  /usr/include/boost/geometry/formulas/eccentricity_sqr.hpp \
- /usr/include/boost/math/special_functions/atanh.hpp \
- /usr/include/boost/math/special_functions/log1p.hpp \
- /usr/include/boost/math/tools/series.hpp \
- /usr/include/boost/math/tools/rational.hpp \
- /usr/include/boost/math/tools/detail/polynomial_horner3_20.hpp \
- /usr/include/boost/math/tools/detail/rational_horner3_20.hpp \
- /usr/include/boost/math/tools/big_constant.hpp \
  /usr/include/boost/geometry/strategies/geographic/buffer_point_circle.hpp \
  /usr/include/boost/geometry/strategies/geographic/densify.hpp \
  /usr/include/boost/geometry/strategies/geographic/disjoint_segment_box.hpp \
@@ -1702,18 +2931,7 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/algorithms/detail/expand_by_epsilon.hpp \
  /usr/include/boost/geometry/algorithms/detail/partition.hpp \
  /usr/include/boost/geometry/index/rtree.hpp \
- /usr/include/boost/container/new_allocator.hpp \
- /usr/include/boost/container/detail/config_begin.hpp \
- /usr/include/boost/container/detail/workaround.hpp \
- /usr/include/boost/container/throw_exception.hpp \
- /usr/include/boost/container/detail/config_end.hpp \
- /usr/include/boost/move/move.hpp /usr/include/boost/move/iterator.hpp \
- /usr/include/boost/move/detail/iterator_traits.hpp \
- /usr/include/boost/move/algorithm.hpp \
- /usr/include/boost/move/algo/move.hpp \
- /usr/include/boost/move/detail/iterator_to_raw_pointer.hpp \
- /usr/include/boost/move/detail/to_raw_pointer.hpp \
- /usr/include/boost/move/detail/pointer_element.hpp \
+ /usr/include/boost/move/move.hpp /usr/include/boost/move/algorithm.hpp \
  /usr/include/boost/geometry/algorithms/detail/comparable_distance/interface.hpp \
  /usr/include/boost/geometry/strategies/comparable_distance_result.hpp \
  /usr/include/boost/geometry/strategies/default_comparable_distance_result.hpp \
@@ -1765,64 +2983,8 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/index/detail/meta.hpp \
  /usr/include/boost/geometry/index/detail/utilities.hpp \
  /usr/include/boost/geometry/index/detail/rtree/node/node.hpp \
- /usr/include/boost/container/vector.hpp \
- /usr/include/boost/container/allocator_traits.hpp \
- /usr/include/boost/container/detail/mpl.hpp \
- /usr/include/boost/intrusive/detail/mpl.hpp \
- /usr/include/boost/intrusive/detail/config_begin.hpp \
- /usr/include/boost/intrusive/detail/config_end.hpp \
- /usr/include/boost/container/detail/type_traits.hpp \
- /usr/include/boost/container/detail/placement_new.hpp \
- /usr/include/boost/intrusive/pointer_traits.hpp \
- /usr/include/boost/intrusive/detail/workaround.hpp \
- /usr/include/boost/intrusive/pointer_rebind.hpp \
- /usr/include/boost/intrusive/detail/has_member_function_callable_with.hpp \
- /usr/include/boost/move/detail/fwd_macros.hpp \
- /usr/include/boost/container/options.hpp \
- /usr/include/boost/intrusive/pack_options.hpp \
- /usr/include/boost/container/detail/advanced_insert_int.hpp \
- /usr/include/boost/container/detail/copy_move_algo.hpp \
- /usr/include/boost/container/detail/iterator.hpp \
- /usr/include/boost/intrusive/detail/iterator.hpp \
- /usr/include/boost/intrusive/detail/std_fwd.hpp \
- /usr/include/boost/container/detail/construct_in_place.hpp \
- /usr/include/boost/container/detail/iterators.hpp \
- /usr/include/boost/container/detail/value_init.hpp \
- /usr/include/boost/intrusive/detail/reverse_iterator.hpp \
- /usr/include/boost/container/detail/variadic_templates_tools.hpp \
- /usr/include/boost/move/adl_move_swap.hpp \
- /usr/include/boost/container/detail/destroyers.hpp \
- /usr/include/boost/container/detail/version_type.hpp \
- /usr/include/boost/container/detail/algorithm.hpp \
- /usr/include/boost/intrusive/detail/algorithm.hpp \
- /usr/include/boost/container/detail/alloc_helpers.hpp \
- /usr/include/boost/container/detail/allocation_type.hpp \
- /usr/include/boost/container/detail/next_capacity.hpp \
- /usr/include/boost/container/detail/min_max.hpp \
- /usr/include/boost/container/detail/value_functors.hpp \
- /usr/include/boost/move/detail/move_helpers.hpp \
- /usr/include/boost/move/algo/adaptive_merge.hpp \
- /usr/include/boost/move/algo/detail/adaptive_sort_merge.hpp \
- /usr/include/boost/move/detail/reverse_iterator.hpp \
- /usr/include/boost/move/algo/detail/merge.hpp \
- /usr/include/boost/move/algo/detail/basic_op.hpp \
- /usr/include/boost/move/detail/destruct_n.hpp \
- /usr/include/boost/move/algo/predicate.hpp \
- /usr/include/boost/move/algo/detail/insertion_sort.hpp \
- /usr/include/boost/move/detail/placement_new.hpp \
- /usr/include/boost/move/algo/detail/merge_sort.hpp \
- /usr/include/boost/move/algo/detail/heap_sort.hpp \
- /usr/include/boost/move/algo/detail/is_sorted.hpp \
- /usr/include/boost/move/algo/unique.hpp \
- /usr/include/boost/move/algo/detail/set_difference.hpp \
  /usr/include/boost/geometry/index/detail/varray.hpp \
- /usr/include/boost/type_traits/aligned_storage.hpp \
- /usr/include/boost/type_traits/type_with_alignment.hpp \
  /usr/include/boost/geometry/index/detail/varray_detail.hpp \
- /usr/include/boost/type_traits/has_trivial_assign.hpp \
- /usr/include/boost/type_traits/is_assignable.hpp \
- /usr/include/boost/type_traits/has_trivial_move_constructor.hpp \
- /usr/include/boost/type_traits/has_trivial_move_assign.hpp \
  /usr/include/boost/detail/no_exceptions_support.hpp \
  /usr/include/boost/config/header_deprecated.hpp \
  /usr/include/boost/geometry/index/detail/rtree/node/concept.hpp \
@@ -1831,10 +2993,8 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/index/detail/rtree/node/scoped_deallocator.hpp \
  /usr/include/boost/geometry/index/detail/rtree/node/variant_visitor.hpp \
  /usr/include/boost/variant/get.hpp \
- /usr/include/boost/utility/addressof.hpp \
  /usr/include/boost/variant/detail/element_index.hpp \
  /usr/include/boost/variant/recursive_wrapper_fwd.hpp \
- /usr/include/boost/type_traits/is_nothrow_move_constructible.hpp \
  /usr/include/boost/variant/detail/move.hpp \
  /usr/include/boost/variant/variant.hpp \
  /usr/include/boost/variant/detail/backup_holder.hpp \
@@ -1842,18 +3002,13 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/variant/detail/forced_return.hpp \
  /usr/include/boost/variant/detail/initializer.hpp \
  /usr/include/boost/detail/reference_content.hpp \
- /usr/include/boost/type_traits/has_nothrow_copy.hpp \
  /usr/include/boost/variant/detail/make_variant_list.hpp \
  /usr/include/boost/variant/detail/over_sequence.hpp \
  /usr/include/boost/variant/detail/visitation_impl.hpp \
  /usr/include/boost/variant/detail/cast_storage.hpp \
  /usr/include/boost/variant/detail/hash_variant.hpp \
- /usr/include/boost/functional/hash_fwd.hpp \
  /usr/include/boost/variant/detail/std_hash.hpp \
  /usr/include/boost/integer/common_factor_ct.hpp \
- /usr/include/boost/type_traits/has_nothrow_constructor.hpp \
- /usr/include/boost/type_traits/is_nothrow_move_assignable.hpp \
- /usr/include/boost/type_traits/has_nothrow_assign.hpp \
  /usr/include/boost/mpl/empty.hpp \
  /usr/include/boost/mpl/aux_/empty_impl.hpp \
  /usr/include/boost/mpl/insert_range.hpp \
@@ -1861,7 +3016,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/mpl/joint_view.hpp \
  /usr/include/boost/mpl/aux_/joint_iter.hpp \
  /usr/include/boost/mpl/aux_/iter_push_front.hpp \
- /usr/include/boost/type_traits/same_traits.hpp \
  /usr/include/boost/mpl/max_element.hpp /usr/include/boost/mpl/sizeof.hpp \
  /usr/include/boost/variant/detail/variant_io.hpp \
  /usr/include/boost/geometry/index/detail/rtree/node/variant_dynamic.hpp \
@@ -1906,11 +3060,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/index/detail/rtree/query_iterators.hpp \
  /usr/include/boost/scoped_ptr.hpp \
  /usr/include/boost/smart_ptr/scoped_ptr.hpp \
- /usr/include/boost/checked_delete.hpp \
- /usr/include/boost/smart_ptr/detail/sp_nullptr_t.hpp \
- /usr/include/boost/smart_ptr/detail/sp_disable_deprecated.hpp \
- /usr/include/boost/smart_ptr/detail/sp_noexcept.hpp \
- /usr/include/boost/smart_ptr/detail/operator_bool.hpp \
  /usr/include/boost/geometry/index/detail/config_end.hpp \
  /usr/include/boost/geometry/algorithms/relate.hpp \
  /usr/include/boost/geometry/algorithms/detail/relate/implementation.hpp \
@@ -2132,148 +3281,6 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /usr/include/boost/geometry/geometries/polygon.hpp \
  /usr/include/boost/geometry/geometries/multi_point.hpp \
  /usr/include/boost/geometry/geometries/multi_linestring.hpp \
- /home/geotyper/CPP_lib/glm/glm/glm.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/_fixes.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/setup.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/../simd/platform.h \
- /home/geotyper/CPP_lib/glm/glm/fwd.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/qualifier.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/setup.hpp \
- /home/geotyper/CPP_lib/glm/glm/vec2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec2.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/./compute_vector_relational.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/./setup.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_float2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_float2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_double2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_double2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_int2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_int2_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../ext/scalar_int_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../ext/../detail/setup.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint2_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../ext/scalar_uint_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/vec3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec3.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/compute_vector_decl.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/_vectorize.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_float3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_float3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_double3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_double3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_int3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_int3_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint3_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/vec4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_vec4.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_bool4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_float4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_float4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_double4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_double4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/setup.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_int4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_int4_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/vector_uint4_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/mat2x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/matrix_double2x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_mat2x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/type_mat2x2.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../matrix.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../detail/setup.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat2x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double2x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat2x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat2x3.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double2x3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float2x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float2x3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat2x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double2x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat2x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat2x4.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double2x4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float2x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float2x4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat3x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x2.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat3x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x3.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../common.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/_fixes.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/func_common.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../vector_relational.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../detail/setup.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../detail/func_vector_relational.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/compute_common.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/setup.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/type_vec1.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/type_vec1.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat3x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat3x4.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double3x4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float3x4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat4x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x2.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat4x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x3.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x3.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x3_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../mat4x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/type_mat4x4.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../geometric.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/func_geometric.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../exponential.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/../detail/../detail/../detail/func_exponential.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_double4x4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x4.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/.././ext/matrix_float4x4_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/../detail/../detail/func_matrix.inl \
- /home/geotyper/CPP_lib/glm/glm/./ext/matrix_double2x2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/matrix_float2x2.hpp \
- /home/geotyper/CPP_lib/glm/glm/./ext/matrix_float2x2_precision.hpp \
- /home/geotyper/CPP_lib/glm/glm/trigonometric.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/func_trigonometric.inl \
- /home/geotyper/CPP_lib/glm/glm/packing.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/func_packing.inl \
- /home/geotyper/CPP_lib/glm/glm/detail/type_half.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/type_half.inl \
- /home/geotyper/CPP_lib/glm/glm/integer.hpp \
- /home/geotyper/CPP_lib/glm/glm/detail/func_integer.inl \
  /home/geotyper/CPP_lib/glm/glm/gtc/matrix_transform.hpp \
  /home/geotyper/CPP_lib/glm/glm/gtc/../ext/matrix_projection.hpp \
  /home/geotyper/CPP_lib/glm/glm/gtc/../ext/../gtc/constants.hpp \
@@ -2324,4 +3331,5 @@ CMakeFiles/ColorMoveArt2.dir/src/main.cpp.o: \
  /home/geotyper/CPP_lib/glm/glm/gtc/../gtc/../ext/vector_int1_sized.hpp \
  /home/geotyper/CPP_lib/glm/glm/gtc/../gtc/../ext/vector_uint1.hpp \
  /home/geotyper/CPP_lib/glm/glm/gtc/../gtc/../ext/vector_uint1_sized.hpp \
- /home/geotyper/CPP_lib/glm/glm/gtc/type_ptr.inl
+ /home/geotyper/CPP_lib/glm/glm/gtc/type_ptr.inl \
+ /home/geotyper/my_projects/CPP/color_move_art2/src/CgalMeshBuilder.h
