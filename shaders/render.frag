@@ -4,9 +4,10 @@ out vec4 fragColor;
 
 layout(binding = 0, rgba32f) uniform image3D imgInput;
 uniform float sharpenAmount;
+uniform vec4 bgColor;
 
 vec4 compositePixel(ivec2 pos, ivec3 size) {
-    vec4 color = vec4(1.0);
+    vec4 color = bgColor;
     for (int z = 0; z < size.z; ++z) {
         vec4 voxel = imageLoad(imgInput, ivec3(pos, z));
         if (voxel.a > 0.01) {

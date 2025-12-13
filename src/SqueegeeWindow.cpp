@@ -7,6 +7,8 @@
 #include <QTextStream>
 #include <QDir>
 #include <QStringList>
+#include <QImage>
+#include <QPainter>
 
 SqueegeeWindow::SqueegeeWindow(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -775,7 +777,94 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
     glBindTexture(GL_TEXTURE_3D, m_texture3DA);
     glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, data.data());
 
+
+    
+    // Check if we have any paths requesting Qt Painter
+    bool useQt = false;
+    for(const auto& p : paths) if(p.useQtPainter) { useQt = true; break; }
+    
+    if (useQt) {
+        QImage wrapper(w, h, QImage::Format_ARGB32_Premultiplied);
+        wrapper.fill(Qt::transparent);
+        QPainter p(&wrapper);
+        p.setRenderHint(QPainter::Antialiasing);
+        
+        for(const auto& path : paths) {
+            if (!path.useQtPainter || path.points.size() < 2) continue;
+            
+            float b = path.brightness;
+            QPen pen(QColor(
+                std::clamp(path.color.redF() * b, 0.0f, 1.0f) * 255, 
+                std::clamp(path.color.greenF() * b, 0.0f, 1.0f) * 255, 
+                std::clamp(path.color.blueF() * b, 0.0f, 1.0f) * 255
+            ));
+            pen.setWidthF(path.size);
+            pen.setCapStyle(Qt::RoundCap);
+            pen.setJoinStyle(Qt::RoundJoin);
+            p.setPen(pen);
+            
+            QPolygonF poly;
+            for(const auto& pt : path.points) {
+                // paintPaths expects GL Y (Bottom-Up) usually? 
+                // Wait, SqueegeeWindow::paintPaths comments said:
+                // "paintPaths (GPU) expects GL Y (Bottom-Up) similar to spawnDrops." -> from MainWindow
+                // But QPainter uses Top-Down (0 at top).
+                // So we need to flip Y.
+                poly << QPointF(pt.x(), h - pt.y());
+            }
+            p.drawPolyline(poly);
+        }
+        p.end();
+        
+        // Blend wrapper into texture
+        // We need to upload this image to a texture and run a compute shader ideally, 
+        // OR just read back the texture, blend on CPU, and upload. 
+        // CPU blending is easiest given we already have 'data' read back.
+        
+        const uchar* bits = wrapper.constBits();
+        // wrapper is ARGB32_Premultiplied (B G R A in memory usually, or ordering depends on endian)
+        // QImage::Format_ARGB32_Premultiplied: 0xAARRGGBB
+        
+        for(int y=0; y<h; ++y) {
+            for(int x=0; x<w; ++x) {
+                QColor c = wrapper.pixelColor(x, y);
+                if (c.alpha() > 0) {
+                    int idx = (0 * w * h + (h - 1 - y) * w + x) * 4; // Flip Y back for GL texture (0 at bottom)
+                    // Blend (Straight RGB Output calculation)
+                    float srcA = c.alphaF();
+                    float srcR = c.redF();
+                    float srcG = c.greenF();
+                    float srcB = c.blueF();
+                    
+                    float dstR = data[idx+0];
+                    float dstG = data[idx+1];
+                    float dstB = data[idx+2];
+                    float dstA = data[idx+3];
+                    
+                    // Composite: src OVER dst
+                    float outA = srcA + dstA * (1.0f - srcA);
+                    
+                    if (outA > 0.001f) {
+                        float outR = (srcR * srcA + dstR * dstA * (1.0f - srcA)) / outA;
+                        float outG = (srcG * srcA + dstG * dstA * (1.0f - srcA)) / outA;
+                        float outB = (srcB * srcA + dstB * dstA * (1.0f - srcA)) / outA;
+                        
+                        data[idx+0] = outR;
+                        data[idx+1] = outG;
+                        data[idx+2] = outB;
+                        data[idx+3] = outA;
+                    } else {
+                         data[idx+3] = 0.0f;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Original GPU-loop-like CPU logic for non-qt paths
     for (const auto& path : paths) {
+        if (path.useQtPainter) continue;
+        
         if (path.points.size() < 2) continue;
 
         int cz = path.layer >= 0 ? path.layer % d : QRandomGenerator::global()->bounded(d);

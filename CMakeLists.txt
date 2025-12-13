@@ -55,6 +55,7 @@ target_link_libraries(ColorMoveArt2 PRIVATE
 
 target_include_directories(ColorMoveArt2 PRIVATE
     /home/geotyper/CPP_lib/glm
+    /home/geotyper/CPP_lib
 )
 
 # Copy art_source to build directory

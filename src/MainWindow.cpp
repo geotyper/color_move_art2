@@ -564,6 +564,14 @@ MainWindow::MainWindow()
     agentLayout->addRow("Count:", m_agentCountSlider);
     agentLayout->addRow(m_agentLifetimeLabel);
     agentLayout->addRow("Lifetime:", m_agentLifetimeSlider);
+
+    m_lineWidthLabel = new QLabel("Width: 1.0 px");
+    m_lineWidthSlider = new QSlider(Qt::Horizontal);
+    m_lineWidthSlider->setRange(1, 50); // 0.1 to 5.0
+    m_lineWidthSlider->setValue(10);
+    connect(m_lineWidthSlider, &QSlider::valueChanged, this, &MainWindow::onLineWidthChanged);
+    agentLayout->addRow(m_lineWidthLabel);
+    agentLayout->addRow(m_lineWidthSlider);
     
     tab3DLayout->addWidget(new QLabel("<b>Agent Projection:</b>"));
     tab3DLayout->addLayout(agentLayout);
@@ -1143,6 +1151,12 @@ void MainWindow::onAgentLifetimeChanged(int value)
     }
 }
 
+void MainWindow::onLineWidthChanged(int value)
+{
+    float width = value / 10.0f;
+    m_lineWidthLabel->setText(QString("Width: %1 px").arg(width, 0, 'f', 1));
+}
+
 void MainWindow::onProjectAgents()
 {
     if (!m_meshViewer || !m_squeegeeWindow) return;
@@ -1209,7 +1223,14 @@ void MainWindow::onPaintTrails()
              if (seg.size() < 2) continue;
              SqueegeeWindow::PathInfo info;
              info.color = a.color;
-             info.size = (float)m_sizeSlider->value();
+             //info.size = (float)m_sizeSlider->value();
+             float lw = m_lineWidthSlider->value() / 10.0f;
+             info.size = lw;
+             info.useQtPainter = true; // Always use QPainter for trails now, or make it conditional
+             // If user wants "old style" thick lines they can use the "Drop Max Size" maybe?
+             // But the request is specific: "when draw 2d lines with 1px width looks like 3-4 px width make then add from 0.1-1 slider"
+             // So we default this slider to control the trail width.
+             
              info.layer = a.layer;
              
              float avgBright = 1.0f;

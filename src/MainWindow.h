@@ -64,6 +64,7 @@ private slots:
     void onAgentCountChanged(int value);
     void onProjectAgents();
     void onPaintTrails();
+    void onLineWidthChanged(int value);
     void onClearCanvas();
     void onBackgroundColorClicked();
     void onExtrudeRandom();
@@ -90,6 +91,9 @@ private:
     QMdiSubWindow *m_meshSubWindow;
     QMdiSubWindow *m_squeegeeSubWindow;
     QMdiSubWindow *m_agentSubWindow;
+
+    QSlider *m_lineWidthSlider;
+    QLabel *m_lineWidthLabel;
 
     void saveSettings();
     void loadSettings();

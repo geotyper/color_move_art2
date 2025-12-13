@@ -182,6 +182,7 @@ public:
         float size;
         float brightness = 1.0f;
         int layer = -1;
+        bool useQtPainter = false;
     };
     void paintPaths(const QVector<PathInfo>& paths);
 
