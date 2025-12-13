@@ -11,22 +11,26 @@
 #include <numeric>
 #include <QFormLayout>
 #include <QTabWidget>
+#include <QRandomGenerator>
 #include "MeshViewerWidget.h"
 #include "AgentProjectionWindow.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <cmath>
 #include "CgalMeshBuilder.h"
+#include "CgalMeshBuilderTentacles.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <CGAL/Polygon_mesh_processing/repair.h>
 #include <CGAL/Polygon_mesh_processing/stitch_borders.h>
+#include <CGAL/Subdivision_method_3/subdivision_methods_3.h>
 
 namespace {
 using SM = CgalMeshBuilder::SurfaceMesh;
 using Kernel = CgalMeshBuilder::Kernel;
 using Vector = Kernel::Vector_3;
 namespace PMP = CGAL::Polygon_mesh_processing;
+namespace S3 = CGAL::Subdivision_method_3;
 
 static SM toSurfaceMesh(const std::vector<Vertex>& verts, const std::vector<uint32_t>& indices) {
     SM sm;
@@ -442,6 +446,28 @@ MainWindow::MainWindow()
     // Density
     genLayout->addWidget(m_densityLabel);
     genLayout->addWidget(m_densitySlider);
+
+    // Line Width (Moved here)
+    m_lineWidthLabel = new QLabel("Trail Width: 1.0 px");
+    m_lineWidthSlider = new QSlider(Qt::Horizontal);
+    m_lineWidthSlider->setRange(1, 1000); // 0.1 to 100.0
+    m_lineWidthSlider->setValue(10);
+    connect(m_lineWidthSlider, &QSlider::valueChanged, this, &MainWindow::onLineWidthChanged);
+    genLayout->addWidget(m_lineWidthLabel);
+    genLayout->addWidget(m_lineWidthSlider);
+    
+    // Buttons in Gen Layout
+    QPushButton *btnProject = new QPushButton("Project to Canvas");
+    connect(btnProject, &QPushButton::clicked, this, &MainWindow::onProjectAgents);
+    genLayout->addWidget(btnProject);
+
+    QPushButton *btnPaint = new QPushButton("Paint Trails");
+    connect(btnPaint, &QPushButton::clicked, this, &MainWindow::onPaintTrails);
+    genLayout->addWidget(btnPaint);
+    
+    QPushButton *btnClear = new QPushButton("Clear Canvas");
+    connect(btnClear, &QPushButton::clicked, this, &MainWindow::onClearCanvas);
+    genLayout->addWidget(btnClear);
     
     formLayout->addRow(genLayout);
     // Preview Checkbox
@@ -565,13 +591,7 @@ MainWindow::MainWindow()
     agentLayout->addRow(m_agentLifetimeLabel);
     agentLayout->addRow("Lifetime:", m_agentLifetimeSlider);
 
-    m_lineWidthLabel = new QLabel("Width: 1.0 px");
-    m_lineWidthSlider = new QSlider(Qt::Horizontal);
-    m_lineWidthSlider->setRange(1, 50); // 0.1 to 5.0
-    m_lineWidthSlider->setValue(10);
-    connect(m_lineWidthSlider, &QSlider::valueChanged, this, &MainWindow::onLineWidthChanged);
-    agentLayout->addRow(m_lineWidthLabel);
-    agentLayout->addRow(m_lineWidthSlider);
+
     
     tab3DLayout->addWidget(new QLabel("<b>Agent Projection:</b>"));
     tab3DLayout->addLayout(agentLayout);
@@ -656,6 +676,56 @@ MainWindow::MainWindow()
     tabGenLayout->addLayout(genForm);
     tabGenLayout->addWidget(m_generateMeshBtn);
     tabGenLayout->addWidget(m_extrudeBtn);
+
+    // Modifiers: Tentacles + Catmull-Clark
+    tabGenLayout->addWidget(new QLabel("<b>Modifiers:</b>"));
+    QFormLayout *modForm = new QFormLayout();
+
+    m_tentacleStepsSlider = new QSlider(Qt::Horizontal);
+    m_tentacleStepsSlider->setRange(1, 50);
+    m_tentacleStepsSlider->setValue(10);
+    m_tentacleStepsLabel = new QLabel("Tentacle Steps: 10");
+    connect(m_tentacleStepsSlider, &QSlider::valueChanged, this, [this](int v){
+        m_tentacleStepsLabel->setText(QString("Tentacle Steps: %1").arg(v));
+    });
+    modForm->addRow(m_tentacleStepsLabel, m_tentacleStepsSlider);
+
+    m_tentacleDistSlider = new QSlider(Qt::Horizontal);
+    m_tentacleDistSlider->setRange(1, 200); // 0.01 .. 2.00
+    m_tentacleDistSlider->setValue(15);     // 0.15 default
+    m_tentacleDistLabel = new QLabel("Step Dist: 0.15");
+    connect(m_tentacleDistSlider, &QSlider::valueChanged, this, [this](int v){
+        m_tentacleDistLabel->setText(QString("Step Dist: %1").arg(v / 100.0, 0, 'f', 2));
+    });
+    modForm->addRow(m_tentacleDistLabel, m_tentacleDistSlider);
+
+    m_tentacleScaleSlider = new QSlider(Qt::Horizontal);
+    m_tentacleScaleSlider->setRange(10, 300); // 0.10 .. 3.00
+    m_tentacleScaleSlider->setValue(75);      // 0.75 default
+    m_tentacleScaleLabel = new QLabel("Step Scale: 0.75x");
+    connect(m_tentacleScaleSlider, &QSlider::valueChanged, this, [this](int v){
+        m_tentacleScaleLabel->setText(QString("Step Scale: %1x").arg(v / 100.0, 0, 'f', 2));
+    });
+    modForm->addRow(m_tentacleScaleLabel, m_tentacleScaleSlider);
+
+    m_growTentaclesBtn = new QPushButton("Grow Tentacles (uses Random Faces %)");
+    connect(m_growTentaclesBtn, &QPushButton::clicked, this, &MainWindow::onGrowTentacles);
+    modForm->addRow(m_growTentaclesBtn);
+
+    m_catmullIterSlider = new QSlider(Qt::Horizontal);
+    m_catmullIterSlider->setRange(0, 4);
+    m_catmullIterSlider->setValue(1);
+    m_catmullIterLabel = new QLabel("Catmull-Clark Iter: 1");
+    connect(m_catmullIterSlider, &QSlider::valueChanged, this, [this](int v){
+        m_catmullIterLabel->setText(QString("Catmull-Clark Iter: %1").arg(v));
+    });
+    modForm->addRow(m_catmullIterLabel, m_catmullIterSlider);
+
+    m_catmullSmoothBtn = new QPushButton("Smooth (Catmull-Clark)");
+    connect(m_catmullSmoothBtn, &QPushButton::clicked, this, &MainWindow::onSmoothCatmull);
+    modForm->addRow(m_catmullSmoothBtn);
+
+    tabGenLayout->addLayout(modForm);
     tabGenLayout->addStretch();
     
     tabs->addTab(tabGen, "3D Gen");
@@ -1154,7 +1224,8 @@ void MainWindow::onAgentLifetimeChanged(int value)
 void MainWindow::onLineWidthChanged(int value)
 {
     float width = value / 10.0f;
-    m_lineWidthLabel->setText(QString("Width: %1 px").arg(width, 0, 'f', 1));
+    m_lineWidthLabel->setText(QString("Trail Width: %1 px").arg(width, 0, 'f', 1));
+    if(m_agentWindow) m_agentWindow->setLineWidth(width);
 }
 
 void MainWindow::onProjectAgents()
@@ -1224,7 +1295,7 @@ void MainWindow::onPaintTrails()
              SqueegeeWindow::PathInfo info;
              info.color = a.color;
              //info.size = (float)m_sizeSlider->value();
-             float lw = m_lineWidthSlider->value() / 10.0f;
+             float lw = std::max(0.1f, m_lineWidthSlider->value() / 10.0f);
              info.size = lw;
              info.useQtPainter = true; // Always use QPainter for trails now, or make it conditional
              // If user wants "old style" thick lines they can use the "Drop Max Size" maybe?
@@ -1362,4 +1433,125 @@ void MainWindow::onExtrudeRandom()
         }
         if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
     }
+}
+
+void MainWindow::onGrowTentacles()
+{
+    bool usingPersistent = !m_currentMesh.is_empty();
+    SM* targetMesh = nullptr;
+    SM tempMesh;
+
+    if (usingPersistent) {
+        targetMesh = &m_currentMesh;
+    } else {
+        if (m_lastVertices.empty() || m_lastIndices.empty()) return;
+        tempMesh = toSurfaceMesh(m_lastVertices, m_lastIndices);
+        PMP::stitch_borders(tempMesh);
+        mergeCoplanarPatches(tempMesh);
+        targetMesh = &tempMesh;
+    }
+
+    SM& sm = *targetMesh;
+    std::size_t faceCount = sm.number_of_faces();
+    if (faceCount == 0) return;
+
+    int percent = std::clamp(m_extrudeProbSlider->value(), 0, 100);
+    std::size_t seedCount = std::max<std::size_t>(1, std::lround((percent / 100.0) * faceCount));
+
+    auto seeds = CgalMeshBuilderTentacles::pick_random_faces(sm, seedCount, QRandomGenerator::global()->generate());
+    if (seeds.empty()) return;
+
+    CgalMeshBuilderTentacles::GrowParams gp;
+    gp.steps = m_tentacleStepsSlider->value();
+    gp.distPerStep = m_tentacleDistSlider->value() / 100.0;
+    gp.amountPerStep = m_tentacleScaleSlider->value() / 100.0;
+    gp.seed = QRandomGenerator::global()->generate();
+    gp.collectEachStep = false;
+    gp.collectBetweenFaces = false;
+
+    // Auto-flip direction to grow outward if normals are inverted.
+    auto faceNormal = [&sm](SM::Face_index f) -> Vector {
+        auto h0 = sm.halfedge(f);
+        if (h0 == SM::null_halfedge()) return Vector(0, 0, 1);
+        auto a = sm.point(target(h0, sm));
+        auto b = sm.point(target(next(h0, sm), sm));
+        auto c = sm.point(target(next(next(h0, sm), sm), sm));
+        auto n = CGAL::cross_product(b - a, c - a);
+        double len2 = n.squared_length();
+        return (len2 > 1e-16) ? n / std::sqrt(len2) : Vector(0, 0, 1);
+    };
+    double orientAccum = 0.0;
+    for (auto f : sm.faces()) {
+        if (sm.is_removed(f)) continue;
+        Vector n = faceNormal(f);
+        auto h = sm.halfedge(f);
+        if (h == SM::null_halfedge()) continue;
+        auto p = sm.point(target(h, sm));
+        orientAccum += (p.x() * n.x() + p.y() * n.y() + p.z() * n.z());
+    }
+    if (orientAccum < 0.0) {
+        gp.distPerStep = -gp.distPerStep;
+    }
+
+    CgalMeshBuilderTentacles::extrudeTentaclesSequential(sm, seeds, gp);
+
+    // Build display copy
+    CgalMeshBuilder::SurfaceMesh displayMesh = sm;
+    CgalMeshBuilder::triangulateAll(displayMesh);
+
+    std::vector<CgalMeshBuilder::Vertex> tmp;
+    CgalMeshBuilder::toVertexIndexFlat(displayMesh, tmp, m_lastIndices);
+    m_lastVertices.resize(tmp.size());
+    for (size_t i = 0; i < tmp.size(); ++i) {
+        m_lastVertices[i].position = glm::vec4(tmp[i].pos[0], tmp[i].pos[1], tmp[i].pos[2], 1.0f);
+        m_lastVertices[i].normal   = glm::vec4(tmp[i].norm[0], tmp[i].norm[1], tmp[i].norm[2], 0.0f);
+        m_lastVertices[i].color    = glm::vec4(tmp[i].col[0], tmp[i].col[1], tmp[i].col[2], 1.0f);
+    }
+    if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
+
+    // Keep polygonal source for further modifiers
+    m_currentMesh = sm;
+}
+
+void MainWindow::onSmoothCatmull()
+{
+    int iterations = std::clamp(m_catmullIterSlider->value(), 0, 4);
+    if (iterations <= 0) return;
+
+    bool usingPersistent = !m_currentMesh.is_empty();
+    SM* targetMesh = nullptr;
+    SM tempMesh;
+
+    if (usingPersistent) {
+        targetMesh = &m_currentMesh;
+    } else {
+        if (m_lastVertices.empty() || m_lastIndices.empty()) return;
+        tempMesh = toSurfaceMesh(m_lastVertices, m_lastIndices);
+        PMP::stitch_borders(tempMesh);
+        mergeCoplanarPatches(tempMesh);
+        targetMesh = &tempMesh;
+    }
+
+    SM& sm = *targetMesh;
+    if (sm.number_of_vertices() == 0) return;
+
+    S3::CatmullClark_subdivision(sm, CGAL::parameters::number_of_iterations(iterations));
+    sm.collect_garbage();
+
+    // Build display copy
+    CgalMeshBuilder::SurfaceMesh displayMesh = sm;
+    CgalMeshBuilder::triangulateAll(displayMesh);
+
+    std::vector<CgalMeshBuilder::Vertex> tmp;
+    CgalMeshBuilder::toVertexIndexFlat(displayMesh, tmp, m_lastIndices);
+    m_lastVertices.resize(tmp.size());
+    for (size_t i = 0; i < tmp.size(); ++i) {
+        m_lastVertices[i].position = glm::vec4(tmp[i].pos[0], tmp[i].pos[1], tmp[i].pos[2], 1.0f);
+        m_lastVertices[i].normal   = glm::vec4(tmp[i].norm[0], tmp[i].norm[1], tmp[i].norm[2], 0.0f);
+        m_lastVertices[i].color    = glm::vec4(tmp[i].col[0], tmp[i].col[1], tmp[i].col[2], 1.0f);
+    }
+    if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
+
+    // Keep polygonal source for further modifiers
+    m_currentMesh = sm;
 }

@@ -17,6 +17,7 @@
 #include "MeshViewerWidget.h"
 #include "Noise2D.h"
 #include "CgalMeshBuilder.h"
+#include "CgalMeshBuilderTentacles.h"
 
 class MainWindow : public QMainWindow
 {
@@ -68,6 +69,8 @@ private slots:
     void onClearCanvas();
     void onBackgroundColorClicked();
     void onExtrudeRandom();
+    void onGrowTentacles();
+    void onSmoothCatmull();
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
@@ -164,6 +167,16 @@ protected:
     QLabel  *m_extrudeScaleLabel;
     QCheckBox *m_extrudeRemoveBase;
     QPushButton *m_extrudeBtn;
+    QSlider *m_tentacleStepsSlider;
+    QLabel  *m_tentacleStepsLabel;
+    QSlider *m_tentacleDistSlider;
+    QLabel  *m_tentacleDistLabel;
+    QSlider *m_tentacleScaleSlider;
+    QLabel  *m_tentacleScaleLabel;
+    QPushButton *m_growTentaclesBtn;
+    QSlider *m_catmullIterSlider;
+    QLabel  *m_catmullIterLabel;
+    QPushButton *m_catmullSmoothBtn;
     
     void onPrimitiveChanged(int index);
     void onPrimParam1Changed(int value);

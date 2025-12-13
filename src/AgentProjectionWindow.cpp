@@ -25,6 +25,11 @@ void AgentProjectionWindow::setAgentLifetime(int ticks)
     if (m_meshViewer) m_meshViewer->setAgentLifetime(ticks);
 }
 
+void AgentProjectionWindow::setLineWidth(float w)
+{
+    m_lineWidth = w;
+}
+
 void AgentProjectionWindow::setRunning(bool run)
 {
     m_running = run;
@@ -99,7 +104,7 @@ void AgentProjectionWindow::updateAgents()
         // Draw Trail Segments
         QColor trailColor = p.color;
         // Apply brightness factor per point if provided
-        painter.setPen(QPen(trailColor, 1));
+        painter.setPen(QPen(trailColor, m_lineWidth));
         painter.setBrush(Qt::NoBrush);
         
         for (size_t si = 0; si < p.trailSegments.size(); ++si) {
@@ -113,7 +118,7 @@ void AgentProjectionWindow::updateAgents()
                     QColor segCol = trailColor;
                     float alpha = 0.55f + 0.45f * b;
                     segCol.setAlphaF(std::clamp(alpha, 0.0f, 1.0f));
-                    painter.setPen(QPen(segCol, 1));
+                    painter.setPen(QPen(segCol, m_lineWidth));
                     poly << QPointF(ox + tp.x() * scale,
                                      height() - (oy + tp.y() * scale));
                 }

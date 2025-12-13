@@ -798,7 +798,12 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                 std::clamp(path.color.greenF() * b, 0.0f, 1.0f) * 255, 
                 std::clamp(path.color.blueF() * b, 0.0f, 1.0f) * 255
             ));
-            pen.setWidthF(path.size);
+            const float penWidth = std::max(0.1f, path.size);
+            // Debug print to verify width
+            if (&path == &paths.first()) qDebug() << "Painting path with width:" << penWidth;
+            // Force non-cosmetic so width is honored in device pixels.
+            pen.setCosmetic(false);
+            pen.setWidthF(penWidth);
             pen.setCapStyle(Qt::RoundCap);
             pen.setJoinStyle(Qt::RoundJoin);
             p.setPen(pen);
@@ -868,7 +873,8 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
         if (path.points.size() < 2) continue;
 
         int cz = path.layer >= 0 ? path.layer % d : QRandomGenerator::global()->bounded(d);
-        float step = std::max(1.0f, path.size * 0.5f);
+        float widthPx = std::max(0.1f, path.size);
+        float step = std::max(1.0f, widthPx * 0.5f);
 
         for (int i = 0; i < path.points.size() - 1; ++i) {
             QVector2D a = path.points[i];
@@ -888,7 +894,7 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                 col.setX(std::clamp(col.x(), 0.0f, 1.0f));
                 col.setY(std::clamp(col.y(), 0.0f, 1.0f));
                 col.setZ(std::clamp(col.z(), 0.0f, 1.0f));
-                drawShapeIntoBuffer(data, w, h, d, (int)p.x(), (int)p.y(), cz, (int)path.size, col);
+                drawShapeIntoBuffer(data, w, h, d, (int)p.x(), (int)p.y(), cz, (int)std::round(widthPx), col);
             }
         }
     }

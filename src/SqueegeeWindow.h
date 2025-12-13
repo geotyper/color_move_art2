@@ -179,7 +179,7 @@ public:
     struct PathInfo {
         QVector<QVector2D> points;
         QColor color;
-        float size;
+        float size = 1.0f; // trail stroke width in canvas pixels
         float brightness = 1.0f;
         int layer = -1;
         bool useQtPainter = false;

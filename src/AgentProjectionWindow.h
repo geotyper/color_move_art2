@@ -17,6 +17,7 @@ public:
     void setAgentCount(int n);
     void setRunning(bool run);
     void setAgentLifetime(int ticks);
+    void setLineWidth(float w);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -32,4 +33,5 @@ private:
     
     int m_targetCount = 10;
     bool m_running = false;
+    float m_lineWidth = 1.0f;
 };
