@@ -38,6 +38,10 @@ set(PROJECT_SOURCES
     src/CgalMeshTriangulation.cpp
     src/CgalMeshBuilderTentacles.h
     src/CgalMeshBuilderTentacles.cpp
+    src/MeshRepository.h
+    src/MeshRepository.cpp
+    src/AgentSystem.h
+    src/AgentSystem.cpp
     resources.qrc
 )
 

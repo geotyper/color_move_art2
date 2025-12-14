@@ -1,5 +1,6 @@
 #version 430 core
 in vec3 vNormal;
+in vec3 vColor;
 out vec4 fragColor;
 
 uniform vec3 u_lightDir;
@@ -18,8 +19,7 @@ void main() {
         // Ambient
         float ambient = 0.2;
         
-        // Sphere Base Color (Grey-ish or White?)
-        vec3 baseColor = vec3(0.8, 0.8, 0.8);
+        vec3 baseColor = vColor;
         
         vec3 finalColor = baseColor * (diff + ambient);
         fragColor = vec4(finalColor, 1.0);

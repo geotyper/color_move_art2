@@ -19,6 +19,7 @@
 #include <cmath>
 #include "CgalMeshBuilder.h"
 #include "CgalMeshBuilderTentacles.h"
+#include "MeshRepository.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <CGAL/Polygon_mesh_processing/repair.h>
@@ -1371,11 +1372,9 @@ void MainWindow::onGenerateMesh()
     const int   resolution = m_primParam1Slider->value();
     const float radius     = m_primParam2Slider->value() / 10.0f;
     
-    m_currentMesh.clear();
-
-    // 1) Построение hexasphere
-    auto allFaces = CgalMeshBuilder::buildHexSphereOriented(
-        m_currentMesh,
+    SM polyMesh;
+    CgalMeshBuilder::buildHexSphereOriented(
+        polyMesh,
         resolution,
         radius,
         CgalMeshBuilder::Point_3(0,0,0),
@@ -1383,21 +1382,15 @@ void MainWindow::onGenerateMesh()
         0.0
     );
 
-    // Экструзию убрали, чтобы при смене радиуса грани оставались стык в стык.
-    m_currentMesh.collect_garbage();
+    polyMesh.collect_garbage();
 
-    // 3) Триангулируем копию для рендера, основную меш оставляем полигональной
-    CgalMeshBuilder::SurfaceMesh displayMesh = m_currentMesh;
-    CgalMeshBuilder::triangulateAll(displayMesh);
-
-    std::vector<CgalMeshBuilder::Vertex> tmp;
-    CgalMeshBuilder::toVertexIndexFlat(displayMesh, tmp, indices);
-    vertices.resize(tmp.size());
-    for(size_t i=0; i<tmp.size(); ++i) {
-        vertices[i].position = glm::vec4(tmp[i].pos[0], tmp[i].pos[1], tmp[i].pos[2], 1.0f);
-        vertices[i].normal   = glm::vec4(tmp[i].norm[0], tmp[i].norm[1], tmp[i].norm[2], 0.0f);
-        vertices[i].color    = glm::vec4(tmp[i].col[0], tmp[i].col[1], tmp[i].col[2], 1.0f);
-    }
+    // Store in repository with default color
+    m_meshRepo.clear();
+    m_activeMeshIndex = m_meshRepo.addMesh(polyMesh, Qt::white);
+    auto* entry = m_meshRepo.active();
+    if (!entry) return;
+    m_meshRepo.rebuildRenderData(*entry);
+    m_meshRepo.buildFlattened(vertices, indices);
 
     m_lastVertices = vertices;
     m_lastIndices = indices;
@@ -1411,12 +1404,12 @@ void MainWindow::onExtrudeRandom()
     // If we have a valid Cgal mesh (e.g. HexSphere), use it directly to keep polygons.
     // Otherwise, rebuild from triangles (legacy behavior).
     
-    bool usingPersistent = !m_currentMesh.is_empty();
-    CgalMeshBuilder::SurfaceMesh* targetMesh = nullptr;
-    CgalMeshBuilder::SurfaceMesh tempMesh; // Only used if rebuilding
+    bool usingPersistent = m_meshRepo.active() != nullptr;
+    SM* targetMesh = nullptr;
+    SM tempMesh; // Only used if rebuilding
     
     if (usingPersistent) {
-        targetMesh = &m_currentMesh;
+        targetMesh = &m_meshRepo.active()->polyMesh;
     } else {
         if (m_lastVertices.empty() || m_lastIndices.empty()) return;
         tempMesh = toSurfaceMesh(m_lastVertices, m_lastIndices);
@@ -1438,29 +1431,27 @@ void MainWindow::onExtrudeRandom()
         // If we just triangulate 'targetMesh', future extrusions will be on triangles again.
         // So we strictly should COPY for display triangulation.
         
-        CgalMeshBuilder::SurfaceMesh displayMesh = *targetMesh;
-        CgalMeshBuilder::triangulateAll(displayMesh);
-        
-        std::vector<CgalMeshBuilder::Vertex> tmp;
-        CgalMeshBuilder::toVertexIndexFlat(displayMesh, tmp, m_lastIndices);
-        m_lastVertices.resize(tmp.size());
-        for(size_t i=0; i<tmp.size(); ++i) {
-            m_lastVertices[i].position = glm::vec4(tmp[i].pos[0], tmp[i].pos[1], tmp[i].pos[2], 1.0f);
-            m_lastVertices[i].normal   = glm::vec4(tmp[i].norm[0], tmp[i].norm[1], tmp[i].norm[2], 0.0f);
-            m_lastVertices[i].color    = glm::vec4(tmp[i].col[0], tmp[i].col[1], tmp[i].col[2], 1.0f);
+        if (!usingPersistent) {
+            m_activeMeshIndex = m_meshRepo.addMesh(*targetMesh, Qt::white);
         }
-        if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
+        auto* entry = m_meshRepo.active();
+        if (entry) {
+            entry->polyMesh = *targetMesh;
+            m_meshRepo.rebuildRenderData(*entry);
+            m_meshRepo.buildFlattened(m_lastVertices, m_lastIndices);
+            if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
+        }
     }
 }
 
 void MainWindow::onGrowTentacles()
 {
-    bool usingPersistent = !m_currentMesh.is_empty();
+    bool usingPersistent = m_meshRepo.active() != nullptr;
     SM* targetMesh = nullptr;
     SM tempMesh;
 
     if (usingPersistent) {
-        targetMesh = &m_currentMesh;
+        targetMesh = &m_meshRepo.active()->polyMesh;
     } else {
         if (m_lastVertices.empty() || m_lastIndices.empty()) return;
         tempMesh = toSurfaceMesh(m_lastVertices, m_lastIndices);
@@ -1514,21 +1505,16 @@ void MainWindow::onGrowTentacles()
     CgalMeshBuilderTentacles::extrudeTentaclesSequential(sm, seeds, gp);
 
     // Build display copy
-    CgalMeshBuilder::SurfaceMesh displayMesh = sm;
-    CgalMeshBuilder::triangulateAll(displayMesh);
-
-    std::vector<CgalMeshBuilder::Vertex> tmp;
-    CgalMeshBuilder::toVertexIndexFlat(displayMesh, tmp, m_lastIndices);
-    m_lastVertices.resize(tmp.size());
-    for (size_t i = 0; i < tmp.size(); ++i) {
-        m_lastVertices[i].position = glm::vec4(tmp[i].pos[0], tmp[i].pos[1], tmp[i].pos[2], 1.0f);
-        m_lastVertices[i].normal   = glm::vec4(tmp[i].norm[0], tmp[i].norm[1], tmp[i].norm[2], 0.0f);
-        m_lastVertices[i].color    = glm::vec4(tmp[i].col[0], tmp[i].col[1], tmp[i].col[2], 1.0f);
+    if (!usingPersistent) {
+        m_activeMeshIndex = m_meshRepo.addMesh(sm, Qt::white);
     }
-    if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
-
-    // Keep polygonal source for further modifiers
-    m_currentMesh = sm;
+    auto* entry = m_meshRepo.active();
+    if (entry) {
+        entry->polyMesh = sm;
+        m_meshRepo.rebuildRenderData(*entry);
+        m_meshRepo.buildFlattened(m_lastVertices, m_lastIndices);
+        if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
+    }
 }
 
 void MainWindow::onSmoothCatmull()
@@ -1536,12 +1522,12 @@ void MainWindow::onSmoothCatmull()
     int iterations = std::clamp(m_catmullIterSlider->value(), 0, 4);
     if (iterations <= 0) return;
 
-    bool usingPersistent = !m_currentMesh.is_empty();
+    bool usingPersistent = m_meshRepo.active() != nullptr;
     SM* targetMesh = nullptr;
     SM tempMesh;
 
     if (usingPersistent) {
-        targetMesh = &m_currentMesh;
+        targetMesh = &m_meshRepo.active()->polyMesh;
     } else {
         if (m_lastVertices.empty() || m_lastIndices.empty()) return;
         tempMesh = toSurfaceMesh(m_lastVertices, m_lastIndices);
@@ -1557,19 +1543,14 @@ void MainWindow::onSmoothCatmull()
     sm.collect_garbage();
 
     // Build display copy
-    CgalMeshBuilder::SurfaceMesh displayMesh = sm;
-    CgalMeshBuilder::triangulateAll(displayMesh);
-
-    std::vector<CgalMeshBuilder::Vertex> tmp;
-    CgalMeshBuilder::toVertexIndexFlat(displayMesh, tmp, m_lastIndices);
-    m_lastVertices.resize(tmp.size());
-    for (size_t i = 0; i < tmp.size(); ++i) {
-        m_lastVertices[i].position = glm::vec4(tmp[i].pos[0], tmp[i].pos[1], tmp[i].pos[2], 1.0f);
-        m_lastVertices[i].normal   = glm::vec4(tmp[i].norm[0], tmp[i].norm[1], tmp[i].norm[2], 0.0f);
-        m_lastVertices[i].color    = glm::vec4(tmp[i].col[0], tmp[i].col[1], tmp[i].col[2], 1.0f);
+    if (!usingPersistent) {
+        m_activeMeshIndex = m_meshRepo.addMesh(sm, Qt::white);
     }
-    if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
-
-    // Keep polygonal source for further modifiers
-    m_currentMesh = sm;
+    auto* entry = m_meshRepo.active();
+    if (entry) {
+        entry->polyMesh = sm;
+        m_meshRepo.rebuildRenderData(*entry);
+        m_meshRepo.buildFlattened(m_lastVertices, m_lastIndices);
+        if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
+    }
 }

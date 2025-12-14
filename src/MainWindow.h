@@ -16,6 +16,7 @@
 #include "SqueegeeWindow.h"
 #include "MeshViewerWidget.h"
 #include "Noise2D.h"
+#include "MeshRepository.h"
 #include "CgalMeshBuilder.h"
 #include "CgalMeshBuilderTentacles.h"
 
@@ -191,6 +192,7 @@ protected:
     std::vector<Vertex> m_lastVertices;
     std::vector<uint32_t> m_lastIndices;
     
-    // Persistent mesh for advanced operations
-    SurfaceMesh m_currentMesh;
+    // Mesh storage with per-mesh/per-face colors
+    MeshRepository m_meshRepo;
+    int m_activeMeshIndex = -1;
 };

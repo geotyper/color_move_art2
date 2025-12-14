@@ -13,6 +13,7 @@
 #include "HelpStructures.h"
 
 #include "CgalMeshTypes.h"
+#include "AgentSystem.h"
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
@@ -87,8 +88,8 @@ public:
     };
     std::vector<AgentRenderInfo> getProjectedAgents(float viewWidth, float viewHeight);
     
-    int getAgentCount() const { return static_cast<int>(m_surfaceAgents.size()); }
-    void clearAgents() { m_surfaceAgents.clear(); }
+    int getAgentCount() const { return m_agentSystem.count(); }
+    void clearAgents() { m_agentSystem.clear(); }
     
     void updateMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
 
@@ -117,6 +118,7 @@ private:
     struct VertexData { // New struct definition
         glm::vec3 position;
         glm::vec3 normal;
+        glm::vec3 color;
     };
     std::vector<VertexData> m_vertices; // Type changed
     int m_vertexCount = 0;
@@ -132,7 +134,7 @@ private:
     SurfaceMesh m_mesh; // New member
     std::vector<glm::vec3> m_faceNormals;
     std::vector<glm::vec3> m_vertexNormals;
-    std::vector<SurfaceAgent> m_surfaceAgents; // New member
+    AgentSystem m_agentSystem;
     int m_agentLifetime = 1000;
     bool m_agentsPaused = false;
     int m_paletteIndex = 0;

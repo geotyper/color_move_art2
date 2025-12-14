@@ -120,6 +120,10 @@ void MeshViewerWidget::initializeGL()
     m_program.enableAttributeArray(1);
     m_program.setAttributeBuffer(1, GL_FLOAT, offsetof(VertexData, normal), 3, sizeof(VertexData));
     
+    // Color (Loc 2)
+    m_program.enableAttributeArray(2);
+    m_program.setAttributeBuffer(2, GL_FLOAT, offsetof(VertexData, color), 3, sizeof(VertexData));
+    
     m_vao.release();
     
     glEnable(GL_DEPTH_TEST);
@@ -185,7 +189,7 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
     qDebug() << "updateMesh called with" << vertices.size() << "vertices and" << indices.size() << "indices";
     m_mesh.clear();
     m_vertices.clear();
-    m_surfaceAgents.clear();
+    m_agentSystem.clear();
     m_faceNormals.clear();
     m_vertexNormals.clear();
     
@@ -219,6 +223,9 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         }
     }
     
+    std::vector<glm::vec3> faceColorsInput;
+    faceColorsInput.reserve(indices.size() / 3);
+
     for(size_t i = 0; i + 2 < indices.size(); i += 3) {
         uint32_t idx0 = indices[i];
         uint32_t idx1 = indices[i+1];
@@ -233,7 +240,12 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         FaceIndex fh = m_mesh.add_face(vh0, vh1, vh2);
         if (fh == SurfaceMesh::null_face()) {
             qDebug() << "Skipped invalid face (maybe non-manifold or duplicate edge)" << idx0 << idx1 << idx2;
+            continue;
         }
+        glm::vec3 c0(vertices[idx0].color.x, vertices[idx0].color.y, vertices[idx0].color.z);
+        glm::vec3 c1(vertices[idx1].color.x, vertices[idx1].color.y, vertices[idx1].color.z);
+        glm::vec3 c2(vertices[idx2].color.x, vertices[idx2].color.y, vertices[idx2].color.z);
+        faceColorsInput.push_back((c0 + c1 + c2) / 3.0f);
     }
     
     m_rtree.clear();
@@ -258,9 +270,11 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         m_vertexNormals[fd.verts[1].idx()] += n;
         m_vertexNormals[fd.verts[2].idx()] += n;
         
-        m_vertices.push_back({v0, n});
-        m_vertices.push_back({v1, n});
-        m_vertices.push_back({v2, n});
+        glm::vec3 faceColor = (f.idx() < (int)faceColorsInput.size()) ? faceColorsInput[f.idx()] : glm::vec3(0.8f);
+
+        m_vertices.push_back({v0, n, faceColor});
+        m_vertices.push_back({v1, n, faceColor});
+        m_vertices.push_back({v2, n, faceColor});
         
         float minX = std::min({v0.x, v1.x, v2.x});
         float minY = std::min({v0.y, v1.y, v2.y});
@@ -419,7 +433,7 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
                 // Color from active palette (cycling if more agents than colors)
                 const QVector<QVector<QVector3D>>* palettesPtr = m_externalPalettes ? m_externalPalettes : &m_palettes;
                 const QVector<QVector3D>& palette = (*palettesPtr)[m_paletteIndex % palettesPtr->size()];
-                int colorIdx = (int)m_surfaceAgents.size() % palette.size();
+                int colorIdx = (int)m_agentSystem.count() % palette.size();
                 const QVector3D& pal = palette[colorIdx];
                 newAgent.color = QColor::fromRgbF(pal.x(), pal.y(), pal.z());
                 newAgent.maxAge = m_agentLifetime;
@@ -430,7 +444,7 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     }
     
     if (hit) {
-        m_surfaceAgents.push_back(newAgent);
+        m_agentSystem.add(newAgent);
         hitPos = rayOrigWorld + rayDirWorld * minT;
         return true;
     }
@@ -459,13 +473,10 @@ glm::vec3 solveBarycentricVelocity(const glm::vec3 &worldVel, const glm::vec3 &v
 
 void MeshViewerWidget::updateAgents() {
     if (m_agentsPaused) return;
-    if (!m_surfaceAgents.empty()) {
-        m_surfaceAgents.erase(std::remove_if(m_surfaceAgents.begin(), m_surfaceAgents.end(),
-            [](const SurfaceAgent &a) { return a.age >= a.maxAge; }),
-            m_surfaceAgents.end());
-    }
+    m_agentSystem.removeIf([](const SurfaceAgent &a) { return a.age >= a.maxAge; });
+    auto& agents = m_agentSystem.agents();
     
-    if (m_surfaceAgents.empty()) return;
+    if (agents.empty()) return;
     update();
 
     // Matrices shared across agents for visibility checks
@@ -559,7 +570,7 @@ void MeshViewerWidget::updateAgents() {
     };
 
     int agentId = 0;
-    for (auto &agent : m_surfaceAgents) {
+    for (auto &agent : agents) {
         agentId++;
         agent.age++;
         float remainingTime = 1.0f;
@@ -754,9 +765,9 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -m_cameraDistance));
     
     // Debug Instability
-    qDebug() << "getProjectedAgents: Rot" << m_rotationX << m_rotationY << "CamDist" << m_cameraDistance << "ViewSize" << viewWidth << viewHeight;
-    if (!m_surfaceAgents.empty()) {
-       qDebug() << "Agent[0] World" << getAgentWorldPos(m_surfaceAgents[0]).x << getAgentWorldPos(m_surfaceAgents[0]).y << getAgentWorldPos(m_surfaceAgents[0]).z;
+    if (!m_agentSystem.agents().empty()) {
+       qDebug() << "getProjectedAgents: Rot" << m_rotationX << m_rotationY << "CamDist" << m_cameraDistance << "ViewSize" << viewWidth << viewHeight;
+       qDebug() << "Agent[0] World" << getAgentWorldPos(m_agentSystem.agents()[0]).x << getAgentWorldPos(m_agentSystem.agents()[0]).y << getAgentWorldPos(m_agentSystem.agents()[0]).z;
     }
 
     // Use caller-provided viewport size to match AgentProjectionWindow
@@ -808,7 +819,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         return std::clamp(0.2f + ndl, 0.0f, 1.0f);
     };
 
-    for (const auto &agent : m_surfaceAgents) {
+    for (const auto &agent : m_agentSystem.agents()) {
         glm::vec3 pos = getAgentWorldPos(agent);
         glm::vec4 viewPos4 = mv * glm::vec4(pos, 1.0f);
         
