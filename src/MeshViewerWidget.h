@@ -49,6 +49,8 @@ struct SurfaceAgent {
     std::deque<glm::vec3> trail; // World positions
     int age = 0;
     int maxAge = 1000;
+    bool wasVisible = false;
+    int invisibleTicks = 0;
 };
 
 class MeshViewerWidget : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core

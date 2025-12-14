@@ -469,12 +469,76 @@ void MeshViewerWidget::updateAgents() {
     if (m_surfaceAgents.empty()) return;
     update();
 
+    // Visibility helper using current viewport
+    auto isVisible = [&](const glm::vec3 &worldPos) -> bool {
+        float viewWidth = std::max(1, width());
+        float viewHeight = std::max(1, height());
+        float aspect = viewWidth > 0 ? (float)viewWidth / (float)viewHeight : 1.0f;
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(m_rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(m_rotationY), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -m_cameraDistance));
+        glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+        glm::mat4 mv = view * model;
+
+        glm::vec4 clip = proj * mv * glm::vec4(worldPos, 1.0f);
+        if (clip.w <= 0.0f) return false;
+        return std::abs(clip.x) <= clip.w && std::abs(clip.y) <= clip.w && clip.z >= -clip.w && clip.z <= clip.w;
+    };
+
+    auto respawnAgent = [&](SurfaceAgent& agent) {
+        std::vector<FaceIndex> faces;
+        faces.reserve(m_mesh.number_of_faces());
+        for (auto f : m_mesh.faces()) {
+            if (!m_mesh.is_removed(f)) faces.push_back(f);
+        }
+        if (faces.empty()) return;
+        FaceIndex f = faces[QRandomGenerator::global()->bounded((int)faces.size())];
+        FaceData fd;
+        if (!fetchFaceData(m_mesh, f, fd)) return;
+        float u = QRandomGenerator::global()->generateDouble(); // [0,1)
+        float v = QRandomGenerator::global()->generateDouble() * (1.0f - u);
+        float w = 1.0f - u - v;
+        agent.face = f;
+        agent.bary = glm::vec3(w, u, v);
+
+        glm::vec3 n = glm::normalize(glm::cross(fd.positions[1] - fd.positions[0], fd.positions[2] - fd.positions[0]));
+        glm::vec3 tangent = glm::normalize(glm::cross(n, glm::vec3(0.0f, 1.0f, 0.0f)));
+        if (!std::isfinite(tangent.x) || glm::length(tangent) < 0.1f) tangent = glm::vec3(1.0f, 0.0f, 0.0f);
+        agent.speed = 0.05f;
+        agent.worldVelocity = tangent * agent.speed;
+        agent.trail.clear();
+        agent.wasVisible = false;
+        agent.invisibleTicks = 0;
+    };
+
     int agentId = 0;
     for (auto &agent : m_surfaceAgents) {
         agentId++;
         agent.age++;
         float remainingTime = 1.0f;
         int loopCount = 0;
+
+        // Visibility-driven behaviors: break trail and respawn if off-screen too long.
+        glm::vec3 headPos = getAgentWorldPos(agent);
+        bool headVisible = isVisible(headPos);
+        if (!headVisible) {
+            agent.invisibleTicks++;
+            // Insert a sentinel to break polyline when it comes back.
+            if (agent.wasVisible) {
+                agent.trail.push_back(glm::vec3(std::numeric_limits<float>::quiet_NaN()));
+            }
+            // Respawn after a short grace period
+            if (agent.invisibleTicks > 10) {
+                respawnAgent(agent);
+                headPos = getAgentWorldPos(agent);
+                headVisible = isVisible(headPos);
+            }
+        } else {
+            agent.invisibleTicks = 0;
+        }
+        agent.wasVisible = headVisible;
         
         while (remainingTime > 1e-4f) {
             loopCount++;
@@ -609,11 +673,11 @@ void MeshViewerWidget::updateAgents() {
                     glm::vec3 rotatedVel = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, edgeDir) * glm::vec4(agent.worldVelocity, 0.0f));
                     // Ensure tangential to the new face
                     glm::vec3 normal = newNormal;
-                    glm::vec3 t = rotatedVel - glm::dot(rotatedVel, normal) * normal;
-                    if (glm::dot(t, t) < 1e-8f) {
-                        // Degenerate tangent; pick any perpendicular
-                        t = glm::cross(normal, glm::vec3(1.0f, 0.0f, 0.0f));
-                        if (glm::dot(t, t) < 1e-8f) t = glm::cross(normal, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec3 t = rotatedVel - glm::dot(rotatedVel, normal) * normal;
+    if (glm::dot(t, t) < 1e-8f) {
+        // Degenerate tangent; pick any perpendicular
+        t = glm::cross(normal, glm::vec3(1.0f, 0.0f, 0.0f));
+        if (glm::dot(t, t) < 1e-8f) t = glm::cross(normal, glm::vec3(0.0f, 1.0f, 0.0f));
                     }
                     agent.worldVelocity = glm::normalize(t) * agent.speed;
                 } else {
@@ -717,6 +781,15 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         std::vector<QVector2D> currentSegment;
         std::vector<float> currentBright;
         for (const auto &p : agent.trail) {
+             if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) {
+                 if (!currentSegment.empty()) {
+                     info.trailSegments.push_back(currentSegment);
+                     info.trailBrightness.push_back(currentBright);
+                     currentSegment.clear();
+                     currentBright.clear();
+                 }
+                 continue;
+             }
              if (isVisible(p)) {
                  currentSegment.push_back(project(p));
                  currentBright.push_back(lambert(computeNormal(agent, p)));
