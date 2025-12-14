@@ -18,6 +18,7 @@
 #include "Noise2D.h"
 #include "MeshRepository.h"
 #include "CgalMeshBuilder.h"
+#include "MainLoop.h"
 #include "CgalMeshBuilderTentacles.h"
 
 class MainWindow : public QMainWindow
@@ -73,6 +74,7 @@ private slots:
     void onGrowTentacles();
     void onSmoothCatmull();
     void onAgentSpeedChanged(int value);
+    void onRandomTrailColorsToggled(bool checked);
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
@@ -93,6 +95,7 @@ private:
     QLabel *m_agentLifetimeLabel;
     QSlider *m_agentSpeedSlider;
     QLabel *m_agentSpeedLabel;
+    QCheckBox *m_randomTrailColorBox;
 
     // Subwindows
     QMdiSubWindow *m_meshSubWindow;
@@ -195,4 +198,6 @@ protected:
     // Mesh storage with per-mesh/per-face colors
     MeshRepository m_meshRepo;
     int m_activeMeshIndex = -1;
+    bool m_randomTrailStepColors = false;
+    MainLoop* m_mainLoop = nullptr;
 };

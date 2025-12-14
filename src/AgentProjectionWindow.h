@@ -2,7 +2,6 @@
 
 #include <QWidget>
 #include <QImage>
-#include <QTimer>
 #include <QVector2D>
 #include <vector>
 #include "MeshViewerWidget.h"
@@ -18,6 +17,8 @@ public:
     void setRunning(bool run);
     void setAgentLifetime(int ticks);
     void setLineWidth(float w);
+    void setRandomTrailColors(bool enabled) { m_randomTrailColors = enabled; }
+    void stepFrame(); // called by main loop
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -28,10 +29,10 @@ private:
     // bool checkRayIntersection(const QVector2D &screenPos); // Removed
 
     MeshViewerWidget *m_meshViewer;
-    QTimer *m_timer;
     QImage m_canvas;
     
     int m_targetCount = 10;
     bool m_running = false;
     float m_lineWidth = 1.0f;
+    bool m_randomTrailColors = false;
 };

@@ -589,6 +589,9 @@ MainWindow::MainWindow()
     m_agentSpeedSlider->setValue(50);     // 0.50 -> 0.05 after scale
     connect(m_agentSpeedSlider, &QSlider::valueChanged, this, &MainWindow::onAgentSpeedChanged);
     
+    m_randomTrailColorBox = new QCheckBox("Random trail color per step");
+    connect(m_randomTrailColorBox, &QCheckBox::toggled, this, &MainWindow::onRandomTrailColorsToggled);
+    
     agentLayout->addRow("Simulation:", m_agentButton);
     agentLayout->addRow(projectAgentsBtn);
     agentLayout->addRow(paintTrailsBtn);
@@ -599,6 +602,7 @@ MainWindow::MainWindow()
     agentLayout->addRow("Lifetime:", m_agentLifetimeSlider);
     agentLayout->addRow(m_agentSpeedLabel);
     agentLayout->addRow("Speed:", m_agentSpeedSlider);
+    agentLayout->addRow(m_randomTrailColorBox);
 
 
     
@@ -784,6 +788,15 @@ MainWindow::MainWindow()
     m_agentSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
     m_agentSubWindow->resize(480, 360);
     m_agentSubWindow->show();
+
+    // Main loop orchestrator
+    m_mainLoop = new MainLoop(this);
+    m_mainLoop->setMeshViewer(m_meshViewer);
+    m_mainLoop->setAgentWindow(m_agentWindow);
+    m_mainLoop->setAgentCount(m_agentCountSlider->value());
+    m_mainLoop->setAgentLifetime(m_agentLifetimeSlider->value());
+    m_mainLoop->setLineWidth(m_lineWidthSlider->value() / 10.0f);
+    m_mainLoop->setRandomTrailColors(false);
     
     mainLayout->addWidget(m_mdiArea, 1);
 
@@ -1209,25 +1222,22 @@ void MainWindow::onToggleAgents()
 {
     bool run = m_agentButton->isChecked();
     m_agentButton->setText(run ? "Stop Agents" : "Start Agents");
-    if (m_agentWindow) {
-        m_agentWindow->setRunning(run);
+    if (m_mainLoop) {
+        if (run) m_mainLoop->start();
+        else m_mainLoop->stop();
     }
 }
 
 void MainWindow::onAgentCountChanged(int value)
 {
     m_agentCountLabel->setText(QString("%1 agents").arg(value));
-    if (m_agentWindow) {
-        m_agentWindow->setAgentCount(value);
-    }
+    if (m_mainLoop) m_mainLoop->setAgentCount(value);
 }
 
 void MainWindow::onAgentLifetimeChanged(int value)
 {
     m_agentLifetimeLabel->setText(QString("%1 ticks").arg(value));
-    if (m_agentWindow) {
-        m_agentWindow->setAgentLifetime(value);
-    }
+    if (m_mainLoop) m_mainLoop->setAgentLifetime(value);
 }
 
 void MainWindow::onAgentSpeedChanged(int value)
@@ -1238,11 +1248,17 @@ void MainWindow::onAgentSpeedChanged(int value)
     if (m_meshViewer) m_meshViewer->setAgentBaseSpeed(speed);
 }
 
+void MainWindow::onRandomTrailColorsToggled(bool checked)
+{
+    m_randomTrailStepColors = checked;
+    if (m_mainLoop) m_mainLoop->setRandomTrailColors(checked);
+}
+
 void MainWindow::onLineWidthChanged(int value)
 {
     float width = value / 10.0f;
     m_lineWidthLabel->setText(QString("Trail Width: %1 px").arg(width, 0, 'f', 1));
-    if(m_agentWindow) m_agentWindow->setLineWidth(width);
+    if(m_mainLoop) m_mainLoop->setLineWidth(width);
 }
 
 void MainWindow::onProjectAgents()
@@ -1306,42 +1322,69 @@ void MainWindow::onPaintTrails()
     auto agents = m_meshViewer->getProjectedAgents(camW, camH);
 
     QVector<SqueegeeWindow::PathInfo> paths;
+    auto randomColor = []() {
+        return QColor::fromRgbF(
+            QRandomGenerator::global()->generateDouble(),
+            QRandomGenerator::global()->generateDouble(),
+            QRandomGenerator::global()->generateDouble());
+    };
     for (const auto& a : agents) {
         if (a.trailSegments.empty()) continue;
             
         for (int si = 0; si < a.trailSegments.size(); ++si) {
              const auto& seg = a.trailSegments[si];
              if (seg.size() < 2) continue;
-             SqueegeeWindow::PathInfo info;
-             info.color = a.color;
-             //info.size = (float)m_sizeSlider->value();
              float lw = std::max(0.1f, m_lineWidthSlider->value() / 10.0f);
-             info.size = lw;
-             info.useQtPainter = true; // Always use QPainter for trails now, or make it conditional
-             // If user wants "old style" thick lines they can use the "Drop Max Size" maybe?
-             // But the request is specific: "when draw 2d lines with 1px width looks like 3-4 px width make then add from 0.1-1 slider"
-             // So we default this slider to control the trail width.
-             
-             info.layer = a.layer;
-             
-             float avgBright = 1.0f;
-             if (si < a.trailBrightness.size()) {
-                 const auto& bseg = a.trailBrightness[si];
-                 if (!bseg.empty()) {
-                     float sum = std::accumulate(bseg.begin(), bseg.end(), 0.0f);
-                     avgBright = sum / (float)bseg.size();
-                     info.brightnessPerPoint = QVector<float>(bseg.begin(), bseg.end());
+             if (m_randomTrailStepColors) {
+                 for (int pi = 1; pi < seg.size(); ++pi) {
+                     SqueegeeWindow::PathInfo info;
+                     info.color = randomColor();
+                     info.size = lw;
+                     info.useQtPainter = true;
+                     info.layer = a.layer;
+                     float px0 = seg[pi - 1].x() * scale + offsetX;
+                     float py0 = seg[pi - 1].y() * scale + offsetY;
+                     float px1 = seg[pi].x() * scale + offsetX;
+                     float py1 = seg[pi].y() * scale + offsetY;
+                     info.points.append(QVector2D(px0, py0));
+                     info.points.append(QVector2D(px1, py1));
+                     // brightness: average of endpoints if available
+                     float b0 = 1.0f;
+                     float b1 = 1.0f;
+                     if (si < a.trailBrightness.size()) {
+                         const auto& bseg = a.trailBrightness[si];
+                         if (pi - 1 < bseg.size()) b0 = bseg[pi - 1];
+                         if (pi < bseg.size())     b1 = bseg[pi];
+                     }
+                     info.brightness = 0.5f * (b0 + b1);
+                     paths.append(info);
                  }
-             }
-             info.brightness = avgBright;
-             
-             for (const auto& p : seg) {
-                 float px = p.x() * scale + offsetX;
-                 float py = p.y() * scale + offsetY; // painter branch flips Y internally
-                 info.points.append(QVector2D(px, py));
-             }
-             if (!info.points.isEmpty()) {
-                 paths.append(info);
+             } else {
+                 SqueegeeWindow::PathInfo info;
+                 info.color = a.color;
+                 info.size = lw;
+                 info.useQtPainter = true;
+                 info.layer = a.layer;
+                 
+                 float avgBright = 1.0f;
+                 if (si < a.trailBrightness.size()) {
+                     const auto& bseg = a.trailBrightness[si];
+                     if (!bseg.empty()) {
+                         float sum = std::accumulate(bseg.begin(), bseg.end(), 0.0f);
+                         avgBright = sum / (float)bseg.size();
+                         info.brightnessPerPoint = QVector<float>(bseg.begin(), bseg.end());
+                     }
+                 }
+                 info.brightness = avgBright;
+                 
+                 for (const auto& p : seg) {
+                     float px = p.x() * scale + offsetX;
+                     float py = p.y() * scale + offsetY; // painter branch flips Y internally
+                     info.points.append(QVector2D(px, py));
+                 }
+                 if (!info.points.isEmpty()) {
+                     paths.append(info);
+                 }
              }
         }
     }

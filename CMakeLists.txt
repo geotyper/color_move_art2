@@ -42,6 +42,8 @@ set(PROJECT_SOURCES
     src/MeshRepository.cpp
     src/AgentSystem.h
     src/AgentSystem.cpp
+    src/MainLoop.h
+    src/MainLoop.cpp
     resources.qrc
 )
 

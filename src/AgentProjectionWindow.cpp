@@ -10,8 +10,6 @@ AgentProjectionWindow::AgentProjectionWindow(MeshViewerWidget *meshViewer, QWidg
     : QWidget(parent)
     , m_meshViewer(meshViewer)
 {
-    m_timer = new QTimer(this);
-    connect(m_timer, &QTimer::timeout, this, &AgentProjectionWindow::updateAgents);
     setAttribute(Qt::WA_OpaquePaintEvent);
 }
 
@@ -33,17 +31,13 @@ void AgentProjectionWindow::setLineWidth(float w)
 void AgentProjectionWindow::setRunning(bool run)
 {
     m_running = run;
-    if (m_running) {
-        if (m_meshViewer) {
+    if (m_meshViewer) {
+        if (run) {
             m_meshViewer->clearAgents();
             m_meshViewer->setAgentsPaused(false);
-        }
-        m_timer->start(16); // ~60fps
-    } else {
-        if (m_meshViewer) {
+        } else {
             m_meshViewer->setAgentsPaused(true);
         }
-        m_timer->stop();
     }
 }
 
@@ -56,9 +50,10 @@ void AgentProjectionWindow::resizeEvent(QResizeEvent *event)
     QWidget::resizeEvent(event);
 }
 
-void AgentProjectionWindow::updateAgents()
+void AgentProjectionWindow::stepFrame()
 {
     if (!m_meshViewer) return;
+    if (!m_running) return;
     
     // Spawn / Refill
     int currentCount = m_meshViewer->getAgentCount();
@@ -115,18 +110,37 @@ void AgentProjectionWindow::updateAgents()
             const auto &segment = p.trailSegments[si];
             const auto &bright  = (si < p.trailBrightness.size()) ? p.trailBrightness[si] : std::vector<float>();
             if (segment.size() > 1) {
-                QPolygonF poly;
-                for (size_t ti = 0; ti < segment.size(); ++ti) {
-                    const auto &tp = segment[ti];
-                    float b = (ti < bright.size()) ? bright[ti] : 1.0f;
-                    QColor segCol = trailColor;
-                    float alpha = 0.55f + 0.45f * b;
-                    segCol.setAlphaF(std::clamp(alpha, 0.0f, 1.0f));
-                    painter.setPen(QPen(segCol, m_lineWidth));
-                    poly << QPointF(ox + tp.x() * scale,
-                                     height() - (oy + tp.y() * scale));
+                if (m_randomTrailColors) {
+                    for (size_t ti = 1; ti < segment.size(); ++ti) {
+                        const auto &prev = segment[ti - 1];
+                        const auto &curr = segment[ti];
+                        float b0 = (ti - 1 < bright.size()) ? bright[ti - 1] : 1.0f;
+                        float b1 = (ti < bright.size()) ? bright[ti] : 1.0f;
+                        float bAvg = 0.5f * (b0 + b1);
+                        QColor segCol = QColor::fromRgbF(
+                            QRandomGenerator::global()->generateDouble(),
+                            QRandomGenerator::global()->generateDouble(),
+                            QRandomGenerator::global()->generateDouble());
+                        float alpha = 0.55f + 0.45f * bAvg;
+                        segCol.setAlphaF(std::clamp(alpha, 0.0f, 1.0f));
+                        painter.setPen(QPen(segCol, m_lineWidth));
+                        painter.drawLine(QPointF(ox + prev.x() * scale, height() - (oy + prev.y() * scale)),
+                                         QPointF(ox + curr.x() * scale, height() - (oy + curr.y() * scale)));
+                    }
+                } else {
+                    QPolygonF poly;
+                    for (size_t ti = 0; ti < segment.size(); ++ti) {
+                        const auto &tp = segment[ti];
+                        float b = (ti < bright.size()) ? bright[ti] : 1.0f;
+                        QColor segCol = trailColor;
+                        float alpha = 0.55f + 0.45f * b;
+                        segCol.setAlphaF(std::clamp(alpha, 0.0f, 1.0f));
+                        painter.setPen(QPen(segCol, m_lineWidth));
+                        poly << QPointF(ox + tp.x() * scale,
+                                         height() - (oy + tp.y() * scale));
+                    }
+                    painter.drawPolyline(poly);
                 }
-                painter.drawPolyline(poly);
             }
         }
         
