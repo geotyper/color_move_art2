@@ -120,8 +120,9 @@ void AgentProjectionWindow::updateAgents()
                     float alpha = 0.55f + 0.45f * b;
                     segCol.setAlphaF(std::clamp(alpha, 0.0f, 1.0f));
                     painter.setPen(QPen(segCol, m_lineWidth));
+                    float yFlip = (float)viewH - tp.y();
                     poly << QPointF(ox + tp.x() * scale,
-                                     height() - (oy + tp.y() * scale));
+                                     height() - (oy + yFlip * scale));
                 }
                 painter.drawPolyline(poly);
             }
@@ -135,8 +136,9 @@ void AgentProjectionWindow::updateAgents()
             float alpha = 0.6f + 0.4f * std::clamp(p.headBrightness, 0.0f, 1.0f);
             head.setAlphaF(alpha);
             painter.setBrush(head);
+            float headY = (float)viewH - p.screenPos.y();
             painter.drawEllipse(QPointF(ox + p.screenPos.x() * scale,
-                                        height() - (oy + p.screenPos.y() * scale)), 2, 2);
+                                        height() - (oy + headY * scale)), 2, 2);
         }
     }
     

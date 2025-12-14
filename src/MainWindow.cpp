@@ -1269,7 +1269,7 @@ void MainWindow::onProjectAgents()
     QVector<SqueegeeWindow::DropInfo> drops;
     for (const auto& a : agents) {
         float px = a.screenPos.x() * scale + offsetX;
-        float py = a.screenPos.y() * scale + offsetY;
+        float py = (camH - a.screenPos.y()) * scale + offsetY;
         
         if (a.isVisible && px >= 0 && px < canvasW && py >= 0 && py < canvasH) {
             SqueegeeWindow::DropInfo info;
@@ -1331,11 +1331,11 @@ void MainWindow::onPaintTrails()
              info.brightness = avgBright;
              
              for (const auto& p : seg) {
-                 float px = p.x() * scale + offsetX;
-                 float py = p.y() * scale + offsetY;
-                 // paintPaths (GPU) expects GL Y (Bottom-Up) similar to spawnDrops.
-                 // No need to invert.
-                 info.points.append(QVector2D(px, py));
+        float px = p.x() * scale + offsetX;
+        float py = (camH - p.y()) * scale + offsetY;
+        // paintPaths (GPU) expects GL Y (Bottom-Up) similar to spawnDrops.
+        // No need to invert.
+        info.points.append(QVector2D(px, py));
              }
              if (!info.points.isEmpty()) {
                  paths.append(info);
