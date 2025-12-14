@@ -810,10 +810,12 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
 
     for (const auto &agent : m_surfaceAgents) {
         glm::vec3 pos = getAgentWorldPos(agent);
+        glm::vec4 viewPos4 = mv * glm::vec4(pos, 1.0f);
         
         AgentRenderInfo info;
         info.screenPos = project(pos);
         info.color = agent.color;
+        info.viewDepth = viewPos4.z; // more negative = farther
         glm::vec3 normalWorld = computeNormal(agent, pos);
         info.isVisible = isVisible(pos);
         

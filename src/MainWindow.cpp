@@ -1261,6 +1261,9 @@ void MainWindow::onProjectAgents()
 
     // Project using the same camera/viewport as the 3D view, then scale into the brush canvas.
     auto agents = m_meshViewer->getProjectedAgents(camW, camH);
+    std::sort(agents.begin(), agents.end(), [](const auto& a, const auto& b){
+        return a.viewDepth < b.viewDepth; // far first, near last
+    });
 
     // Clear previous projection so each press reflects the current agent set only.
     m_squeegeeWindow->clearCanvas();
@@ -1269,7 +1272,7 @@ void MainWindow::onProjectAgents()
     QVector<SqueegeeWindow::DropInfo> drops;
     for (const auto& a : agents) {
         float px = a.screenPos.x() * scale + offsetX;
-        float py = (camH - a.screenPos.y()) * scale + offsetY;
+        float py = a.screenPos.y() * scale + offsetY;
         
         if (a.isVisible && px >= 0 && px < canvasW && py >= 0 && py < canvasH) {
             SqueegeeWindow::DropInfo info;
@@ -1331,11 +1334,10 @@ void MainWindow::onPaintTrails()
              info.brightness = avgBright;
              
              for (const auto& p : seg) {
-        float px = p.x() * scale + offsetX;
-        float py = (camH - p.y()) * scale + offsetY;
-        // paintPaths (GPU) expects GL Y (Bottom-Up) similar to spawnDrops.
-        // No need to invert.
-        info.points.append(QVector2D(px, py));
+                 float px = p.x() * scale + offsetX;
+                 float py = p.y() * scale + offsetY;
+                 // paintPaths does its own Y flip for QPainter, so pass camera-space Y.
+                 info.points.append(QVector2D(px, py));
              }
              if (!info.points.isEmpty()) {
                  paths.append(info);

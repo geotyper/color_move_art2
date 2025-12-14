@@ -80,6 +80,7 @@ public:
         QColor color;
         bool isVisible;
         int layer = 0;
+        float viewDepth = 0.0f; // View-space z (for depth sorting in 2D projections)
         std::vector<std::vector<QVector2D>> trailSegments;
         float headBrightness = 1.0f;
         std::vector<std::vector<float>> trailBrightness;
