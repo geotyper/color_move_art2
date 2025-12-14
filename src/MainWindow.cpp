@@ -1272,7 +1272,7 @@ void MainWindow::onProjectAgents()
     QVector<SqueegeeWindow::DropInfo> drops;
     for (const auto& a : agents) {
         float px = a.screenPos.x() * scale + offsetX;
-        float py = a.screenPos.y() * scale + offsetY;
+        float py = a.screenPos.y() * scale + offsetY; // pass camera-space Y; painter will flip
         
         if (a.isVisible && px >= 0 && px < canvasW && py >= 0 && py < canvasH) {
             SqueegeeWindow::DropInfo info;
@@ -1329,14 +1329,14 @@ void MainWindow::onPaintTrails()
                  if (!bseg.empty()) {
                      float sum = std::accumulate(bseg.begin(), bseg.end(), 0.0f);
                      avgBright = sum / (float)bseg.size();
+                     info.brightnessPerPoint = QVector<float>(bseg.begin(), bseg.end());
                  }
              }
              info.brightness = avgBright;
              
              for (const auto& p : seg) {
                  float px = p.x() * scale + offsetX;
-                 float py = p.y() * scale + offsetY;
-                 // paintPaths does its own Y flip for QPainter, so pass camera-space Y.
+                 float py = p.y() * scale + offsetY; // painter branch flips Y internally
                  info.points.append(QVector2D(px, py));
              }
              if (!info.points.isEmpty()) {

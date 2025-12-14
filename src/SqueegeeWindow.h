@@ -181,6 +181,7 @@ public:
         QColor color;
         float size = 1.0f; // trail stroke width in canvas pixels
         float brightness = 1.0f;
+        QVector<float> brightnessPerPoint; // optional per-point brightness
         int layer = -1;
         bool useQtPainter = false;
     };

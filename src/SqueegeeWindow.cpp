@@ -792,11 +792,17 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
         for(const auto& path : paths) {
             if (!path.useQtPainter || path.points.size() < 2) continue;
             
-            float b = path.brightness;
+            auto sampleBrightness = [&](int idx) -> float {
+                if (idx >= 0 && idx < path.brightnessPerPoint.size())
+                    return path.brightnessPerPoint[idx];
+                return path.brightness;
+            };
+
+            float b0 = sampleBrightness(0);
             QPen pen(QColor(
-                std::clamp(path.color.redF() * b, 0.0f, 1.0f) * 255, 
-                std::clamp(path.color.greenF() * b, 0.0f, 1.0f) * 255, 
-                std::clamp(path.color.blueF() * b, 0.0f, 1.0f) * 255
+                std::clamp(path.color.redF() * b0, 0.0f, 1.0f) * 255, 
+                std::clamp(path.color.greenF() * b0, 0.0f, 1.0f) * 255, 
+                std::clamp(path.color.blueF() * b0, 0.0f, 1.0f) * 255
             ));
             const float penWidth = std::max(0.1f, path.size);
             // Debug print to verify width
@@ -809,7 +815,16 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
             p.setPen(pen);
             
             QPolygonF poly;
-            for(const auto& pt : path.points) {
+            for(int idx = 0; idx < path.points.size(); ++idx) {
+                const auto& pt = path.points[idx];
+                float b = sampleBrightness(idx);
+                QColor c(
+                    std::clamp(path.color.redF() * b, 0.0f, 1.0f) * 255, 
+                    std::clamp(path.color.greenF() * b, 0.0f, 1.0f) * 255, 
+                    std::clamp(path.color.blueF() * b, 0.0f, 1.0f) * 255
+                );
+                pen.setColor(c);
+                p.setPen(pen);
                 // paintPaths expects GL Y (Bottom-Up) usually? 
                 // Wait, SqueegeeWindow::paintPaths comments said:
                 // "paintPaths (GPU) expects GL Y (Bottom-Up) similar to spawnDrops." -> from MainWindow
@@ -888,9 +903,12 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
             for (int s = 0; s <= samples; ++s) {
                 float t = (float)s / (float)samples;
                 QVector2D p = a + dir * (len * t);
-                QVector3D col(path.color.redF() * path.brightness,
-                              path.color.greenF() * path.brightness,
-                              path.color.blueF() * path.brightness);
+                float bSample = path.brightness;
+                if (s < path.brightnessPerPoint.size())
+                    bSample = path.brightnessPerPoint[s];
+                QVector3D col(path.color.redF() * bSample,
+                              path.color.greenF() * bSample,
+                              path.color.blueF() * bSample);
                 col.setX(std::clamp(col.x(), 0.0f, 1.0f));
                 col.setY(std::clamp(col.y(), 0.0f, 1.0f));
                 col.setZ(std::clamp(col.z(), 0.0f, 1.0f));
