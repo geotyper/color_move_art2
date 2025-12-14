@@ -63,6 +63,9 @@ void AgentProjectionWindow::updateAgents()
     // Spawn / Refill
     int currentCount = m_meshViewer->getAgentCount();
     int needed = m_targetCount - currentCount;
+    int viewW = m_meshViewer ? m_meshViewer->width() : 0;
+    int viewH = m_meshViewer ? m_meshViewer->height() : 0;
+    if (viewW <= 0 || viewH <= 0) return;
     if (needed > 0) {
         // Try to spawn 'needed' agents, but limit per frame to avoid freeze if bad luck
         int attempts = needed * 2;
@@ -70,10 +73,10 @@ void AgentProjectionWindow::updateAgents()
         glm::vec3 hit;
         
         for (int i = 0; i < attempts && spawned < needed; ++i) {
-            float rx = QRandomGenerator::global()->bounded((double)width());
-            float ry = QRandomGenerator::global()->bounded((double)height());
+            float rx = QRandomGenerator::global()->bounded((double)viewW);
+            float ry = QRandomGenerator::global()->bounded((double)viewH);
             
-            if (m_meshViewer->checkRayIntersection(rx, ry, width(), height(), hit)) {
+            if (m_meshViewer->checkRayIntersection(rx, ry, viewW, viewH, hit)) {
                 spawned++;
             }
         }
@@ -88,8 +91,6 @@ void AgentProjectionWindow::updateAgents()
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setPen(Qt::NoPen);
     
-    int viewW = m_meshViewer->width();
-    int viewH = m_meshViewer->height();
     if (viewW <= 0 || viewH <= 0) {
         update();
         return;

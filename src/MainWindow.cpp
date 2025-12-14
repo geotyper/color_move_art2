@@ -581,6 +581,12 @@ MainWindow::MainWindow()
     m_agentLifetimeSlider->setRange(10, 1500);
     m_agentLifetimeSlider->setValue(1000);
     connect(m_agentLifetimeSlider, &QSlider::valueChanged, this, &MainWindow::onAgentLifetimeChanged);
+
+    m_agentSpeedLabel = new QLabel("Speed: 0.05");
+    m_agentSpeedSlider = new QSlider(Qt::Horizontal);
+    m_agentSpeedSlider->setRange(1, 200); // 0.01 .. 2.00
+    m_agentSpeedSlider->setValue(50);     // 0.50 -> 0.05 after scale
+    connect(m_agentSpeedSlider, &QSlider::valueChanged, this, &MainWindow::onAgentSpeedChanged);
     
     agentLayout->addRow("Simulation:", m_agentButton);
     agentLayout->addRow(projectAgentsBtn);
@@ -590,6 +596,8 @@ MainWindow::MainWindow()
     agentLayout->addRow("Count:", m_agentCountSlider);
     agentLayout->addRow(m_agentLifetimeLabel);
     agentLayout->addRow("Lifetime:", m_agentLifetimeSlider);
+    agentLayout->addRow(m_agentSpeedLabel);
+    agentLayout->addRow("Speed:", m_agentSpeedSlider);
 
 
     
@@ -1219,6 +1227,14 @@ void MainWindow::onAgentLifetimeChanged(int value)
     if (m_agentWindow) {
         m_agentWindow->setAgentLifetime(value);
     }
+}
+
+void MainWindow::onAgentSpeedChanged(int value)
+{
+    // Slider 1..200 -> 0.01 .. 2.00
+    float speed = value / 1000.0f;
+    m_agentSpeedLabel->setText(QString("Speed: %1").arg(speed, 0, 'f', 3));
+    if (m_meshViewer) m_meshViewer->setAgentBaseSpeed(speed);
 }
 
 void MainWindow::onLineWidthChanged(int value)

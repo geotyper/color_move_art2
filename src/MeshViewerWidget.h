@@ -67,6 +67,7 @@ public:
     void setPaletteIndex(int idx) { m_paletteIndex = idx; }
     int getPaletteIndex() const { return m_paletteIndex; }
     void setPalettes(const QVector<QVector<QVector3D>>* palettes) { m_externalPalettes = palettes; }
+    void setAgentBaseSpeed(float s) { m_agentBaseSpeed = s; }
     
     // Check intersection and return hit info
     bool checkRayIntersection(float x, float y, float viewWidth, float viewHeight, glm::vec3 &hitPos);
@@ -139,6 +140,7 @@ private:
         { QVector3D(0.8f, 0.2f, 0.2f), QVector3D(0.2f, 0.6f, 0.4f), QVector3D(0.2f, 0.4f, 0.8f),
           QVector3D(0.9f, 0.7f, 0.1f), QVector3D(0.6f, 0.3f, 0.5f), QVector3D(0.2f, 0.2f, 0.3f) }
     };
+    float m_agentBaseSpeed = 0.05f;
     
     // Spatial Index
     bgi::rtree<BoostValue, bgi::quadratic<16>> m_rtree;

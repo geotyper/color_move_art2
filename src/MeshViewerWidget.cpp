@@ -395,14 +395,13 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
         float t, u, v;
         if (rayTriangleIntersect(rayOrigWorld, rayDirWorld, v0, v1, v2, t, u, v)) {
             if (t > 0 && t < minT) {
+                glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
                 minT = t;
                 hit = true;
                 newAgent.face = f;
                 newAgent.bary = glm::vec3(1.0f - u - v, u, v);
                 
-                glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-                
-                // Random vector not parallel to n
+                // Random tangent not parallel to n
                 float rx = (float)std::rand() / RAND_MAX - 0.5f;
                 float ry = (float)std::rand() / RAND_MAX - 0.5f;
                 float rz = (float)std::rand() / RAND_MAX - 0.5f;
@@ -415,7 +414,7 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
                      else tangent = glm::normalize(glm::cross(n, glm::vec3(0,1,0)));
                 }
 
-                newAgent.speed = 0.05f; // Increased speed for visibility
+                newAgent.speed = m_agentBaseSpeed; // configurable speed
                 newAgent.worldVelocity = tangent * newAgent.speed;
                 // Color from active palette (cycling if more agents than colors)
                 const QVector<QVector<QVector3D>>* palettesPtr = m_externalPalettes ? m_externalPalettes : &m_palettes;
@@ -469,48 +468,94 @@ void MeshViewerWidget::updateAgents() {
     if (m_surfaceAgents.empty()) return;
     update();
 
-    // Visibility helper using current viewport
-    auto isVisible = [&](const glm::vec3 &worldPos) -> bool {
-        float viewWidth = std::max(1, width());
-        float viewHeight = std::max(1, height());
-        float aspect = viewWidth > 0 ? (float)viewWidth / (float)viewHeight : 1.0f;
+    // Matrices shared across agents for visibility checks
+    float viewWidth = std::max(1, width());
+    float viewHeight = std::max(1, height());
+    float aspect = viewWidth > 0 ? (float)viewWidth / (float)viewHeight : 1.0f;
 
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(m_rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, glm::radians(m_rotationY), glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -m_cameraDistance));
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
-        glm::mat4 mv = view * model;
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(m_rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(m_rotationY), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -m_cameraDistance));
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+    glm::mat4 mv = view * model;
+    glm::vec3 cameraPosWorld(0.0f, 0.0f, m_cameraDistance);
 
+    auto isClipVisible = [&](const glm::vec3 &worldPos) -> bool {
         glm::vec4 clip = proj * mv * glm::vec4(worldPos, 1.0f);
         if (clip.w <= 0.0f) return false;
         return std::abs(clip.x) <= clip.w && std::abs(clip.y) <= clip.w && clip.z >= -clip.w && clip.z <= clip.w;
     };
 
-    auto respawnAgent = [&](SurfaceAgent& agent) {
-        std::vector<FaceIndex> faces;
-        faces.reserve(m_mesh.number_of_faces());
-        for (auto f : m_mesh.faces()) {
-            if (!m_mesh.is_removed(f)) faces.push_back(f);
-        }
-        if (faces.empty()) return;
-        FaceIndex f = faces[QRandomGenerator::global()->bounded((int)faces.size())];
-        FaceData fd;
-        if (!fetchFaceData(m_mesh, f, fd)) return;
-        float u = QRandomGenerator::global()->generateDouble(); // [0,1)
-        float v = QRandomGenerator::global()->generateDouble() * (1.0f - u);
-        float w = 1.0f - u - v;
-        agent.face = f;
-        agent.bary = glm::vec3(w, u, v);
+    auto isVisible = [&](const SurfaceAgent&, const glm::vec3 &worldPos) -> bool {
+        return isClipVisible(worldPos);
+    };
 
-        glm::vec3 n = glm::normalize(glm::cross(fd.positions[1] - fd.positions[0], fd.positions[2] - fd.positions[0]));
-        glm::vec3 tangent = glm::normalize(glm::cross(n, glm::vec3(0.0f, 1.0f, 0.0f)));
-        if (!std::isfinite(tangent.x) || glm::length(tangent) < 0.1f) tangent = glm::vec3(1.0f, 0.0f, 0.0f);
-        agent.speed = 0.05f;
-        agent.worldVelocity = tangent * agent.speed;
-        agent.trail.clear();
-        agent.wasVisible = false;
-        agent.invisibleTicks = 0;
+    auto respawnAgent = [&](SurfaceAgent& agent) {
+        bool placed = false;
+        for (int attempt = 0; attempt < 32 && !placed; ++attempt) {
+            float sx = QRandomGenerator::global()->bounded(viewWidth);
+            float sy = QRandomGenerator::global()->bounded(viewHeight);
+
+            float ndcX = (2.0f * sx) / viewWidth - 1.0f;
+            float ndcY = 1.0f - (2.0f * sy) / viewHeight;
+            glm::mat4 invMVP = glm::inverse(proj * mv);
+            glm::vec4 nearPoint = invMVP * glm::vec4(ndcX, ndcY, -1.0f, 1.0f);
+            glm::vec4 farPoint  = invMVP * glm::vec4(ndcX, ndcY,  1.0f, 1.0f);
+            nearPoint /= nearPoint.w;
+            farPoint  /= farPoint.w;
+            glm::vec3 rayOrigWorld = glm::vec3(nearPoint);
+            glm::vec3 rayDirWorld  = glm::normalize(glm::vec3(farPoint - nearPoint));
+
+            float minX = std::min(rayOrigWorld.x, rayOrigWorld.x + rayDirWorld.x * 100.0f);
+            float minY = std::min(rayOrigWorld.y, rayOrigWorld.y + rayDirWorld.y * 100.0f);
+            float minZ = std::min(rayOrigWorld.z, rayOrigWorld.z + rayDirWorld.z * 100.0f);
+            float maxX = std::max(rayOrigWorld.x, rayOrigWorld.x + rayDirWorld.x * 100.0f);
+            float maxY = std::max(rayOrigWorld.y, rayOrigWorld.y + rayDirWorld.y * 100.0f);
+            float maxZ = std::max(rayOrigWorld.z, rayOrigWorld.z + rayDirWorld.z * 100.0f);
+            BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
+
+            std::vector<BoostValue> result;
+            m_rtree.query(bgi::intersects(queryBox), std::back_inserter(result));
+
+            float bestT = std::numeric_limits<float>::max();
+            FaceIndex bestFace = SurfaceMesh::null_face();
+            glm::vec3 bestBary(0.0f);
+
+            for (const auto &val : result) {
+                FaceIndex f(val.second);
+                FaceData fd;
+                if (!fetchFaceData(m_mesh, f, fd)) continue;
+                glm::vec3 v0 = fd.positions[0];
+                glm::vec3 v1 = fd.positions[1];
+                glm::vec3 v2 = fd.positions[2];
+                float t,u,v;
+                if (rayTriangleIntersect(rayOrigWorld, rayDirWorld, v0, v1, v2, t, u, v)) {
+                    if (t > 0.0f && t < bestT) {
+                        bestT = t;
+                        bestFace = f;
+                        bestBary = glm::vec3(1.0f - u - v, u, v);
+                    }
+                }
+            }
+
+            if (bestFace != SurfaceMesh::null_face()) {
+                agent.face = bestFace;
+                agent.bary = bestBary;
+
+                FaceData fd;
+                if (!fetchFaceData(m_mesh, bestFace, fd)) continue;
+                glm::vec3 n = glm::normalize(glm::cross(fd.positions[1] - fd.positions[0], fd.positions[2] - fd.positions[0]));
+                glm::vec3 tangent = glm::normalize(glm::cross(n, glm::vec3(0.0f, 1.0f, 0.0f)));
+                if (!std::isfinite(tangent.x) || glm::length(tangent) < 0.1f) tangent = glm::vec3(1.0f, 0.0f, 0.0f);
+                agent.speed = m_agentBaseSpeed;
+                agent.worldVelocity = tangent * agent.speed;
+                agent.trail.clear();
+                agent.wasVisible = false;
+                agent.invisibleTicks = 0;
+                placed = true;
+            }
+        }
     };
 
     int agentId = 0;
@@ -520,26 +565,6 @@ void MeshViewerWidget::updateAgents() {
         float remainingTime = 1.0f;
         int loopCount = 0;
 
-        // Visibility-driven behaviors: break trail and respawn if off-screen too long.
-        glm::vec3 headPos = getAgentWorldPos(agent);
-        bool headVisible = isVisible(headPos);
-        if (!headVisible) {
-            agent.invisibleTicks++;
-            // Insert a sentinel to break polyline when it comes back.
-            if (agent.wasVisible) {
-                agent.trail.push_back(glm::vec3(std::numeric_limits<float>::quiet_NaN()));
-            }
-            // Respawn after a short grace period
-            if (agent.invisibleTicks > 10) {
-                respawnAgent(agent);
-                headPos = getAgentWorldPos(agent);
-                headVisible = isVisible(headPos);
-            }
-        } else {
-            agent.invisibleTicks = 0;
-        }
-        agent.wasVisible = headVisible;
-        
         while (remainingTime > 1e-4f) {
             loopCount++;
             if (loopCount > 100) {
@@ -686,6 +711,26 @@ void MeshViewerWidget::updateAgents() {
                 }
             }
         }
+
+        // Visibility-driven behaviors: break trail and respawn if off-screen too long.
+        glm::vec3 headPos = getAgentWorldPos(agent);
+        bool headVisible = isVisible(agent, headPos);
+        if (!headVisible) {
+            agent.invisibleTicks++;
+            // Insert a sentinel to break polyline when it comes back.
+            if (agent.wasVisible) {
+                agent.trail.push_back(glm::vec3(std::numeric_limits<float>::quiet_NaN()));
+            }
+            // Respawn after a short grace period
+            if (agent.invisibleTicks > 10) {
+                respawnAgent(agent);
+                headPos = getAgentWorldPos(agent);
+                headVisible = isVisible(agent, headPos);
+            }
+        } else {
+            agent.invisibleTicks = 0;
+        }
+        agent.wasVisible = headVisible;
     }
 }
 
@@ -770,10 +815,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         info.screenPos = project(pos);
         info.color = agent.color;
         glm::vec3 normalWorld = computeNormal(agent, pos);
-        
-        // Backface culling: Check if normal points towards camera (View Space +Z)
-        bool isFrontFacing = normalWorld.z > -0.1f; // Small bias to prevent popping
-        info.isVisible = isVisible(pos) && isFrontFacing;
+        info.isVisible = isVisible(pos);
         
         info.layer = agent.layer;
         info.headBrightness = lambert(normalWorld);
@@ -790,10 +832,12 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
                  }
                  continue;
              }
-             if (isVisible(p)) {
-                 currentSegment.push_back(project(p));
-                 currentBright.push_back(lambert(computeNormal(agent, p)));
-             } else {
+            glm::vec3 nWorld = computeNormal(agent, p);
+
+            if (isVisible(p)) {
+                currentSegment.push_back(project(p));
+                currentBright.push_back(lambert(nWorld));
+            } else {
                  if (!currentSegment.empty()) {
                      info.trailSegments.push_back(currentSegment);
                      info.trailBrightness.push_back(currentBright);

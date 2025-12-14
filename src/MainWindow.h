@@ -71,6 +71,7 @@ private slots:
     void onExtrudeRandom();
     void onGrowTentacles();
     void onSmoothCatmull();
+    void onAgentSpeedChanged(int value);
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
@@ -89,6 +90,8 @@ private:
     QLabel *m_agentCountLabel;
     QSlider *m_agentLifetimeSlider;
     QLabel *m_agentLifetimeLabel;
+    QSlider *m_agentSpeedSlider;
+    QLabel *m_agentSpeedLabel;
 
     // Subwindows
     QMdiSubWindow *m_meshSubWindow;
