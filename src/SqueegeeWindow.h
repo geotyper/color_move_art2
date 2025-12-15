@@ -47,6 +47,7 @@ public:
     };
 
     void setBackgroundColor(const QColor &color);
+    void setTrailBrightnessScale(float s) { m_trailBrightnessScale = std::clamp(s, 0.0f, 2.0f); update(); }
 
 protected:
     void initializeGL() override;
@@ -192,6 +193,7 @@ private:
     void drawShapeIntoBuffer(std::vector<float>& buffer, int w, int h, int d, int cx, int cy, int cz, int r, QVector3D col);
 
     QColor m_backgroundColor = Qt::white;
+    float m_trailBrightnessScale = 1.0f;
 
     struct BrushNoiseResult {
         float size = 0.0f;

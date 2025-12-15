@@ -47,7 +47,11 @@ struct SurfaceAgent {
     float speed; // Scalar speed
     int layer = 0; // Assigned texture layer for painting
     QColor color;
-    std::deque<glm::vec3> trail; // World positions
+    struct TrailSample {
+        glm::vec3 pos;
+        glm::vec3 normal; // World-space normal at the time of sampling
+    };
+    std::deque<TrailSample> trail; // World positions with normals for lighting
     int age = 0;
     int maxAge = 1000;
     bool wasVisible = false;

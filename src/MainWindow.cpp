@@ -323,7 +323,6 @@ MainWindow::MainWindow()
     m_paletteCombo->addItem("Cyberpunk");
     m_paletteCombo->addItem("Single Color Gray");
     connect(m_paletteCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPaletteChanged);
-    formLayout->addRow("Palette:", m_paletteCombo);
 
     // Shape Combo
     m_shapeCombo = new QComboBox();
@@ -448,85 +447,43 @@ MainWindow::MainWindow()
     genLayout->addWidget(m_densityLabel);
     genLayout->addWidget(m_densitySlider);
 
-    // Line Width (Moved here)
-    m_lineWidthLabel = new QLabel("Trail Width: 1.0 px");
-    m_lineWidthSlider = new QSlider(Qt::Horizontal);
-    m_lineWidthSlider->setRange(1, 1000); // 0.1 to 100.0
-    m_lineWidthSlider->setValue(10);
-    connect(m_lineWidthSlider, &QSlider::valueChanged, this, &MainWindow::onLineWidthChanged);
-    genLayout->addWidget(m_lineWidthLabel);
-    genLayout->addWidget(m_lineWidthSlider);
-    
-    // Buttons in Gen Layout
-    QPushButton *btnProject = new QPushButton("Project to Canvas");
-    connect(btnProject, &QPushButton::clicked, this, &MainWindow::onProjectAgents);
-    genLayout->addWidget(btnProject);
-
-    QPushButton *btnPaint = new QPushButton("Paint Trails");
-    connect(btnPaint, &QPushButton::clicked, this, &MainWindow::onPaintTrails);
-    genLayout->addWidget(btnPaint);
-    
-    QPushButton *btnClear = new QPushButton("Clear Canvas");
-    connect(btnClear, &QPushButton::clicked, this, &MainWindow::onClearCanvas);
-    genLayout->addWidget(btnClear);
-    
+    // Buttons in Gen Layout (removed unused project/paint/clear)
     formLayout->addRow(genLayout);
-    // Preview Checkbox
-    m_previewCheckBox = new QCheckBox("Show Preview Only");
-    connect(m_previewCheckBox, &QCheckBox::toggled, this, &MainWindow::onPreviewToggled);
-    formLayout->addRow(m_previewCheckBox);
-    
-    // Toroidal Checkbox
-    m_toroidalCheckBox = new QCheckBox("Toroidal Movement");
-    connect(m_toroidalCheckBox, &QCheckBox::toggled, this, &MainWindow::onToroidalToggled);
-    formLayout->addRow(m_toroidalCheckBox);
 
-    // Background Color Button
-    QPushButton *bgColorBtn = new QPushButton("Background Color");
-    connect(bgColorBtn, &QPushButton::clicked, this, &MainWindow::onBackgroundColorClicked);
-    formLayout->addRow(bgColorBtn);
-
-    // BUTTONS (Global)
-    QGridLayout *btnLayout = new QGridLayout();
-    
-    QPushButton *regenBtn = new QPushButton("Regenerate (R)");
-    connect(regenBtn, &QPushButton::clicked, this, &MainWindow::onRegenerate);
-    btnLayout->addWidget(regenBtn, 0, 0);
-
-    QPushButton *regenOverlayBtn = new QPushButton("Regen (Overlay)");
-    connect(regenOverlayBtn, &QPushButton::clicked, this, &MainWindow::onRegenerateOverlay);
-    btnLayout->addWidget(regenOverlayBtn, 0, 1);
-
-    QPushButton *regenShiftedBtn = new QPushButton("Regen (Shifted)");
-    connect(regenShiftedBtn, &QPushButton::clicked, this, &MainWindow::onRegenerateShiftedOverlay);
-    btnLayout->addWidget(regenShiftedBtn, 1, 0);
-
-    QPushButton *regenOverlaySqueegeeBtn = new QPushButton("Regen2 (Overlay)");
-    connect(regenOverlaySqueegeeBtn, &QPushButton::clicked, this, &MainWindow::onRegenerateOverlaySqueegeeOnly);
-    btnLayout->addWidget(regenOverlaySqueegeeBtn, 1, 1);
-
-    QPushButton *saturateBtn = new QPushButton("Saturate");
-    connect(saturateBtn, &QPushButton::clicked, this, &MainWindow::onSaturate);
-    btnLayout->addWidget(saturateBtn, 2, 0);
-
-    QPushButton *combFixBtn = new QPushButton("Comb Fix");
-    connect(combFixBtn, &QPushButton::clicked, this, &MainWindow::onCombFix);
-    btnLayout->addWidget(combFixBtn, 2, 1);
-    
-    controlLayout->addLayout(btnLayout);
+    // Skip legacy preview/toroidal/background/regeneration controls
     
     // TABS
     QTabWidget *tabs = new QTabWidget();
     controlLayout->addWidget(tabs);
     
-    // --- TAB 1: BRUSH ---
-    QWidget *tabBrush = new QWidget();
-    QVBoxLayout *brushLayout = new QVBoxLayout(tabBrush);
-    brushLayout->addLayout(formLayout); // Restore the missing menu!
-    brushLayout->addStretch();
-    tabs->addTab(tabBrush, "Brush");
+    // --- TAB: Render ---
+    QWidget *tabRender = new QWidget();
+    QFormLayout *renderLayout = new QFormLayout(tabRender);
 
-    // --- TAB 2: 3D VIEW ---
+    m_lineWidthLabel = new QLabel("Trail Width: 1.0 px");
+    m_lineWidthSlider = new QSlider(Qt::Horizontal);
+    m_lineWidthSlider->setRange(1, 1000); // 0.1 to 100.0
+    m_lineWidthSlider->setValue(10);
+    connect(m_lineWidthSlider, &QSlider::valueChanged, this, &MainWindow::onLineWidthChanged);
+    renderLayout->addRow(m_lineWidthLabel, m_lineWidthSlider);
+
+    m_trailBrightnessLabel = new QLabel("Trail lightness: 1.00");
+    m_trailBrightnessSlider = new QSlider(Qt::Horizontal);
+    m_trailBrightnessSlider->setRange(10, 200); // 0.1 .. 2.0
+    m_trailBrightnessSlider->setValue(100);
+    connect(m_trailBrightnessSlider, &QSlider::valueChanged, this, [&](int v){
+        float scale = v / 100.0f;
+        m_trailBrightnessLabel->setText(QString("Trail lightness: %1").arg(scale, 0, 'f', 2));
+        if (m_squeegeeWindow) m_squeegeeWindow->setTrailBrightnessScale(scale);
+    });
+    renderLayout->addRow(m_trailBrightnessLabel, m_trailBrightnessSlider);
+    renderLayout->addRow("Palette:", m_paletteCombo);
+    QPushButton *bgColorBtn = new QPushButton("Background Color");
+    connect(bgColorBtn, &QPushButton::clicked, this, &MainWindow::onBackgroundColorClicked);
+    renderLayout->addRow(bgColorBtn);
+    tabs->addTab(tabRender, "Render");
+
+    // --- TAB 3D VIEW ---
     QWidget *tab3D = new QWidget();
     QVBoxLayout *tab3DLayout = new QVBoxLayout(tab3D);
     
@@ -573,7 +530,7 @@ MainWindow::MainWindow()
     
     m_agentCountLabel = new QLabel("10 agents");
     m_agentCountSlider = new QSlider(Qt::Horizontal);
-    m_agentCountSlider->setRange(10, 5000);
+    m_agentCountSlider->setRange(5, 500);
     m_agentCountSlider->setValue(10);
     connect(m_agentCountSlider, &QSlider::valueChanged, this, &MainWindow::onAgentCountChanged);
     

@@ -798,41 +798,80 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                 return path.brightness;
             };
 
-            float b0 = sampleBrightness(0);
-            QPen pen(QColor(
-                std::clamp(path.color.redF() * b0, 0.0f, 1.0f) * 255, 
-                std::clamp(path.color.greenF() * b0, 0.0f, 1.0f) * 255, 
-                std::clamp(path.color.blueF() * b0, 0.0f, 1.0f) * 255
-            ));
+            auto catmullRom = [](const QVector2D& p0, const QVector2D& p1, const QVector2D& p2, const QVector2D& p3, float t) -> QVector2D {
+                float t2 = t * t;
+                float t3 = t2 * t;
+                return 0.5f * ((2.0f * p1) +
+                               (-p0 + p2) * t +
+                               (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * t2 +
+                               (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t3);
+            };
+
+            // Smooth polyline with Catmull-Rom and resample to keep even spacing.
+            auto buildSmooth = [&](float sampleStep) -> std::pair<QVector<QVector2D>, QVector<float>> {
+                QVector<QVector2D> ptsSmooth;
+                QVector<float> brightnessSmooth;
+                if (path.points.size() < 2) {
+                    for (int i = 0; i < path.points.size(); ++i) {
+                        ptsSmooth.append(path.points[i]);
+                        brightnessSmooth.append(sampleBrightness(i));
+                    }
+                    return {ptsSmooth, brightnessSmooth};
+                }
+
+                const int n = path.points.size();
+                ptsSmooth.reserve(n * 2);
+                brightnessSmooth.reserve(n * 2);
+                ptsSmooth.append(path.points[0]);
+                brightnessSmooth.append(sampleBrightness(0));
+
+                for (int i = 0; i < n - 1; ++i) {
+                    QVector2D p0 = path.points[std::max(0, i - 1)];
+                    QVector2D p1 = path.points[i];
+                    QVector2D p2 = path.points[i + 1];
+                    QVector2D p3 = path.points[std::min(n - 1, i + 2)];
+                    float segLen = (p2 - p1).length();
+                    int samples = std::max(1, (int)std::ceil(segLen / sampleStep));
+                    for (int s = 1; s <= samples; ++s) {
+                        float t = (float)s / (float)samples;
+                        ptsSmooth.append(catmullRom(p0, p1, p2, p3, t));
+                        float b1 = sampleBrightness(i);
+                        float b2 = sampleBrightness(i + 1);
+                        brightnessSmooth.append(b1 * (1.0f - t) + b2 * t);
+                    }
+                }
+                return {ptsSmooth, brightnessSmooth};
+            };
+
+            QPen pen;
             const float penWidth = std::max(0.1f, path.size);
-            // Debug print to verify width
             if (&path == &paths.first()) qDebug() << "Painting path with width:" << penWidth;
-            // Force non-cosmetic so width is honored in device pixels.
             pen.setCosmetic(false);
             pen.setWidthF(penWidth);
-            pen.setCapStyle(Qt::RoundCap);
+            pen.setCapStyle(Qt::SquareCap); // rectangular stroke footprint
             pen.setJoinStyle(Qt::RoundJoin);
-            p.setPen(pen);
-            
-            QPolygonF poly;
-            for(int idx = 0; idx < path.points.size(); ++idx) {
-                const auto& pt = path.points[idx];
-                float b = sampleBrightness(idx);
+
+            // Draw each smoothed segment with its own brightness so lighting changes along the trail.
+            float sampleStep = std::max(1.0f, penWidth * 0.8f);
+            auto smooth = buildSmooth(sampleStep);
+            const auto& ptsSmooth = smooth.first;
+            const auto& brightSmooth = smooth.second;
+            for (int idx = 1; idx < ptsSmooth.size(); ++idx) {
+                const auto& prev = ptsSmooth[idx - 1];
+                const auto& curr = ptsSmooth[idx];
+                float b0 = brightSmooth[idx - 1] * m_trailBrightnessScale;
+                float b1 = brightSmooth[idx] * m_trailBrightnessScale;
+                float bAvg = 0.5f * (b0 + b1);
                 QColor c(
-                    std::clamp(path.color.redF() * b, 0.0f, 1.0f) * 255, 
-                    std::clamp(path.color.greenF() * b, 0.0f, 1.0f) * 255, 
-                    std::clamp(path.color.blueF() * b, 0.0f, 1.0f) * 255
+                    std::clamp(path.color.redF() * bAvg, 0.0f, 1.0f) * 255, 
+                    std::clamp(path.color.greenF() * bAvg, 0.0f, 1.0f) * 255, 
+                    std::clamp(path.color.blueF() * bAvg, 0.0f, 1.0f) * 255
                 );
                 pen.setColor(c);
                 p.setPen(pen);
-                // paintPaths expects GL Y (Bottom-Up) usually? 
-                // Wait, SqueegeeWindow::paintPaths comments said:
-                // "paintPaths (GPU) expects GL Y (Bottom-Up) similar to spawnDrops." -> from MainWindow
-                // But QPainter uses Top-Down (0 at top).
-                // So we need to flip Y.
-                poly << QPointF(pt.x(), h - pt.y());
+                // paintPaths expects GL Y (Bottom-Up), QPainter uses Top-Down; flip Y here.
+                p.drawLine(QPointF(prev.x(), h - prev.y()), QPointF(curr.x(), h - curr.y()));
             }
-            p.drawPolyline(poly);
         }
         p.end();
         

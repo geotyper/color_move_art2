@@ -626,20 +626,29 @@ void MeshViewerWidget::updateAgents() {
             
             if (minT > 0) {
                  glm::vec3 currentPos = v0 * agent.bary.x + v1 * agent.bary.y + v2 * agent.bary.z;
+                 // Smooth per-point normal using vertex normals and barycentric weights.
+                 glm::vec3 n0 = m_vertexNormals[fd.verts[0].idx()];
+                 glm::vec3 n1 = m_vertexNormals[fd.verts[1].idx()];
+                 glm::vec3 n2 = m_vertexNormals[fd.verts[2].idx()];
+                 glm::vec3 currentNormal = glm::normalize(n0 * agent.bary.x + n1 * agent.bary.y + n2 * agent.bary.z);
+                 if (!std::isfinite(currentNormal.x) || !std::isfinite(currentNormal.y) || !std::isfinite(currentNormal.z) || glm::dot(currentNormal, currentNormal) < 1e-10f) {
+                     currentNormal = glm::normalize(faceNormal);
+                 }
+                 currentNormal = glm::normalize(glm::mat3(model) * currentNormal);
                  
                  bool shouldPush = false;
                  if (agent.trail.empty()) {
                      shouldPush = true;
                  } else {
-                     glm::vec3 diff = agent.trail.back() - currentPos;
+                     glm::vec3 diff = agent.trail.back().pos - currentPos;
                      if (glm::dot(diff, diff) > 1e-6f) {
                          shouldPush = true;
                      }
                  }
                  
                  if (shouldPush) {
-                       agent.trail.push_back(currentPos);
-                       if (agent.trail.size() > 1000) agent.trail.pop_front();
+                      agent.trail.push_back({currentPos, currentNormal});
+                      if (agent.trail.size() > 1000) agent.trail.pop_front();
                  }
             }
 
@@ -730,7 +739,8 @@ void MeshViewerWidget::updateAgents() {
             agent.invisibleTicks++;
             // Insert a sentinel to break polyline when it comes back.
             if (agent.wasVisible) {
-                agent.trail.push_back(glm::vec3(std::numeric_limits<float>::quiet_NaN()));
+                agent.trail.push_back({glm::vec3(std::numeric_limits<float>::quiet_NaN()),
+                                       glm::vec3(std::numeric_limits<float>::quiet_NaN())});
             }
             // Respawn after a short grace period
             if (agent.invisibleTicks > 10) {
@@ -835,7 +845,8 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         
         std::vector<QVector2D> currentSegment;
         std::vector<float> currentBright;
-        for (const auto &p : agent.trail) {
+        for (const auto &sample : agent.trail) {
+             const auto& p = sample.pos;
              if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) {
                  if (!currentSegment.empty()) {
                      info.trailSegments.push_back(currentSegment);
@@ -845,7 +856,10 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
                  }
                  continue;
              }
-            glm::vec3 nWorld = computeNormal(agent, p);
+            glm::vec3 nWorld = sample.normal;
+            if (!std::isfinite(nWorld.x) || !std::isfinite(nWorld.y) || !std::isfinite(nWorld.z) || glm::dot(nWorld, nWorld) < 1e-8f) {
+                nWorld = computeNormal(agent, p);
+            }
 
             if (isVisible(p)) {
                 currentSegment.push_back(project(p));
