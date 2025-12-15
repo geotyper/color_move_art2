@@ -678,6 +678,15 @@ MainWindow::MainWindow()
     });
     modForm->addRow(m_tentacleScaleLabel, m_tentacleScaleSlider);
 
+    m_tentacleRotationSlider = new QSlider(Qt::Horizontal);
+    m_tentacleRotationSlider->setRange(-180, 180); // degrees per step
+    m_tentacleRotationSlider->setValue(0);
+    m_tentacleRotationLabel = new QLabel("Section Rotation: 0 deg");
+    connect(m_tentacleRotationSlider, &QSlider::valueChanged, this, [this](int v){
+        m_tentacleRotationLabel->setText(QString("Section Rotation: %1 deg").arg(v));
+    });
+    modForm->addRow(m_tentacleRotationLabel, m_tentacleRotationSlider);
+
     m_growTentaclesBtn = new QPushButton("Grow Tentacles (uses Random Faces %)");
     connect(m_growTentaclesBtn, &QPushButton::clicked, this, &MainWindow::onGrowTentacles);
     modForm->addRow(m_growTentaclesBtn);
@@ -1474,6 +1483,9 @@ void MainWindow::onGrowTentacles()
     gp.steps = m_tentacleStepsSlider->value();
     gp.distPerStep = m_tentacleDistSlider->value() / 100.0;
     gp.amountPerStep = m_tentacleScaleSlider->value() / 100.0;
+    const double degToRad = 3.14159265358979323846 / 180.0;
+    const double sectionTwistRad = m_tentacleRotationSlider->value() * degToRad;
+    gp.twistMinRad = gp.twistMaxRad = sectionTwistRad; // fixed rotation per step
     gp.seed = QRandomGenerator::global()->generate();
     gp.collectEachStep = false;
     gp.collectBetweenFaces = false;

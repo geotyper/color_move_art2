@@ -182,6 +182,8 @@ protected:
     QLabel  *m_tentacleDistLabel;
     QSlider *m_tentacleScaleSlider;
     QLabel  *m_tentacleScaleLabel;
+    QSlider *m_tentacleRotationSlider;
+    QLabel  *m_tentacleRotationLabel;
     QPushButton *m_growTentaclesBtn;
     QSlider *m_catmullIterSlider;
     QLabel  *m_catmullIterLabel;
