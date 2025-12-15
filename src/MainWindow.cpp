@@ -12,6 +12,8 @@
 #include <QFormLayout>
 #include <QTabWidget>
 #include <QRandomGenerator>
+#include <QCoreApplication>
+#include <QEventLoop>
 #include "MeshViewerWidget.h"
 #include "AgentProjectionWindow.h"
 #include <glm/glm.hpp>
@@ -500,7 +502,7 @@ MainWindow::MainWindow()
     connect(m_lightElevationSlider, &QSlider::valueChanged, this, &MainWindow::onLightChanged);
     
     m_zoomSlider = new QSlider(Qt::Horizontal);
-    m_zoomSlider->setRange(10, 100); // 1.0 to 10.0
+    m_zoomSlider->setRange(5, 270); // 0.5 to 10.0
     m_zoomSlider->setValue(30); // 3.0
     connect(m_zoomSlider, &QSlider::valueChanged, this, &MainWindow::onZoomChanged);
     
@@ -525,6 +527,9 @@ MainWindow::MainWindow()
     QPushButton *paintTrailsBtn = new QPushButton("Paint Trails");
     connect(paintTrailsBtn, &QPushButton::clicked, this, &MainWindow::onPaintTrails);
 
+    QPushButton *paintZoomStepsBtn = new QPushButton("Paint Zoom Steps Trails");
+    connect(paintZoomStepsBtn, &QPushButton::clicked, this, &MainWindow::onPaintZoomStepsTrails);
+
     QPushButton *clearCanvasBtn = new QPushButton("Clear Canvas");
     connect(clearCanvasBtn, &QPushButton::clicked, this, &MainWindow::onClearCanvas);
     
@@ -546,12 +551,29 @@ MainWindow::MainWindow()
     m_agentSpeedSlider->setValue(50);     // 0.50 -> 0.05 after scale
     connect(m_agentSpeedSlider, &QSlider::valueChanged, this, &MainWindow::onAgentSpeedChanged);
     
+    m_paintZoomCountSlider = new QSlider(Qt::Horizontal);
+    m_paintZoomCountSlider->setRange(1, 20);
+    m_paintZoomCountSlider->setValue(5);
+    m_paintZoomCountLabel = new QLabel("Zoom Steps: 5");
+    connect(m_paintZoomCountSlider, &QSlider::valueChanged, this, [this](int v){
+        m_paintZoomCountLabel->setText(QString("Zoom Steps: %1").arg(v));
+    });
+
+    m_paintZoomStepSlider = new QSlider(Qt::Horizontal);
+    m_paintZoomStepSlider->setRange(-100, 100); // -100% .. +100% of current zoom
+    m_paintZoomStepSlider->setValue(10);        // +10% default
+    m_paintZoomStepLabel = new QLabel("Zoom Step: +10%");
+    connect(m_paintZoomStepSlider, &QSlider::valueChanged, this, [this](int v){
+        m_paintZoomStepLabel->setText(QString("Zoom Step: %1%").arg(v));
+    });
+
     m_randomTrailColorBox = new QCheckBox("Random trail color per step");
     connect(m_randomTrailColorBox, &QCheckBox::toggled, this, &MainWindow::onRandomTrailColorsToggled);
     
     agentLayout->addRow("Simulation:", m_agentButton);
     agentLayout->addRow(projectAgentsBtn);
     agentLayout->addRow(paintTrailsBtn);
+    agentLayout->addRow(paintZoomStepsBtn);
     agentLayout->addRow(clearCanvasBtn);
     agentLayout->addRow(m_agentCountLabel);
     agentLayout->addRow("Count:", m_agentCountSlider);
@@ -559,6 +581,8 @@ MainWindow::MainWindow()
     agentLayout->addRow("Lifetime:", m_agentLifetimeSlider);
     agentLayout->addRow(m_agentSpeedLabel);
     agentLayout->addRow("Speed:", m_agentSpeedSlider);
+    agentLayout->addRow(m_paintZoomCountLabel, m_paintZoomCountSlider);
+    agentLayout->addRow(m_paintZoomStepLabel, m_paintZoomStepSlider);
     agentLayout->addRow(m_randomTrailColorBox);
 
 
@@ -1355,6 +1379,47 @@ void MainWindow::onPaintTrails()
         }
     }
     m_squeegeeWindow->paintPaths(paths);
+}
+
+void MainWindow::onPaintZoomStepsTrails()
+{
+    if (!m_zoomSlider || !m_paintZoomCountSlider || !m_paintZoomStepSlider) return;
+
+    const int originalZoom = m_zoomSlider->value();
+    const int steps = std::max(1, m_paintZoomCountSlider->value());
+    const double stepPercent = m_paintZoomStepSlider->value() / 100.0; // relative to current zoom
+    const int minZoom = m_zoomSlider->minimum();
+    const int maxZoom = m_zoomSlider->maximum();
+
+    // Precompute zoom sequence so the count is exact even if clamped.
+    QVector<int> zoomSequence;
+    zoomSequence.reserve(steps);
+
+    int currentZoom = originalZoom;
+    for (int i = 0; i < steps; ++i) {
+        int delta = static_cast<int>(std::round(currentZoom * stepPercent));
+        if (delta == 0 && stepPercent != 0.0) {
+            delta = (stepPercent > 0.0) ? 1 : -1; // guarantee progress
+        }
+        int target = std::clamp(currentZoom + delta, minZoom, maxZoom);
+        zoomSequence.push_back(target);
+        currentZoom = target;
+    }
+
+    for (int z : zoomSequence) {
+        if (m_zoomSlider->value() != z) {
+            m_zoomSlider->setValue(z); // triggers onZoomChanged
+        } else {
+            onZoomChanged(z); // ensure camera updates even if unchanged
+        }
+
+        onPaintTrails();
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    }
+
+    if (m_zoomSlider->value() != originalZoom) {
+        m_zoomSlider->setValue(originalZoom);
+    }
 }
 
 void MainWindow::onClearCanvas()

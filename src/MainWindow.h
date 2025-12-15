@@ -67,6 +67,7 @@ private slots:
     void onAgentCountChanged(int value);
     void onProjectAgents();
     void onPaintTrails();
+    void onPaintZoomStepsTrails();
     void onLineWidthChanged(int value);
     void onClearCanvas();
     void onBackgroundColorClicked();
@@ -96,6 +97,10 @@ private:
     QSlider *m_agentSpeedSlider;
     QLabel *m_agentSpeedLabel;
     QCheckBox *m_randomTrailColorBox;
+    QSlider *m_paintZoomCountSlider;
+    QLabel  *m_paintZoomCountLabel;
+    QSlider *m_paintZoomStepSlider;
+    QLabel  *m_paintZoomStepLabel;
 
     // Subwindows
     QMdiSubWindow *m_meshSubWindow;
