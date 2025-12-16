@@ -125,6 +125,8 @@ private:
     float m_brushNoiseStrength = 0.0f; // 0..1
     float m_minSizeRatio = 0.1f; // 0.1 .. 0.9
     QVector2D m_noiseOffsetAccum = QVector2D(0.0f, 0.0f);
+    int m_brushSegments = 1;
+    float m_segmentVisibility = 1.0f; // 0..1 fraction of active segment coverage
 
     QVector2D m_lastMousePos;
     QVector2D m_currentMousePos;
@@ -156,6 +158,8 @@ public:
     void setBrushNoiseMode(BrushNoiseMode mode) { m_brushNoiseMode = mode; }
     void setBrushNoiseScale(float scale) { m_brushNoiseScale = std::max(1.0f, scale); }
     void setBrushNoiseStrength(float strength) { m_brushNoiseStrength = std::clamp(strength, 0.0f, 1.0f); }
+    void setBrushSegments(int segments) { m_brushSegments = std::max(1, segments); }
+    void setSegmentVisibility(float visibility) { m_segmentVisibility = std::clamp(visibility, 0.0f, 1.0f); }
     void setMinSizeRatio(float ratio) { m_minSizeRatio = std::clamp(ratio, 0.1f, 0.9f); }
     const QVector<QVector3D>& getPalettes() const { return m_palettes[m_currentPaletteIdx]; }
     const QVector<QVector<QVector3D>>& allPalettes() const { return m_palettes; }

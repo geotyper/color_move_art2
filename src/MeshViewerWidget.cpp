@@ -15,6 +15,20 @@
 #include <algorithm>
 #include <map>
 
+static glm::vec3 randomTangentAroundNormal(const glm::vec3& nInput) {
+    glm::vec3 n = glm::normalize(nInput);
+    if (!std::isfinite(n.x) || !std::isfinite(n.y) || !std::isfinite(n.z) || glm::length(n) < 1e-6f) {
+        n = glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+    glm::vec3 up = (std::abs(n.z) < 0.9f) ? glm::vec3(0.0f, 0.0f, 1.0f) : glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 t1 = glm::normalize(glm::cross(n, up));
+    if (glm::length(t1) < 1e-6f) t1 = glm::vec3(1.0f, 0.0f, 0.0f);
+    glm::vec3 t2 = glm::normalize(glm::cross(n, t1));
+    float angle = static_cast<float>(QRandomGenerator::global()->generateDouble() * (2.0 * M_PI));
+    glm::vec3 tangent = glm::normalize(std::cos(angle) * t1 + std::sin(angle) * t2);
+    return tangent;
+}
+
 // We need boost geometry specifics here too if not fully in header
 namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
@@ -415,19 +429,7 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
                 newAgent.face = f;
                 newAgent.bary = glm::vec3(1.0f - u - v, u, v);
                 
-                // Random tangent not parallel to n
-                float rx = (float)std::rand() / RAND_MAX - 0.5f;
-                float ry = (float)std::rand() / RAND_MAX - 0.5f;
-                float rz = (float)std::rand() / RAND_MAX - 0.5f;
-                glm::vec3 rnd(rx, ry, rz);
-                
-                glm::vec3 tangent = glm::normalize(rnd - glm::dot(rnd, n) * n);
-                if (glm::length(tangent) < 0.1f) {
-                     // Degenerate case fallback
-                     if (std::abs(n.z) < 0.9f) tangent = glm::normalize(glm::cross(n, glm::vec3(0,0,1)));
-                     else tangent = glm::normalize(glm::cross(n, glm::vec3(0,1,0)));
-                }
-
+                glm::vec3 tangent = randomTangentAroundNormal(n);
                 newAgent.speed = m_agentBaseSpeed; // configurable speed
                 newAgent.worldVelocity = tangent * newAgent.speed;
                 // Color from active palette (cycling if more agents than colors)
@@ -498,8 +500,41 @@ void MeshViewerWidget::updateAgents() {
         return std::abs(clip.x) <= clip.w && std::abs(clip.y) <= clip.w && clip.z >= -clip.w && clip.z <= clip.w;
     };
 
+    auto firstHitAlongRay = [&](const glm::vec3& worldPos) -> float {
+        glm::vec3 dir = glm::normalize(worldPos - cameraPosWorld);
+        float targetT = glm::length(worldPos - cameraPosWorld);
+        if (targetT < 1e-5f) return 0.0f;
+
+        float minX = std::min(cameraPosWorld.x, worldPos.x);
+        float minY = std::min(cameraPosWorld.y, worldPos.y);
+        float minZ = std::min(cameraPosWorld.z, worldPos.z);
+        float maxX = std::max(cameraPosWorld.x, worldPos.x);
+        float maxY = std::max(cameraPosWorld.y, worldPos.y);
+        float maxZ = std::max(cameraPosWorld.z, worldPos.z);
+        BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
+
+        std::vector<BoostValue> result;
+        m_rtree.query(bgi::intersects(queryBox), std::back_inserter(result));
+
+        float bestT = std::numeric_limits<float>::max();
+        for (const auto &val : result) {
+            FaceIndex f(val.second);
+            FaceData fd;
+            if (!fetchFaceData(m_mesh, f, fd)) continue;
+            float t, u, v;
+            if (rayTriangleIntersect(cameraPosWorld, dir, fd.positions[0], fd.positions[1], fd.positions[2], t, u, v)) {
+                if (t > 0.0f && t < bestT) bestT = t;
+            }
+        }
+        return bestT;
+    };
+
     auto isVisible = [&](const SurfaceAgent&, const glm::vec3 &worldPos) -> bool {
-        return isClipVisible(worldPos);
+        if (!isClipVisible(worldPos)) return false;
+        float targetT = glm::length(worldPos - cameraPosWorld);
+        float hitT = firstHitAlongRay(worldPos);
+        // visible if nothing hit before target (with small tolerance)
+        return hitT == std::numeric_limits<float>::max() || targetT <= hitT + 1e-3f;
     };
 
     auto respawnAgent = [&](SurfaceAgent& agent) {
@@ -557,8 +592,7 @@ void MeshViewerWidget::updateAgents() {
                 FaceData fd;
                 if (!fetchFaceData(m_mesh, bestFace, fd)) continue;
                 glm::vec3 n = glm::normalize(glm::cross(fd.positions[1] - fd.positions[0], fd.positions[2] - fd.positions[0]));
-                glm::vec3 tangent = glm::normalize(glm::cross(n, glm::vec3(0.0f, 1.0f, 0.0f)));
-                if (!std::isfinite(tangent.x) || glm::length(tangent) < 0.1f) tangent = glm::vec3(1.0f, 0.0f, 0.0f);
+                glm::vec3 tangent = randomTangentAroundNormal(n);
                 agent.speed = m_agentBaseSpeed;
                 agent.worldVelocity = tangent * agent.speed;
                 agent.trail.clear();
@@ -787,12 +821,48 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
     glm::mat4 mv = view * model;
     glm::vec4 viewport(0.0f, 0.0f, viewWidth, viewHeight);
     
-    // Visibility: use proper clip-space frustum test so non-spherical meshes (e.g., cubes) are not culled incorrectly.
-    auto isVisible = [&](const glm::vec3 &worldPos) -> bool {
+    // Visibility: frustum + occlusion via rtree ray test.
+    auto isClipVisible = [&](const glm::vec3 &worldPos) -> bool {
         glm::vec4 clip = proj * mv * glm::vec4(worldPos, 1.0f);
         if (clip.w <= 0.0f) return false; // behind eye
-        // Inside clip frustum
         return std::abs(clip.x) <= clip.w && std::abs(clip.y) <= clip.w && clip.z >= -clip.w && clip.z <= clip.w;
+    };
+
+    glm::vec3 cameraPosWorld(0.0f, 0.0f, m_cameraDistance);
+    auto firstHitAlongRay = [&](const glm::vec3& worldPos) -> float {
+        glm::vec3 dir = glm::normalize(worldPos - cameraPosWorld);
+        float targetT = glm::length(worldPos - cameraPosWorld);
+        if (targetT < 1e-5f) return 0.0f;
+
+        float minX = std::min(cameraPosWorld.x, worldPos.x);
+        float minY = std::min(cameraPosWorld.y, worldPos.y);
+        float minZ = std::min(cameraPosWorld.z, worldPos.z);
+        float maxX = std::max(cameraPosWorld.x, worldPos.x);
+        float maxY = std::max(cameraPosWorld.y, worldPos.y);
+        float maxZ = std::max(cameraPosWorld.z, worldPos.z);
+        BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
+
+        std::vector<BoostValue> result;
+        m_rtree.query(bgi::intersects(queryBox), std::back_inserter(result));
+
+        float bestT = std::numeric_limits<float>::max();
+        for (const auto &val : result) {
+            FaceIndex f(val.second);
+            FaceData fd;
+            if (!fetchFaceData(m_mesh, f, fd)) continue;
+            float t, u, v;
+            if (rayTriangleIntersect(cameraPosWorld, dir, fd.positions[0], fd.positions[1], fd.positions[2], t, u, v)) {
+                if (t > 0.0f && t < bestT) bestT = t;
+            }
+        }
+        return bestT;
+    };
+
+    auto isVisible = [&](const glm::vec3 &worldPos) -> bool {
+        if (!isClipVisible(worldPos)) return false;
+        float targetT = glm::length(worldPos - cameraPosWorld);
+        float hitT = firstHitAlongRay(worldPos);
+        return hitT == std::numeric_limits<float>::max() || targetT <= hitT + 1e-3f;
     };
 
     auto project = [&](const glm::vec3 &worldPos) -> QVector2D {

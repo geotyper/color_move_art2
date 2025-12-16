@@ -264,6 +264,9 @@ void SqueegeeWindow::paintGL()
         m_computeSqueegee->setUniformValue("brushSize", brushSizeForShader);
         m_computeSqueegee->setUniformValue("isMouseDown", m_isMouseDown);
         m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
+        m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
+        m_computeSqueegee->setUniformValue("brushSegments", m_brushSegments);
+        m_computeSqueegee->setUniformValue("segmentVisibility", m_segmentVisibility);
         
         glDispatchCompute((width() + 7) / 8, (height() + 7) / 8, 32); // 32 layers
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -454,6 +457,8 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
     m_computeSqueegee->setUniformValue("isMouseDown", true);
     m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
     m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
+    m_computeSqueegee->setUniformValue("brushSegments", m_brushSegments);
+    m_computeSqueegee->setUniformValue("segmentVisibility", m_segmentVisibility);
     
     for (int i = 0; i < steps; ++i) {
         float t = (float)i / (float)steps;
@@ -499,6 +504,8 @@ void SqueegeeWindow::simulateStroke(QVector2D start, QVector2D end, float size)
         m_computeSqueegee->setUniformValue("isMouseDown", true);
         m_computeSqueegee->setUniformValue("toroidal", m_toroidal);
         m_computeSqueegee->setUniformValue("squeegeeMode", (int)m_squeegeeMode);
+        m_computeSqueegee->setUniformValue("brushSegments", m_brushSegments);
+        m_computeSqueegee->setUniformValue("segmentVisibility", m_segmentVisibility);
         
         last = current;
         noisyLast = noisyCurrent;

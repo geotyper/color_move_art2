@@ -233,228 +233,8 @@ MainWindow::MainWindow()
     controls->setFixedWidth(320);
     QVBoxLayout *controlLayout = new QVBoxLayout(controls);
     
-    QFormLayout *formLayout = new QFormLayout;
-    
-    // Angle Slider (0 - 360)
-    m_angleSlider = new QSlider(Qt::Horizontal);
-    m_angleSlider->setRange(0, 360);
-    m_angleSlider->setValue(45);
-    m_angleLabel = new QLabel("45 deg");
-    connect(m_angleSlider, &QSlider::valueChanged, this, &MainWindow::onAngleChanged);
-    formLayout->addRow("Angle:", m_angleLabel);
-    formLayout->addRow(m_angleSlider);
-
-    // Angle Snap Checkbox
-    m_angleSnapCheckBox = new QCheckBox("Angle Snap (45 deg)");
-    connect(m_angleSnapCheckBox, &QCheckBox::toggled, this, &MainWindow::onAngleSnapToggled);
-    formLayout->addRow(m_angleSnapCheckBox);
-    
-    // Width Slider (10% - 300%)
-    m_widthSlider = new QSlider(Qt::Horizontal);
-    m_widthSlider->setRange(10, 300);
-    m_widthSlider->setValue(200);
-    m_widthLabel = new QLabel("200%");
-    connect(m_widthSlider, &QSlider::valueChanged, this, &MainWindow::onWidthChanged);
-    formLayout->addRow("Width:", m_widthLabel);
-    formLayout->addRow(m_widthSlider);
-    
-    // Passes Slider (1 - 5)
-    m_passesSlider = new QSlider(Qt::Horizontal);
-    m_passesSlider->setRange(1, 5);
-    m_passesSlider->setValue(1);
-    m_passesLabel = new QLabel("1");
-    connect(m_passesSlider, &QSlider::valueChanged, this, &MainWindow::onPassesChanged);
-    formLayout->addRow("Passes:", m_passesLabel);
-    formLayout->addRow(m_passesSlider);
-    
-    // Speed/Steps Slider (50 - 2000)
-    // Lower steps = Faster movement (less physics per pixel)
-    // Higher steps = Slower movement (more physics per pixel)
-    m_stepsSlider = new QSlider(Qt::Horizontal);
-    m_stepsSlider->setRange(25, 250);
-    m_stepsSlider->setValue(100);
-    m_stepsLabel = new QLabel("100 steps");
-    connect(m_stepsSlider, &QSlider::valueChanged, this, &MainWindow::onStepsChanged);
-    formLayout->addRow("Simulation Steps:", m_stepsLabel);
-    formLayout->addRow("Coarse (25-250):", m_stepsSlider);
-
-    m_stepsFineSlider = new QSlider(Qt::Horizontal);
-    m_stepsFineSlider->setRange(1, 25);
-    m_stepsFineSlider->setValue(25);
-    connect(m_stepsFineSlider, &QSlider::valueChanged, this, &MainWindow::onStepsFineChanged);
-    formLayout->addRow("Fine (1-25):", m_stepsFineSlider);
-
-    m_stepsPresetCombo = new QComboBox();
-    for (int v = 25; v <= 250; v += 25) {
-        m_stepsPresetCombo->addItem(QString::number(v) + " steps", v);
-    }
-    m_stepsPresetCombo->setCurrentIndex(3); // 100 steps
-    connect(m_stepsPresetCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onStepsPresetChanged);
-    formLayout->addRow("Preset:", m_stepsPresetCombo);
-    
-    // Density Slider (100 - 2000)
-
-
-    
-    // Drop Max Size Slider (1 - 100)
-    m_sizeSlider = new QSlider(Qt::Horizontal);
-    m_sizeSlider->setRange(1, 100);
-    m_sizeSlider->setValue(25);
-    m_sizeLabel = new QLabel("25 px");
-    connect(m_sizeSlider, &QSlider::valueChanged, this, &MainWindow::onSizeChanged);
-    formLayout->addRow("Drop Max Size:", m_sizeLabel);
-    formLayout->addRow(m_sizeSlider);
-    
-    // Concentric Circles Slider (1 - 7)
-    m_concentricSlider = new QSlider(Qt::Horizontal);
-    m_concentricSlider->setRange(1, 7);
-    m_concentricSlider->setValue(1);
-    m_concentricLabel = new QLabel("1");
-    connect(m_concentricSlider, &QSlider::valueChanged, this, &MainWindow::onConcentricChanged);
-    formLayout->addRow("Nested Circles:", m_concentricLabel);
-    formLayout->addRow(m_concentricSlider);
-    
-    // Palette Combo
-    m_paletteCombo = new QComboBox();
-    m_paletteCombo->addItem("Modern Art (Original Calm)");
-    m_paletteCombo->addItem("Modern Earth (High Contrast)");
-    m_paletteCombo->addItem("Deep Ocean (Vibrant Blues)");
-    m_paletteCombo->addItem("Vibrant Sunset");
-    m_paletteCombo->addItem("Forest & Berry");
-    m_paletteCombo->addItem("Modern Pop Art");
-    m_paletteCombo->addItem("Cyberpunk");
-    m_paletteCombo->addItem("Single Color Gray");
-    connect(m_paletteCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPaletteChanged);
-
-    // Shape Combo
-    m_shapeCombo = new QComboBox();
-    m_shapeCombo->addItem("Circle");
-    m_shapeCombo->addItem("Square");
-    connect(m_shapeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onShapeChanged);
-    formLayout->addRow("Drop Shape:", m_shapeCombo);
-
-    // Generation Mode Combo
-    m_genModeCombo = new QComboBox();
-    m_genModeCombo->addItem("Random");
-    m_genModeCombo->addItem("Grid");
-    connect(m_genModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onGenModeChanged);
-    formLayout->addRow("Gen Mode:", m_genModeCombo);
-
-    m_depthScalingCheckBox = new QCheckBox("Depth Radius Growth (exp)");
-    connect(m_depthScalingCheckBox, &QCheckBox::toggled, this, &MainWindow::onDepthScalingToggled);
-    formLayout->addRow(m_depthScalingCheckBox);
-
-    // Squeegee Mode Combo
-    m_squeegeeModeCombo = new QComboBox();
-    m_squeegeeModeCombo->addItem("Solid");
-    m_squeegeeModeCombo->addItem("Soft");
-    m_squeegeeModeCombo->addItem("Accurate");
-    connect(m_squeegeeModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onSqueegeeModeChanged);
-    formLayout->addRow("Squeegee:", m_squeegeeModeCombo);
-
-    m_noiseModeCombo = new QComboBox();
-    m_noiseModeCombo->addItem("Noise Off", (int)SqueegeeWindow::NoiseOff);
-    m_noiseModeCombo->addItem("Noise -> Brush Intensity", (int)SqueegeeWindow::NoiseBrushIntensity);
-    m_noiseModeCombo->addItem("Noise -> Brush Offset (wavy)", (int)SqueegeeWindow::NoiseBrushOffset);
-    connect(m_noiseModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onNoiseModeChanged);
-    formLayout->addRow("Brush Noise:", m_noiseModeCombo);
-
-    m_noiseScaleSlider = new QSlider(Qt::Horizontal);
-    m_noiseScaleSlider->setRange(10, 400);
-    m_noiseScaleSlider->setValue(120);
-    m_noiseScaleLabel = new QLabel("120 px");
-    connect(m_noiseScaleSlider, &QSlider::valueChanged, this, &MainWindow::onNoiseScaleChanged);
-    formLayout->addRow("Noise Scale:", m_noiseScaleLabel);
-    formLayout->addRow(m_noiseScaleSlider);
-
-    m_noiseStrengthSlider = new QSlider(Qt::Horizontal);
-    m_noiseStrengthSlider->setRange(0, 100);
-    m_noiseStrengthSlider->setValue(0);
-    m_noiseStrengthLabel = new QLabel("0.00");
-    connect(m_noiseStrengthSlider, &QSlider::valueChanged, this, &MainWindow::onNoiseStrengthChanged);
-    formLayout->addRow("Noise Strength:", m_noiseStrengthLabel);
-    formLayout->addRow(m_noiseStrengthSlider);
-
-    m_noisePreviewLabel = new QLabel();
-    m_noisePreviewLabel->setFixedSize(180, 90);
-    m_noisePreviewLabel->setFrameStyle(QFrame::Box | QFrame::Plain);
-    m_noisePreviewLabel->setAlignment(Qt::AlignCenter);
-    m_noisePreviewLabel->setScaledContents(true);
-    formLayout->addRow("Noise Preview:", m_noisePreviewLabel);
-
-    // Sharpen Slider
-    m_sharpenSlider = new QSlider(Qt::Horizontal);
-    m_sharpenSlider->setRange(0, 200); // 0.0 - 2.0
-    m_sharpenSlider->setValue(0);
-    connect(m_sharpenSlider, &QSlider::valueChanged, this, &MainWindow::onSharpenChanged);
-    formLayout->addRow("Sharpen:", m_sharpenSlider);
-
-    // Brush Type Combo (Restored)
-    m_brushTypeCombo = new QComboBox();
-    m_brushTypeCombo->addItem("Normal");
-    m_brushTypeCombo->addItem("Missing Teeth");
-    // Connect to something if needed, or just poll it like we do in onPaintTrails
-    formLayout->addRow("Brush Type:", m_brushTypeCombo);
-
-    // Grid Step Slider (10 - 200 px)
-    m_gridStepSlider = new QSlider(Qt::Horizontal);
-    m_gridStepSlider->setRange(10, 200);
-    m_gridStepSlider->setValue(50);
-    m_gridStepLabel = new QLabel("50 px");
-    connect(m_gridStepSlider, &QSlider::valueChanged, this, &MainWindow::onGridStepChanged);
-    
-    m_densityLabel = new QLabel("600 drops");
-    m_densitySlider = new QSlider(Qt::Horizontal);
-    m_densitySlider->setRange(10, 5000); // 10 to 5000 drops
-    m_densitySlider->setValue(600);
-    connect(m_densitySlider, &QSlider::valueChanged, this, &MainWindow::onDensityChanged);
-
-    QVBoxLayout *genLayout = new QVBoxLayout;
-    genLayout->setSpacing(5); // Tighter spacing for control groups
-
-    genLayout->addWidget(new QLabel("<b>Generation:</b>"));
-    
-    // Shape
-    genLayout->addWidget(new QLabel("Shape:"));
-    genLayout->addWidget(m_shapeCombo);
-    
-    // Mode
-    genLayout->addWidget(new QLabel("Mode:"));
-    genLayout->addWidget(m_genModeCombo);
-    
-    // Size
-    m_sizeSlider->setRange(1, 150); // Allow down to 1px
-    genLayout->addWidget(m_sizeLabel);
-    genLayout->addWidget(m_sizeSlider);
-    
-    // Min Size Ratio
-    m_minSizeRatioLabel = new QLabel("Min Size: 10%");
-    m_minSizeRatioSlider = new QSlider(Qt::Horizontal);
-    m_minSizeRatioSlider->setRange(10, 90); // 0.1 to 0.9
-    m_minSizeRatioSlider->setValue(10);
-    connect(m_minSizeRatioSlider, &QSlider::valueChanged, this, &MainWindow::onMinSizeRatioChanged);
-    
-    genLayout->addWidget(m_minSizeRatioLabel);
-    genLayout->addWidget(m_minSizeRatioSlider);
-    
-    // Concentric
-    genLayout->addWidget(m_concentricLabel);
-    genLayout->addWidget(m_concentricSlider);
-    
-    // Grid Step
-    genLayout->addWidget(m_gridStepLabel);
-    genLayout->addWidget(m_gridStepSlider);
-    
-    // Density
-    genLayout->addWidget(m_densityLabel);
-    genLayout->addWidget(m_densitySlider);
-
-    // Buttons in Gen Layout (removed unused project/paint/clear)
-    formLayout->addRow(genLayout);
-
-    // Skip legacy preview/toroidal/background/regeneration controls
-    
     // TABS
+
     QTabWidget *tabs = new QTabWidget();
     controlLayout->addWidget(tabs);
     
@@ -479,7 +259,69 @@ MainWindow::MainWindow()
         if (m_squeegeeWindow) m_squeegeeWindow->setTrailBrightnessScale(scale);
     });
     renderLayout->addRow(m_trailBrightnessLabel, m_trailBrightnessSlider);
+
+    m_paletteCombo = new QComboBox();
+    m_paletteCombo->addItem("Modern Art (Original Calm)");
+    m_paletteCombo->addItem("Modern Earth (High Contrast)");
+    m_paletteCombo->addItem("Deep Ocean (Vibrant Blues)");
+    m_paletteCombo->addItem("Vibrant Sunset");
+    m_paletteCombo->addItem("Forest & Berry");
+    m_paletteCombo->addItem("Modern Pop Art");
+    m_paletteCombo->addItem("Cyberpunk");
+    m_paletteCombo->addItem("Single Color Gray");
+    connect(m_paletteCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPaletteChanged);
     renderLayout->addRow("Palette:", m_paletteCombo);
+
+    m_noiseModeCombo = new QComboBox();
+    m_noiseModeCombo->addItem("Noise Off", (int)SqueegeeWindow::NoiseOff);
+    m_noiseModeCombo->addItem("Noise -> Brush Intensity", (int)SqueegeeWindow::NoiseBrushIntensity);
+    m_noiseModeCombo->addItem("Noise -> Brush Offset (wavy)", (int)SqueegeeWindow::NoiseBrushOffset);
+    connect(m_noiseModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onNoiseModeChanged);
+    renderLayout->addRow("Brush Noise:", m_noiseModeCombo);
+
+    m_noiseScaleSlider = new QSlider(Qt::Horizontal);
+    m_noiseScaleSlider->setRange(10, 400);
+    m_noiseScaleSlider->setValue(120);
+    m_noiseScaleLabel = new QLabel("120 px");
+    connect(m_noiseScaleSlider, &QSlider::valueChanged, this, &MainWindow::onNoiseScaleChanged);
+    renderLayout->addRow("Noise Scale:", m_noiseScaleLabel);
+    renderLayout->addRow(m_noiseScaleSlider);
+
+    m_noiseStrengthSlider = new QSlider(Qt::Horizontal);
+    m_noiseStrengthSlider->setRange(0, 100);
+    m_noiseStrengthSlider->setValue(0);
+    m_noiseStrengthLabel = new QLabel("0.00");
+    connect(m_noiseStrengthSlider, &QSlider::valueChanged, this, &MainWindow::onNoiseStrengthChanged);
+    renderLayout->addRow("Noise Strength:", m_noiseStrengthLabel);
+    renderLayout->addRow(m_noiseStrengthSlider);
+
+    m_segmentCountSlider = new QSlider(Qt::Horizontal);
+    m_segmentCountSlider->setRange(1, 32);
+    m_segmentCountSlider->setValue(1);
+    m_segmentCountLabel = new QLabel("Segments: 1");
+    connect(m_segmentCountSlider, &QSlider::valueChanged, this, &MainWindow::onSegmentCountChanged);
+    renderLayout->addRow(m_segmentCountLabel, m_segmentCountSlider);
+
+    m_segmentVisibilitySlider = new QSlider(Qt::Horizontal);
+    m_segmentVisibilitySlider->setRange(0, 100);
+    m_segmentVisibilitySlider->setValue(100);
+    m_segmentVisibilityLabel = new QLabel("Segment fill: 1.00");
+    connect(m_segmentVisibilitySlider, &QSlider::valueChanged, this, &MainWindow::onSegmentVisibilityChanged);
+    renderLayout->addRow(m_segmentVisibilityLabel, m_segmentVisibilitySlider);
+
+    m_noisePreviewLabel = new QLabel();
+    m_noisePreviewLabel->setFixedSize(180, 90);
+    m_noisePreviewLabel->setFrameStyle(QFrame::Box | QFrame::Plain);
+    m_noisePreviewLabel->setAlignment(Qt::AlignCenter);
+    m_noisePreviewLabel->setScaledContents(true);
+    renderLayout->addRow("Noise Preview:", m_noisePreviewLabel);
+
+    m_sharpenSlider = new QSlider(Qt::Horizontal);
+    m_sharpenSlider->setRange(0, 200); // 0.0 - 2.0
+    m_sharpenSlider->setValue(0);
+    connect(m_sharpenSlider, &QSlider::valueChanged, this, &MainWindow::onSharpenChanged);
+    renderLayout->addRow("Sharpen:", m_sharpenSlider);
+
     QPushButton *bgColorBtn = new QPushButton("Background Color");
     connect(bgColorBtn, &QPushButton::clicked, this, &MainWindow::onBackgroundColorClicked);
     renderLayout->addRow(bgColorBtn);
@@ -798,6 +640,8 @@ MainWindow::MainWindow()
     onNoiseModeChanged(m_noiseModeCombo->currentIndex());
     onNoiseScaleChanged(m_noiseScaleSlider->value());
     onNoiseStrengthChanged(m_noiseStrengthSlider->value());
+    onSegmentCountChanged(m_segmentCountSlider->value());
+    onSegmentVisibilityChanged(m_segmentVisibilitySlider->value());
     updateNoisePreview();
 
     loadSettings();
@@ -907,32 +751,32 @@ void MainWindow::onPrimParam3Changed(int value)
 
 void MainWindow::onAngleChanged(int value)
 {
-    if (m_angleSnapCheckBox->isChecked()) {
+    if (m_angleSnapCheckBox && m_angleSnapCheckBox->isChecked()) {
         int snapped = qRound(value / 45.0) * 45;
         if (snapped != value) {
-            m_angleSlider->setValue(snapped);
+            if (m_angleSlider) m_angleSlider->setValue(snapped);
             return;
         }
     }
-    m_angleLabel->setText(QString::number(value) + " deg");
+    if (m_angleLabel) m_angleLabel->setText(QString::number(value) + " deg");
     m_squeegeeWindow->setGenAngle((float)value);
 }
 
 void MainWindow::onWidthChanged(int value)
 {
-    m_widthLabel->setText(QString::number(value) + "%");
+    if (m_widthLabel) m_widthLabel->setText(QString::number(value) + "%");
     m_squeegeeWindow->setGenWidth((float)value / 100.0f);
 }
 
 void MainWindow::onPassesChanged(int value)
 {
-    m_passesLabel->setText(QString::number(value));
+    if (m_passesLabel) m_passesLabel->setText(QString::number(value));
     m_squeegeeWindow->setGenPasses(value);
 }
 
 void MainWindow::onStepsChanged(int value)
 {
-    m_stepsLabel->setText(QString("Simulation Steps: %1 steps").arg(value));
+    if (m_stepsLabel) m_stepsLabel->setText(QString("Simulation Steps: %1 steps").arg(value));
     
     // Sync logic (optional, but good for UX if we had fine controls linked)
     // The user moved the coarse slider, so update label and backend.
@@ -950,7 +794,7 @@ void MainWindow::onStepsChanged(int value)
     // The Coarse slider is 25-250.
     
     // Update label
-    m_stepsLabel->setText(QString("%1 steps").arg(snapped));
+    if (m_stepsLabel) m_stepsLabel->setText(QString("%1 steps").arg(snapped));
 
     // Update Fine Slider (approximate sync)
     // The fine slider is 1-25. If coarse is moved, we might reset fine or leave it?
@@ -961,7 +805,7 @@ void MainWindow::onStepsChanged(int value)
 
 void MainWindow::onDensityChanged(int value)
 {
-    m_densityLabel->setText(QString("Density: %1").arg(value));
+    if (m_densityLabel) m_densityLabel->setText(QString("Density: %1").arg(value));
     m_squeegeeWindow->setGenDensity(value);
 }
 
@@ -970,20 +814,20 @@ void MainWindow::onDensityChanged(int value)
 
 void MainWindow::onSizeChanged(int value)
 {
-    m_sizeLabel->setText(QString::number(value) + " px");
+    if (m_sizeLabel) m_sizeLabel->setText(QString::number(value) + " px");
     m_squeegeeWindow->setDropMaxSize(value);
 }
 
 void MainWindow::onMinSizeRatioChanged(int value)
 {
     float ratio = value / 100.0f;
-    m_minSizeRatioLabel->setText(QString("Min Size: %1%").arg(value));
+    if (m_minSizeRatioLabel) m_minSizeRatioLabel->setText(QString("Min Size: %1%").arg(value));
     m_squeegeeWindow->setMinSizeRatio(ratio);
 }
 
 void MainWindow::onConcentricChanged(int value)
 {
-    m_concentricLabel->setText(QString::number(value));
+    if (m_concentricLabel) m_concentricLabel->setText(QString::number(value));
     m_squeegeeWindow->setGenConcentric(value);
 }
 
@@ -999,7 +843,7 @@ void MainWindow::onToroidalToggled(bool checked)
 
 void MainWindow::onAngleSnapToggled(bool checked)
 {
-    if (checked) {
+    if (checked && m_angleSlider) {
         // Trigger re-snap of current value
         onAngleChanged(m_angleSlider->value());
     }
@@ -1060,6 +904,31 @@ void MainWindow::onNoiseStrengthChanged(int value)
     m_noiseStrengthLabel->setText(QString::number(strength, 'f', 2));
     m_squeegeeWindow->setBrushNoiseStrength(strength);
     updateNoisePreview();
+}
+
+void MainWindow::onSegmentCountChanged(int value)
+{
+    int clamped = std::clamp(value, 1, 32);
+    if (clamped != value) {
+        m_segmentCountSlider->blockSignals(true);
+        m_segmentCountSlider->setValue(clamped);
+        m_segmentCountSlider->blockSignals(false);
+    }
+    m_segmentCountLabel->setText(QString("Segments: %1").arg(clamped));
+    if (m_squeegeeWindow) m_squeegeeWindow->setBrushSegments(clamped);
+}
+
+void MainWindow::onSegmentVisibilityChanged(int value)
+{
+    int clamped = std::clamp(value, 0, 100);
+    if (clamped != value) {
+        m_segmentVisibilitySlider->blockSignals(true);
+        m_segmentVisibilitySlider->setValue(clamped);
+        m_segmentVisibilitySlider->blockSignals(false);
+    }
+    float v = clamped / 100.0f;
+    m_segmentVisibilityLabel->setText(QString("Segment fill: %1").arg(v, 0, 'f', 2));
+    if (m_squeegeeWindow) m_squeegeeWindow->setSegmentVisibility(v);
 }
 
 void MainWindow::updateNoisePreview()
@@ -1318,64 +1187,86 @@ void MainWindow::onPaintTrails()
             QRandomGenerator::global()->generateDouble(),
             QRandomGenerator::global()->generateDouble());
     };
+    auto buildPerp = [](const std::vector<QVector2D>& pts) {
+        std::vector<QVector2D> perps(pts.size(), QVector2D(0, 0));
+        for (int i = 0; i < (int)pts.size(); ++i) {
+            QVector2D prev = pts[std::max(0, i - 1)];
+            QVector2D next = pts[std::min<int>(pts.size() - 1, i + 1)];
+            QVector2D t = next - prev;
+            if (t.lengthSquared() < 1e-6f) t = QVector2D(1.0f, 0.0f);
+            t.normalize();
+            perps[i] = QVector2D(-t.y(), t.x());
+        }
+        return perps;
+    };
+
+    int segCount = std::max(1, m_segmentCountSlider ? m_segmentCountSlider->value() : 1);
+    float fillProb = m_segmentVisibilitySlider ? (m_segmentVisibilitySlider->value() / 100.0f) : 1.0f;
+
     for (const auto& a : agents) {
-        if (a.trailSegments.empty()) continue;
+        if (!a.isVisible || a.trailSegments.empty()) continue;
             
         for (int si = 0; si < a.trailSegments.size(); ++si) {
              const auto& seg = a.trailSegments[si];
              if (seg.size() < 2) continue;
              float lw = std::max(0.1f, m_lineWidthSlider->value() / 10.0f);
-             if (m_randomTrailStepColors) {
-                 for (int pi = 1; pi < seg.size(); ++pi) {
-                     SqueegeeWindow::PathInfo info;
-                     info.color = randomColor();
-                     info.size = lw;
-                     info.useQtPainter = true;
-                     info.layer = a.layer;
-                     float px0 = seg[pi - 1].x() * scale + offsetX;
-                     float py0 = seg[pi - 1].y() * scale + offsetY;
-                     float px1 = seg[pi].x() * scale + offsetX;
-                     float py1 = seg[pi].y() * scale + offsetY;
-                     info.points.append(QVector2D(px0, py0));
-                     info.points.append(QVector2D(px1, py1));
-                     // brightness: average of endpoints if available
-                     float b0 = 1.0f;
-                     float b1 = 1.0f;
-                     if (si < a.trailBrightness.size()) {
-                         const auto& bseg = a.trailBrightness[si];
-                         if (pi - 1 < bseg.size()) b0 = bseg[pi - 1];
-                         if (pi < bseg.size())     b1 = bseg[pi];
+             float perSegmentWidth = std::max(0.1f, lw / (float)segCount);
+             auto perps = buildPerp(seg);
+
+             auto applyOffsetAndAppend = [&](const QColor& color, const std::vector<float>* brightnessSrc) {
+                 auto bandCenter = [&](int k) {
+                     return (-0.5f + (k + 0.5f) / (float)segCount) * lw;
+                 };
+
+                 for (int pi = 1; pi < (int)seg.size(); ++pi) {
+                     // сэмпл активных полос на каждом шаге
+                     std::vector<int> activeBands(segCount, 1);
+                     if (fillProb < 0.999f) {
+                         for (int k = 0; k < segCount; ++k) {
+                             double r = QRandomGenerator::global()->generateDouble();
+                             activeBands[k] = (r <= fillProb) ? 1 : 0;
+                         }
+                         if (std::accumulate(activeBands.begin(), activeBands.end(), 0) == 0) {
+                             int idx = QRandomGenerator::global()->bounded(segCount);
+                             activeBands[idx] = 1;
+                         }
                      }
-                     info.brightness = 0.5f * (b0 + b1);
-                     paths.append(info);
-                 }
-             } else {
-                 SqueegeeWindow::PathInfo info;
-                 info.color = a.color;
-                 info.size = lw;
-                 info.useQtPainter = true;
-                 info.layer = a.layer;
-                 
-                 float avgBright = 1.0f;
-                 if (si < a.trailBrightness.size()) {
-                     const auto& bseg = a.trailBrightness[si];
-                     if (!bseg.empty()) {
-                         float sum = std::accumulate(bseg.begin(), bseg.end(), 0.0f);
-                         avgBright = sum / (float)bseg.size();
-                         info.brightnessPerPoint = QVector<float>(bseg.begin(), bseg.end());
+
+                     for (int k = 0; k < segCount; ++k) {
+                         if (!activeBands[k]) continue;
+                         SqueegeeWindow::PathInfo info;
+                         info.color = color;
+                         info.size = perSegmentWidth;
+                         info.useQtPainter = true;
+                         info.layer = a.layer;
+                         float bc = bandCenter(k);
+                         QVector2D p0 = seg[pi - 1] + perps[pi - 1] * bc;
+                         QVector2D p1 = seg[pi]     + perps[pi]     * bc;
+                         float px0 = p0.x() * scale + offsetX;
+                         float py0 = p0.y() * scale + offsetY;
+                         float px1 = p1.x() * scale + offsetX;
+                         float py1 = p1.y() * scale + offsetY;
+                         if (!((px0 >= 0 && px0 < canvasW && py0 >= 0 && py0 < canvasH) ||
+                               (px1 >= 0 && px1 < canvasW && py1 >= 0 && py1 < canvasH))) {
+                             continue;
+                         }
+                         info.points.append(QVector2D(px0, py0));
+                         info.points.append(QVector2D(px1, py1));
+                         float b0 = 1.0f;
+                         float b1 = 1.0f;
+                         if (brightnessSrc) {
+                             if (pi - 1 < brightnessSrc->size()) b0 = (*brightnessSrc)[pi - 1];
+                             if (pi < brightnessSrc->size())     b1 = (*brightnessSrc)[pi];
+                         }
+                         info.brightness = 0.5f * (b0 + b1);
+                         paths.append(info);
                      }
                  }
-                 info.brightness = avgBright;
-                 
-                 for (const auto& p : seg) {
-                     float px = p.x() * scale + offsetX;
-                     float py = p.y() * scale + offsetY; // painter branch flips Y internally
-                     info.points.append(QVector2D(px, py));
-                 }
-                 if (!info.points.isEmpty()) {
-                     paths.append(info);
-                 }
-             }
+             };
+
+             const auto* bsegPtr = (si < a.trailBrightness.size()) ? &a.trailBrightness[si] : nullptr;
+             QColor useColor = m_randomTrailStepColors ? randomColor() : a.color;
+             applyOffsetAndAppend(useColor, bsegPtr);
         }
     }
     m_squeegeeWindow->paintPaths(paths);

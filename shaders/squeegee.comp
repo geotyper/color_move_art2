@@ -11,6 +11,8 @@ uniform float brushSize;
 uniform bool isMouseDown;
 uniform bool toroidal;
 uniform int squeegeeMode; // 0: solid, 1: soft, 2: accurate
+uniform int brushSegments; // >1 enables segmented ("ragged") width
+uniform float segmentVisibility; // 0..1 probability a segment is active per chunk
 
 float segmentDistance(vec2 p, vec2 a, vec2 b) {
     vec2 pa = p - a;
@@ -45,10 +47,38 @@ void main() {
         }
     }
     
+    vec2 dir = strokeDir;
+    float dirLen = length(dir);
+    dir = (dirLen < 0.1) ? vec2(1.0, 0.0) : dir / dirLen;
+    vec2 perp = vec2(-dir.y, dir.x);
+
+    float halfW = max(brushSize, 0.0001);
+    float lateral = dot(vec2(pos.xy) - mousePos, perp);
+    if (abs(lateral) >= halfW) {
+        imageStore(imgOut, pos, current);
+        return;
+    }
+
+    bool segmentActive = true;
+    if (brushSegments > 1 && segmentVisibility < 0.999) {
+        float bandWidth = (2.0 * halfW) / float(brushSegments);
+        float u = (lateral + halfW) / bandWidth; // 0..segments
+        int segIdx = clamp(int(floor(u)), 0, brushSegments - 1);
+        float alongCell = floor(dot(vec2(pos.xy), dir) / 8.0); // chunk along stroke to avoid white noise
+        if (segmentVisibility <= 0.0) {
+            segmentActive = false;
+        } else {
+            float hashVal = fract(sin((float(segIdx) + alongCell * 13.37) * 12.9898) * 43758.5453);
+            segmentActive = hashVal <= segmentVisibility;
+        }
+    }
+
+    if (!segmentActive) {
+        imageStore(imgOut, pos, current);
+        return;
+    }
+
     if (dist < brushSize) {
-        vec2 dir = normalize(strokeDir);
-        if (length(dir) < 0.1) dir = vec2(0.0);
-        vec2 perp = vec2(-dir.y, dir.x);
 
         float falloff = 1.0;
         if (squeegeeMode == 1) { 

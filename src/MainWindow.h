@@ -55,6 +55,8 @@ private slots:
     void onNoiseScaleChanged(int value);
     void onNoiseStrengthChanged(int value);
     void updateNoisePreview();
+    void onSegmentCountChanged(int value);
+    void onSegmentVisibilityChanged(int value);
 
     void onRegenerate();
     void onRegenerateOverlay();
@@ -143,6 +145,8 @@ protected:
     QComboBox *m_noiseModeCombo;
     
     QSlider *m_densitySlider; // New Density Slider
+    QSlider *m_segmentCountSlider;
+    QSlider *m_segmentVisibilitySlider;
     
     QLabel *m_angleLabel;
     QLabel *m_widthLabel;
@@ -159,6 +163,8 @@ protected:
     QLabel *m_concentricLabel;
     QLabel *m_noiseScaleLabel;
     QLabel *m_noiseStrengthLabel;
+    QLabel *m_segmentCountLabel;
+    QLabel *m_segmentVisibilityLabel;
     QSlider *m_noiseScaleSlider;
     QSlider *m_noiseStrengthSlider;
     QLabel *m_noisePreviewLabel;
