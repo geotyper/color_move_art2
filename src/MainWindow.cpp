@@ -14,6 +14,7 @@
 #include <QRandomGenerator>
 #include <QCoreApplication>
 #include <QEventLoop>
+#include <limits>
 #include "MeshViewerWidget.h"
 #include "AgentProjectionWindow.h"
 #include <glm/glm.hpp>
@@ -469,6 +470,41 @@ MainWindow::MainWindow()
     
     m_generateMeshBtn = new QPushButton("Generate Mesh");
     connect(m_generateMeshBtn, &QPushButton::clicked, this, &MainWindow::onGenerateMesh);
+    m_addPlaneBtn = new QPushButton("Add Backdrop Plane");
+    connect(m_addPlaneBtn, &QPushButton::clicked, this, &MainWindow::onAddPlaneBehindSphere);
+
+    // Plane controls
+    m_planeSizeSlider = new QSlider(Qt::Horizontal);
+    m_planeSizeSlider->setRange(50, 2000); // 5.0 .. 200.0 units
+    m_planeSizeSlider->setValue(400);      // 40.0 default
+    m_planeSizeLabel = new QLabel("Plane size: 40.0");
+    connect(m_planeSizeSlider, &QSlider::valueChanged, this, [this](int v){
+        m_planeSizeLabel->setText(QString("Plane size: %1").arg(v / 10.0, 0, 'f', 1));
+    });
+
+    m_planeSubdivXSlider = new QSlider(Qt::Horizontal);
+    m_planeSubdivXSlider->setRange(1, 128);
+    m_planeSubdivXSlider->setValue(15);
+    m_planeSubdivXLabel = new QLabel("Subdiv X: 15");
+    connect(m_planeSubdivXSlider, &QSlider::valueChanged, this, [this](int v){
+        m_planeSubdivXLabel->setText(QString("Subdiv X: %1").arg(v));
+    });
+
+    m_planeSubdivYSlider = new QSlider(Qt::Horizontal);
+    m_planeSubdivYSlider->setRange(1, 128);
+    m_planeSubdivYSlider->setValue(15);
+    m_planeSubdivYLabel = new QLabel("Subdiv Y: 15");
+    connect(m_planeSubdivYSlider, &QSlider::valueChanged, this, [this](int v){
+        m_planeSubdivYLabel->setText(QString("Subdiv Y: %1").arg(v));
+    });
+
+    m_planeDepthSlider = new QSlider(Qt::Horizontal);
+    m_planeDepthSlider->setRange(10, 300); // percent of diameter
+    m_planeDepthSlider->setValue(100);     // 100% of diameter
+    m_planeDepthLabel = new QLabel("Depth: 1.00x diameter");
+    connect(m_planeDepthSlider, &QSlider::valueChanged, this, [this](int v){
+        m_planeDepthLabel->setText(QString("Depth: %1x diameter").arg(v / 100.0, 0, 'f', 2));
+    });
 
     // Extrusion controls
     m_extrudeProbSlider = new QSlider(Qt::Horizontal);
@@ -511,6 +547,15 @@ MainWindow::MainWindow()
     tabGenLayout->addWidget(new QLabel("<b>Mesh Generation:</b>"));
     tabGenLayout->addLayout(genForm);
     tabGenLayout->addWidget(m_generateMeshBtn);
+    tabGenLayout->addWidget(m_planeSizeLabel);
+    tabGenLayout->addWidget(m_planeSizeSlider);
+    tabGenLayout->addWidget(m_planeSubdivXLabel);
+    tabGenLayout->addWidget(m_planeSubdivXSlider);
+    tabGenLayout->addWidget(m_planeSubdivYLabel);
+    tabGenLayout->addWidget(m_planeSubdivYSlider);
+    tabGenLayout->addWidget(m_planeDepthLabel);
+    tabGenLayout->addWidget(m_planeDepthSlider);
+    tabGenLayout->addWidget(m_addPlaneBtn);
     tabGenLayout->addWidget(m_extrudeBtn);
 
     // Modifiers: Tentacles + Catmull-Clark
@@ -593,6 +638,12 @@ MainWindow::MainWindow()
 
     m_meshViewer = new MeshViewerWidget();
     m_meshViewer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    connect(m_meshViewer, &MeshViewerWidget::cameraDistanceChanged, this, [this](float dist){
+        if (!m_zoomSlider) return;
+        int sliderVal = static_cast<int>(std::round(dist * 10.0f));
+        QSignalBlocker b(m_zoomSlider);
+        m_zoomSlider->setValue(sliderVal);
+    });
     m_meshSubWindow = m_mdiArea->addSubWindow(m_meshViewer);
     m_meshSubWindow->setWindowTitle("3D Mesh Viewer");
     m_meshSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
@@ -1363,6 +1414,66 @@ void MainWindow::onGenerateMesh()
     m_lastVertices = vertices;
     m_lastIndices = indices;
     m_meshViewer->updateMesh(vertices, indices);
+}
+
+void MainWindow::onAddPlaneBehindSphere()
+{
+    // Derive a reasonable plane size/depth from current mesh bounds.
+    glm::vec3 minB(std::numeric_limits<float>::max());
+    glm::vec3 maxB(-std::numeric_limits<float>::max());
+    if (!m_lastVertices.empty()) {
+        for (const auto& v : m_lastVertices) {
+            glm::vec3 p(v.position);
+            minB = glm::min(minB, p);
+            maxB = glm::max(maxB, p);
+        }
+    } else {
+        minB = glm::vec3(-1.0f);
+        maxB = glm::vec3(1.0f);
+    }
+    glm::vec3 extent = glm::abs(maxB - minB);
+    float sceneRadius = 0.5f * std::max(std::max(extent.x, extent.y), extent.z);
+    sceneRadius = std::max(sceneRadius, 1.0f);
+    float planeSize = m_planeSizeSlider ? (m_planeSizeSlider->value() / 10.0f) : (sceneRadius * 4.0f);
+    int subdivX = m_planeSubdivXSlider ? std::max(1, m_planeSubdivXSlider->value()) : 15;
+    int subdivY = m_planeSubdivYSlider ? std::max(1, m_planeSubdivYSlider->value()) : 15;
+    float depthFactor = m_planeDepthSlider ? (m_planeDepthSlider->value() / 100.0f) : 1.0f;
+    float planeZ = minB.z - std::max(0.1f, sceneRadius * 2.0f * depthFactor);
+
+    SM plane;
+    // Build a grid (subdivX x subdivY) as quads split into two triangles each.
+    std::vector<SM::Vertex_index> grid;
+    grid.reserve((subdivX + 1) * (subdivY + 1));
+    for (int iy = 0; iy <= subdivY; ++iy) {
+        float fy = -planeSize + (2.0f * planeSize) * (float)iy / (float)subdivY;
+        for (int ix = 0; ix <= subdivX; ++ix) {
+            float fx = -planeSize + (2.0f * planeSize) * (float)ix / (float)subdivX;
+            grid.push_back(plane.add_vertex(SM::Point(fx, fy, planeZ)));
+        }
+    }
+    auto idx = [&](int x, int y) { return grid[y * (subdivX + 1) + x]; };
+    for (int y = 0; y < subdivY; ++y) {
+        for (int x = 0; x < subdivX; ++x) {
+            auto v00 = idx(x, y);
+            auto v10 = idx(x + 1, y);
+            auto v11 = idx(x + 1, y + 1);
+            auto v01 = idx(x, y + 1);
+            std::vector<SM::Vertex_index> quad = {v00, v10, v11, v01};
+            CGAL::Euler::add_face(quad, plane); // keep as quad; triangulated later for rendering
+        }
+    }
+    plane.collect_garbage();
+
+    int prevActive = m_meshRepo.activeIndex();
+    QColor planeColor = QColor::fromRgbF(0.12f, 0.12f, 0.15f);
+    m_meshRepo.addMesh(plane, planeColor);
+    if (prevActive >= 0 && prevActive < m_meshRepo.size()) {
+        m_meshRepo.setActiveIndex(prevActive); // keep sphere active for edits
+    }
+
+    // Rebuild flattened buffers with the new plane included.
+    m_meshRepo.buildFlattened(m_lastVertices, m_lastIndices);
+    if (m_meshViewer) m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
 }
 
 // ... (skipping unchanged methods) ...

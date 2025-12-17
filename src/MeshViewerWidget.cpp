@@ -43,11 +43,6 @@ inline glm::vec3 toGlm(const Point_3& p) {
     return glm::vec3(static_cast<float>(p.x()), static_cast<float>(p.y()), static_cast<float>(p.z()));
 }
 
-struct FaceData {
-    std::array<VertexIndex, 3> verts;
-    std::array<glm::vec3, 3> positions;
-};
-
 bool fetchFaceData(const SurfaceMesh& mesh, FaceIndex f, FaceData& out) {
     if (f == SurfaceMesh::null_face()) return false;
     auto h = mesh.halfedge(f);
@@ -62,6 +57,23 @@ bool fetchFaceData(const SurfaceMesh& mesh, FaceIndex f, FaceData& out) {
     return i == 3;
 }
 } // namespace
+
+const FaceCacheEntry* MeshViewerWidget::faceCache(FaceIndex f) const {
+    if (f == SurfaceMesh::null_face()) return nullptr;
+    int idx = f.idx();
+    if (idx < 0 || idx >= static_cast<int>(m_faceCache.size())) return nullptr;
+    const FaceCacheEntry& entry = m_faceCache[idx];
+    return entry.valid ? &entry : nullptr;
+}
+
+bool MeshViewerWidget::getFaceData(FaceIndex f, FaceData& out) const {
+    if (const FaceCacheEntry* c = faceCache(f)) {
+        out.verts = c->verts;
+        out.positions = c->positions;
+        return true;
+    }
+    return fetchFaceData(m_mesh, f, out);
+}
 
 MeshViewerWidget::MeshViewerWidget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -89,7 +101,10 @@ void MeshViewerWidget::setLightDirection(const QVector3D &dir)
 
 void MeshViewerWidget::setCameraDistance(float dist)
 {
-    m_cameraDistance = dist;
+    float clamped = std::clamp(dist, 0.5f, 30.0f);
+    if (std::abs(clamped - m_cameraDistance) < 1e-4f) return;
+    m_cameraDistance = clamped;
+    emit cameraDistanceChanged(m_cameraDistance);
     update();
 }
 
@@ -263,6 +278,7 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
     }
     
     m_rtree.clear();
+    m_faceCache.assign(m_mesh.number_of_faces(), {});
     m_vertices.reserve(m_mesh.number_of_faces() * 3);
     m_faceNormals.assign(m_mesh.number_of_faces(), glm::vec3(0.0f));
     m_vertexNormals.assign(m_mesh.number_of_vertices(), glm::vec3(0.0f));
@@ -270,7 +286,7 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
     for (auto f : m_mesh.faces()) {
         if (m_mesh.is_removed(f)) continue;
         FaceData fd;
-        if (!fetchFaceData(m_mesh, f, fd)) continue;
+        if (!getFaceData(f, fd)) continue;
         
         glm::vec3 v0 = fd.positions[0];
         glm::vec3 v1 = fd.positions[1];
@@ -283,6 +299,14 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         m_vertexNormals[fd.verts[0].idx()] += n;
         m_vertexNormals[fd.verts[1].idx()] += n;
         m_vertexNormals[fd.verts[2].idx()] += n;
+        // Cache face geometry for fast lookups during agent simulation.
+        if (f.idx() >= 0 && f.idx() < static_cast<int>(m_faceCache.size())) {
+            auto& cache = m_faceCache[f.idx()];
+            cache.verts = fd.verts;
+            cache.positions = fd.positions;
+            cache.normal = n;
+            cache.valid = true;
+        }
         
         glm::vec3 faceColor = (f.idx() < (int)faceColorsInput.size()) ? faceColorsInput[f.idx()] : glm::vec3(0.8f);
 
@@ -415,7 +439,7 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
         int f_idx = val.second;
         FaceIndex f(f_idx);
         FaceData fd;
-        if (!fetchFaceData(m_mesh, f, fd)) continue;
+        if (!getFaceData(f, fd)) continue;
         glm::vec3 v0 = fd.positions[0];
         glm::vec3 v1 = fd.positions[1];
         glm::vec3 v2 = fd.positions[2];
@@ -522,7 +546,7 @@ void MeshViewerWidget::updateAgents() {
         for (const auto &val : result) {
             FaceIndex f(val.second);
             FaceData fd;
-            if (!fetchFaceData(m_mesh, f, fd)) continue;
+            if (!getFaceData(f, fd)) continue;
             float t, u, v;
             if (rayTriangleIntersect(cameraPosModel, dir, fd.positions[0], fd.positions[1], fd.positions[2], t, u, v)) {
                 if (t > 0.0f && t < bestT) bestT = t;
@@ -573,7 +597,7 @@ void MeshViewerWidget::updateAgents() {
             for (const auto &val : result) {
                 FaceIndex f(val.second);
                 FaceData fd;
-                if (!fetchFaceData(m_mesh, f, fd)) continue;
+                if (!getFaceData(f, fd)) continue;
                 glm::vec3 v0 = fd.positions[0];
                 glm::vec3 v1 = fd.positions[1];
                 glm::vec3 v2 = fd.positions[2];
@@ -592,7 +616,7 @@ void MeshViewerWidget::updateAgents() {
                 agent.bary = bestBary;
 
                 FaceData fd;
-                if (!fetchFaceData(m_mesh, bestFace, fd)) continue;
+                if (!getFaceData(bestFace, fd)) continue;
                 glm::vec3 n = glm::normalize(glm::cross(fd.positions[1] - fd.positions[0], fd.positions[2] - fd.positions[0]));
                 glm::vec3 tangent = randomTangentAroundNormal(n);
                 agent.speed = m_agentBaseSpeed;
@@ -624,12 +648,12 @@ void MeshViewerWidget::updateAgents() {
                 break;
             }
 
-            FaceData fd;
-            if (!fetchFaceData(m_mesh, agent.face, fd)) {
-                qDebug() << "Agent" << agentId << "degenerate face";
-                agent.face = SurfaceMesh::null_face();
-                break;
-            }
+                FaceData fd;
+                if (!getFaceData(agent.face, fd)) {
+                    qDebug() << "Agent" << agentId << "degenerate face";
+                    agent.face = SurfaceMesh::null_face();
+                    break;
+                }
             
             glm::vec3 v0 = fd.positions[0];
             glm::vec3 v1 = fd.positions[1];
@@ -712,7 +736,7 @@ void MeshViewerWidget::updateAgents() {
                     agent.face = nextFace;
 
                     FaceData nd;
-                    if (!fetchFaceData(m_mesh, agent.face, nd)) {
+                    if (!getFaceData(agent.face, nd)) {
                         agent.face = SurfaceMesh::null_face();
                         break;
                     }
@@ -795,7 +819,7 @@ void MeshViewerWidget::updateAgents() {
 glm::vec3 MeshViewerWidget::getAgentWorldPos(const SurfaceAgent &agent) {
     if (agent.face == SurfaceMesh::null_face()) return glm::vec3(0.0f);
     FaceData fd;
-    if (!fetchFaceData(m_mesh, agent.face, fd)) return glm::vec3(0.0f);
+    if (!getFaceData(agent.face, fd)) return glm::vec3(0.0f);
     glm::vec3 v0 = fd.positions[0];
     glm::vec3 v1 = fd.positions[1];
     glm::vec3 v2 = fd.positions[2];
@@ -854,7 +878,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         for (const auto &val : result) {
             FaceIndex f(val.second);
             FaceData fd;
-            if (!fetchFaceData(m_mesh, f, fd)) continue;
+            if (!getFaceData(f, fd)) continue;
             float t, u, v;
             if (rayTriangleIntersect(cameraPosModel, dir, fd.positions[0], fd.positions[1], fd.positions[2], t, u, v)) {
                 if (t > 0.0f && t < bestT) bestT = t;
@@ -879,7 +903,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         glm::vec3 normal = glm::normalize(fallbackPos); // fallback
         if (agentRef.face != SurfaceMesh::null_face()) {
             FaceData fd;
-            if (fetchFaceData(m_mesh, agentRef.face, fd)) {
+            if (getFaceData(agentRef.face, fd)) {
                 glm::vec3 nv0 = m_vertexNormals[fd.verts[0].idx()];
                 glm::vec3 nv1 = m_vertexNormals[fd.verts[1].idx()];
                 glm::vec3 nv2 = m_vertexNormals[fd.verts[2].idx()];
@@ -976,4 +1000,15 @@ void MeshViewerWidget::mouseMoveEvent(QMouseEvent *event) {
         
         update();
     }
+}
+
+void MeshViewerWidget::wheelEvent(QWheelEvent *event) {
+    // Use angleDelta to support high-resolution wheels; 120 units per notch.
+    QPoint numDegrees = event->angleDelta() / 8;
+    if (numDegrees.isNull()) return;
+    int steps = numDegrees.y() / 15; // 15 deg per step (120 / 8)
+    if (steps == 0) return;
+    float factor = std::pow(0.9f, steps); // zoom in for positive steps
+    setCameraDistance(m_cameraDistance * factor);
+    event->accept();
 }

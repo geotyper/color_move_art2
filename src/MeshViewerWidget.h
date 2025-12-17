@@ -8,8 +8,10 @@
 #include <QTimer>
 #include <vector>
 #include <deque>
+#include <array>
 #include <QVector3D>
 #include <QKeyEvent>
+#include <QWheelEvent>
 #include "HelpStructures.h"
 
 #include "CgalMeshTypes.h"
@@ -40,6 +42,11 @@ using SurfaceMesh = CgalMeshTypes::SurfaceMesh;
 using FaceIndex  = CgalMeshTypes::F;
 using VertexIndex = CgalMeshTypes::V;
 
+struct FaceData {
+    std::array<VertexIndex, 3> verts;
+    std::array<glm::vec3, 3> positions;
+};
+
 struct SurfaceAgent {
     FaceIndex face = SurfaceMesh::null_face();
     glm::vec3 bary; // u, v, w
@@ -58,6 +65,13 @@ struct SurfaceAgent {
     int invisibleTicks = 0;
 };
 
+struct FaceCacheEntry {
+    std::array<VertexIndex, 3> verts;
+    std::array<glm::vec3, 3> positions;
+    glm::vec3 normal;
+    bool valid = false;
+};
+
 class MeshViewerWidget : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
     Q_OBJECT
@@ -73,6 +87,7 @@ public:
     int getPaletteIndex() const { return m_paletteIndex; }
     void setPalettes(const QVector<QVector<QVector3D>>* palettes) { m_externalPalettes = palettes; }
     void setAgentBaseSpeed(float s) { m_agentBaseSpeed = s; }
+    float cameraDistance() const { return m_cameraDistance; }
     
     // Check intersection and return hit info
     bool checkRayIntersection(float x, float y, float viewWidth, float viewHeight, glm::vec3 &hitPos);
@@ -104,6 +119,7 @@ protected:
     
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private:
     // struct Vertex { // Renamed to VertexData and moved
@@ -154,4 +170,10 @@ private:
 
     // Helper to get world pos from agent
     glm::vec3 getAgentWorldPos(const SurfaceAgent &agent); // New member
+    bool getFaceData(FaceIndex f, FaceData& out) const;
+    const FaceCacheEntry* faceCache(FaceIndex f) const;
+    std::vector<FaceCacheEntry> m_faceCache;
+
+signals:
+    void cameraDistanceChanged(float dist);
 };

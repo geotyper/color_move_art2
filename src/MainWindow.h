@@ -78,6 +78,7 @@ private slots:
     void onSmoothCatmull();
     void onAgentSpeedChanged(int value);
     void onRandomTrailColorsToggled(bool checked);
+    void onAddPlaneBehindSphere();
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
@@ -179,6 +180,15 @@ protected:
     QSlider *m_primParam3Slider;
     QLabel *m_primParam3Label;
     QPushButton *m_generateMeshBtn;
+    QPushButton *m_addPlaneBtn;
+    QSlider *m_planeSizeSlider;
+    QLabel  *m_planeSizeLabel;
+    QSlider *m_planeSubdivXSlider;
+    QLabel  *m_planeSubdivXLabel;
+    QSlider *m_planeSubdivYSlider;
+    QLabel  *m_planeSubdivYLabel;
+    QSlider *m_planeDepthSlider;
+    QLabel  *m_planeDepthLabel;
     QSlider *m_extrudeProbSlider;
     QLabel  *m_extrudeProbLabel;
     QSlider *m_extrudeDistSlider;
