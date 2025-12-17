@@ -28,6 +28,7 @@
 #include <CGAL/Polygon_mesh_processing/repair.h>
 #include <CGAL/Polygon_mesh_processing/stitch_borders.h>
 #include <CGAL/Subdivision_method_3/subdivision_methods_3.h>
+#include <CGAL/boost/graph/Euler_operations.h>
 
 namespace {
 using SM = CgalMeshBuilder::SurfaceMesh;
@@ -464,6 +465,7 @@ MainWindow::MainWindow()
     
     m_primitiveCombo = new QComboBox();
     m_primitiveCombo->addItem("HexSphere");
+    m_primitiveCombo->addItem("Cube");
     
     connect(m_primitiveCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onPrimitiveChanged);
     genForm->addRow("Primitive:", m_primitiveCombo);
@@ -488,6 +490,15 @@ MainWindow::MainWindow()
     m_primParam3Slider->setValue(0);
     connect(m_primParam3Slider, &QSlider::valueChanged, this, &MainWindow::onPrimParam3Changed);
     genForm->addRow(m_primParam3Label, m_primParam3Slider);
+
+    m_cubeQuadLabel = new QLabel("Quad size: 1.0");
+    m_cubeQuadSlider = new QSlider(Qt::Horizontal);
+    m_cubeQuadSlider->setRange(1, 100); // 0.1 .. 10.0
+    m_cubeQuadSlider->setValue(10);
+    connect(m_cubeQuadSlider, &QSlider::valueChanged, this, [this](int v){
+        m_cubeQuadLabel->setText(QString("Quad size: %1").arg(v / 10.0f, 0, 'f', 1));
+    });
+    genForm->addRow(m_cubeQuadLabel, m_cubeQuadSlider);
     
     m_generateMeshBtn = new QPushButton("Generate Mesh");
     connect(m_generateMeshBtn, &QPushButton::clicked, this, &MainWindow::onGenerateMesh);
@@ -717,6 +728,7 @@ MainWindow::MainWindow()
         float a = m_ambientSlider->value() / 100.0f;
         if (m_meshViewer) m_meshViewer->setAmbient(a);
     }
+    onPrimitiveChanged(m_primitiveCombo->currentIndex());
     onNoiseModeChanged(m_noiseModeCombo->currentIndex());
     onNoiseScaleChanged(m_noiseScaleSlider->value());
     onNoiseStrengthChanged(m_noiseStrengthSlider->value());
@@ -798,12 +810,25 @@ void MainWindow::onPrimitiveChanged(int index)
     QString p2 = "Param 2";
     QString p3 = "Param 3";
     
-    Q_UNUSED(index);
-    p1 = "Resolution (1-5)";
-    m_primParam1Slider->setRange(1, 5);m_primParam1Slider->setValue(2);
-    p2 = "Radius (0.1-5.0)";
-    m_primParam2Slider->setRange(1, 50);m_primParam2Slider->setValue(10);
-    p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+    if (index == 1) { // Cube
+        p1 = "Quads X (1-200)";
+        p2 = "Quads Y (1-200)";
+        p3 = "Quads Z (1-200)";
+        m_primParam1Slider->setRange(1, 200); m_primParam1Slider->setValue(10);
+        m_primParam2Slider->setRange(1, 200); m_primParam2Slider->setValue(10);
+        m_primParam3Slider->setRange(1, 200); m_primParam3Slider->setValue(10);
+        m_primParam3Slider->setEnabled(true);
+        if (m_cubeQuadSlider) m_cubeQuadSlider->setEnabled(true);
+        if (m_cubeQuadLabel) m_cubeQuadLabel->setEnabled(true);
+    } else { // HexSphere default
+        p1 = "Resolution (1-5)";
+        m_primParam1Slider->setRange(1, 5);m_primParam1Slider->setValue(2);
+        p2 = "Radius (0.1-5.0)";
+        m_primParam2Slider->setRange(1, 50);m_primParam2Slider->setValue(10);
+        p3 = "N/A"; m_primParam3Slider->setEnabled(false);
+        if (m_cubeQuadSlider) m_cubeQuadSlider->setEnabled(false);
+        if (m_cubeQuadLabel) m_cubeQuadLabel->setEnabled(false);
+    }
     
     m_primParam1Label->setText(p1);
     m_primParam2Label->setText(p2);
@@ -1416,19 +1441,69 @@ void MainWindow::onGenerateMesh()
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
     
-    // Params (reuse UI sliders for resolution/radius)
-    const int   resolution = m_primParam1Slider->value();
-    const float radius     = m_primParam2Slider->value() / 10.0f;
-    
     SM polyMesh;
-    CgalMeshBuilder::buildHexSphereOriented(
-        polyMesh,
-        resolution,
-        radius,
-        CgalMeshBuilder::Point_3(0,0,0),
-        CgalMeshBuilder::Vector_3(0,1,0),
-        0.0
-    );
+    if (m_primitiveCombo->currentIndex() == 1) { // Cube
+        int segX = std::max(1, m_primParam1Slider->value());
+        int segY = std::max(1, m_primParam2Slider->value());
+        int segZ = std::max(1, m_primParam3Slider->value());
+        float quadSize = m_cubeQuadSlider ? std::max(0.1f, m_cubeQuadSlider->value() / 10.0f) : 1.0f;
+        float sizeX = quadSize * segX;
+        float sizeY = quadSize * segY;
+        float sizeZ = quadSize * segZ;
+
+        auto addPatch = [&](const glm::vec3& origin, const glm::vec3& uDir, const glm::vec3& vDir, int nu, int nv) {
+            std::vector<SM::Vertex_index> grid;
+            grid.reserve((nu + 1) * (nv + 1));
+            for (int j = 0; j <= nv; ++j) {
+                for (int i = 0; i <= nu; ++i) {
+                    glm::vec3 p = origin + uDir * (float)i + vDir * (float)j;
+                    grid.push_back(polyMesh.add_vertex(SM::Point(p.x, p.y, p.z)));
+                }
+            }
+            auto idx = [&](int i, int j) { return grid[j * (nu + 1) + i]; };
+            for (int j = 0; j < nv; ++j) {
+                for (int i = 0; i < nu; ++i) {
+                    std::vector<SM::Vertex_index> quad = {
+                        idx(i, j),
+                        idx(i + 1, j),
+                        idx(i + 1, j + 1),
+                        idx(i, j + 1)
+                    };
+                    CGAL::Euler::add_face(quad, polyMesh);
+                }
+            }
+        };
+
+        float hx = sizeX * 0.5f;
+        float hy = sizeY * 0.5f;
+        float hz = sizeZ * 0.5f;
+
+        // +X
+        addPatch(glm::vec3(hx, -hy, -hz), glm::vec3(0, sizeY / segY, 0), glm::vec3(0, 0, sizeZ / segZ), segY, segZ);
+        // -X
+        addPatch(glm::vec3(-hx, -hy, hz), glm::vec3(0, sizeY / segY, 0), glm::vec3(0, 0, -sizeZ / segZ), segY, segZ);
+        // +Y
+        addPatch(glm::vec3(-hx, hy, -hz), glm::vec3(0, 0, sizeZ / segZ), glm::vec3(sizeX / segX, 0, 0), segZ, segX);
+        // -Y
+        addPatch(glm::vec3(-hx, -hy, hz), glm::vec3(0, 0, -sizeZ / segZ), glm::vec3(sizeX / segX, 0, 0), segZ, segX);
+        // +Z
+        addPatch(glm::vec3(-hx, -hy, hz), glm::vec3(sizeX / segX, 0, 0), glm::vec3(0, sizeY / segY, 0), segX, segY);
+        // -Z
+        addPatch(glm::vec3(hx, -hy, -hz), glm::vec3(-sizeX / segX, 0, 0), glm::vec3(0, sizeY / segY, 0), segX, segY);
+    } else {
+        // Params (reuse UI sliders for resolution/radius)
+        const int   resolution = m_primParam1Slider->value();
+        const float radius     = m_primParam2Slider->value() / 10.0f;
+        
+        CgalMeshBuilder::buildHexSphereOriented(
+            polyMesh,
+            resolution,
+            radius,
+            CgalMeshBuilder::Point_3(0,0,0),
+            CgalMeshBuilder::Vector_3(0,1,0),
+            0.0
+        );
+    }
 
     polyMesh.collect_garbage();
 

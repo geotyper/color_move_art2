@@ -184,6 +184,8 @@ protected:
     QSlider *m_primParam3Slider;
     QLabel *m_primParam3Label;
     QPushButton *m_generateMeshBtn;
+    QSlider *m_cubeQuadSlider;
+    QLabel  *m_cubeQuadLabel;
     QPushButton *m_addPlaneBtn;
     QSlider *m_planeSizeSlider;
     QLabel  *m_planeSizeLabel;
