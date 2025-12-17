@@ -492,7 +492,9 @@ void MeshViewerWidget::updateAgents() {
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -m_cameraDistance));
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
     glm::mat4 mv = view * model;
-    glm::vec3 cameraPosWorld(0.0f, 0.0f, m_cameraDistance);
+    glm::mat4 invModel = glm::inverse(model);
+    // Bring camera into mesh/model space so visibility tests use the same frame as the R-tree.
+    glm::vec3 cameraPosModel = glm::vec3(invModel * glm::vec4(0.0f, 0.0f, m_cameraDistance, 1.0f));
 
     auto isClipVisible = [&](const glm::vec3 &worldPos) -> bool {
         glm::vec4 clip = proj * mv * glm::vec4(worldPos, 1.0f);
@@ -501,16 +503,16 @@ void MeshViewerWidget::updateAgents() {
     };
 
     auto firstHitAlongRay = [&](const glm::vec3& worldPos) -> float {
-        glm::vec3 dir = glm::normalize(worldPos - cameraPosWorld);
-        float targetT = glm::length(worldPos - cameraPosWorld);
+        glm::vec3 dir = glm::normalize(worldPos - cameraPosModel);
+        float targetT = glm::length(worldPos - cameraPosModel);
         if (targetT < 1e-5f) return 0.0f;
 
-        float minX = std::min(cameraPosWorld.x, worldPos.x);
-        float minY = std::min(cameraPosWorld.y, worldPos.y);
-        float minZ = std::min(cameraPosWorld.z, worldPos.z);
-        float maxX = std::max(cameraPosWorld.x, worldPos.x);
-        float maxY = std::max(cameraPosWorld.y, worldPos.y);
-        float maxZ = std::max(cameraPosWorld.z, worldPos.z);
+        float minX = std::min(cameraPosModel.x, worldPos.x);
+        float minY = std::min(cameraPosModel.y, worldPos.y);
+        float minZ = std::min(cameraPosModel.z, worldPos.z);
+        float maxX = std::max(cameraPosModel.x, worldPos.x);
+        float maxY = std::max(cameraPosModel.y, worldPos.y);
+        float maxZ = std::max(cameraPosModel.z, worldPos.z);
         BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
 
         std::vector<BoostValue> result;
@@ -522,7 +524,7 @@ void MeshViewerWidget::updateAgents() {
             FaceData fd;
             if (!fetchFaceData(m_mesh, f, fd)) continue;
             float t, u, v;
-            if (rayTriangleIntersect(cameraPosWorld, dir, fd.positions[0], fd.positions[1], fd.positions[2], t, u, v)) {
+            if (rayTriangleIntersect(cameraPosModel, dir, fd.positions[0], fd.positions[1], fd.positions[2], t, u, v)) {
                 if (t > 0.0f && t < bestT) bestT = t;
             }
         }
@@ -531,7 +533,7 @@ void MeshViewerWidget::updateAgents() {
 
     auto isVisible = [&](const SurfaceAgent&, const glm::vec3 &worldPos) -> bool {
         if (!isClipVisible(worldPos)) return false;
-        float targetT = glm::length(worldPos - cameraPosWorld);
+        float targetT = glm::length(worldPos - cameraPosModel);
         float hitT = firstHitAlongRay(worldPos);
         // visible if nothing hit before target (with small tolerance)
         return hitT == std::numeric_limits<float>::max() || targetT <= hitT + 1e-3f;
@@ -771,19 +773,20 @@ void MeshViewerWidget::updateAgents() {
         bool headVisible = isVisible(agent, headPos);
         if (!headVisible) {
             agent.invisibleTicks++;
-            // Insert a sentinel to break polyline when it comes back.
+            // Break trail (mark stop) so запись возобновится только после появления
             if (agent.wasVisible) {
                 agent.trail.push_back({glm::vec3(std::numeric_limits<float>::quiet_NaN()),
                                        glm::vec3(std::numeric_limits<float>::quiet_NaN())});
             }
-            // Respawn after a short grace period
-            if (agent.invisibleTicks > 10) {
+            // Продолжаем движение без добавления точек пока невидим
+            if (agent.invisibleTicks > 50) {
                 respawnAgent(agent);
                 headPos = getAgentWorldPos(agent);
                 headVisible = isVisible(agent, headPos);
             }
         } else {
             agent.invisibleTicks = 0;
+            // при появлении снова продолжаем добавление точек
         }
         agent.wasVisible = headVisible;
     }
@@ -820,6 +823,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
     
     glm::mat4 mv = view * model;
     glm::vec4 viewport(0.0f, 0.0f, viewWidth, viewHeight);
+    glm::mat4 invModel = glm::inverse(model);
     
     // Visibility: frustum + occlusion via rtree ray test.
     auto isClipVisible = [&](const glm::vec3 &worldPos) -> bool {
@@ -828,18 +832,19 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         return std::abs(clip.x) <= clip.w && std::abs(clip.y) <= clip.w && clip.z >= -clip.w && clip.z <= clip.w;
     };
 
-    glm::vec3 cameraPosWorld(0.0f, 0.0f, m_cameraDistance);
+    // Match the frame used by the rtree (model space) to avoid false occlusion.
+    glm::vec3 cameraPosModel = glm::vec3(invModel * glm::vec4(0.0f, 0.0f, m_cameraDistance, 1.0f));
     auto firstHitAlongRay = [&](const glm::vec3& worldPos) -> float {
-        glm::vec3 dir = glm::normalize(worldPos - cameraPosWorld);
-        float targetT = glm::length(worldPos - cameraPosWorld);
+        glm::vec3 dir = glm::normalize(worldPos - cameraPosModel);
+        float targetT = glm::length(worldPos - cameraPosModel);
         if (targetT < 1e-5f) return 0.0f;
 
-        float minX = std::min(cameraPosWorld.x, worldPos.x);
-        float minY = std::min(cameraPosWorld.y, worldPos.y);
-        float minZ = std::min(cameraPosWorld.z, worldPos.z);
-        float maxX = std::max(cameraPosWorld.x, worldPos.x);
-        float maxY = std::max(cameraPosWorld.y, worldPos.y);
-        float maxZ = std::max(cameraPosWorld.z, worldPos.z);
+        float minX = std::min(cameraPosModel.x, worldPos.x);
+        float minY = std::min(cameraPosModel.y, worldPos.y);
+        float minZ = std::min(cameraPosModel.z, worldPos.z);
+        float maxX = std::max(cameraPosModel.x, worldPos.x);
+        float maxY = std::max(cameraPosModel.y, worldPos.y);
+        float maxZ = std::max(cameraPosModel.z, worldPos.z);
         BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
 
         std::vector<BoostValue> result;
@@ -851,7 +856,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
             FaceData fd;
             if (!fetchFaceData(m_mesh, f, fd)) continue;
             float t, u, v;
-            if (rayTriangleIntersect(cameraPosWorld, dir, fd.positions[0], fd.positions[1], fd.positions[2], t, u, v)) {
+            if (rayTriangleIntersect(cameraPosModel, dir, fd.positions[0], fd.positions[1], fd.positions[2], t, u, v)) {
                 if (t > 0.0f && t < bestT) bestT = t;
             }
         }
@@ -860,7 +865,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
 
     auto isVisible = [&](const glm::vec3 &worldPos) -> bool {
         if (!isClipVisible(worldPos)) return false;
-        float targetT = glm::length(worldPos - cameraPosWorld);
+        float targetT = glm::length(worldPos - cameraPosModel);
         float hitT = firstHitAlongRay(worldPos);
         return hitT == std::numeric_limits<float>::max() || targetT <= hitT + 1e-3f;
     };

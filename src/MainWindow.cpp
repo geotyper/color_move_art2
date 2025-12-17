@@ -1146,6 +1146,8 @@ void MainWindow::onProjectAgents()
 
     // Drops Only (Project Agents)
     QVector<SqueegeeWindow::DropInfo> drops;
+    // Scale drop size along with coordinates so brush canvas matches the projection view.
+    float dropSize = m_sizeSlider ? (m_sizeSlider->value() * scale) : (10.0f * scale);
     for (const auto& a : agents) {
         float px = a.screenPos.x() * scale + offsetX;
         float py = a.screenPos.y() * scale + offsetY; // pass camera-space Y; painter will flip
@@ -1155,7 +1157,7 @@ void MainWindow::onProjectAgents()
             // spawnDrops (CPU) expects Raw GL Y.
             info.pos = QVector2D(px, py);
             info.color = a.color;
-            info.size = (float)m_sizeSlider->value();
+            info.size = dropSize;
             info.layer = a.layer;
             drops.append(info);
         }
@@ -1204,7 +1206,8 @@ void MainWindow::onPaintTrails()
     float fillProb = m_segmentVisibilitySlider ? (m_segmentVisibilitySlider->value() / 100.0f) : 1.0f;
 
     for (const auto& a : agents) {
-        if (!a.isVisible || a.trailSegments.empty()) continue;
+        // Keep trails even if the current head is occluded; visibility was already checked per-point when segments were built.
+        if (a.trailSegments.empty()) continue;
             
         for (int si = 0; si < a.trailSegments.size(); ++si) {
              const auto& seg = a.trailSegments[si];
