@@ -250,6 +250,17 @@ MainWindow::MainWindow()
     connect(m_lineWidthSlider, &QSlider::valueChanged, this, &MainWindow::onLineWidthChanged);
     renderLayout->addRow(m_lineWidthLabel, m_lineWidthSlider);
 
+    m_brushAlphaLabel = new QLabel("Brush Opacity: 0.80");
+    m_brushAlphaSlider = new QSlider(Qt::Horizontal);
+    m_brushAlphaSlider->setRange(0, 100);
+    m_brushAlphaSlider->setValue(80);
+    connect(m_brushAlphaSlider, &QSlider::valueChanged, this, [this](int v){
+        float a = v / 100.0f;
+        m_brushAlphaLabel->setText(QString("Brush Opacity: %1").arg(a, 0, 'f', 2));
+        if (m_squeegeeWindow) m_squeegeeWindow->setBrushAlpha(a);
+    });
+    renderLayout->addRow(m_brushAlphaLabel, m_brushAlphaSlider);
+
     m_trailBrightnessLabel = new QLabel("Trail lightness: 1.00");
     m_trailBrightnessSlider = new QSlider(Qt::Horizontal);
     m_trailBrightnessSlider->setRange(10, 200); // 0.1 .. 2.0
@@ -343,6 +354,15 @@ MainWindow::MainWindow()
     m_lightElevationSlider->setRange(-90, 90);
     m_lightElevationSlider->setValue(30);
     connect(m_lightElevationSlider, &QSlider::valueChanged, this, &MainWindow::onLightChanged);
+    m_ambientLabel = new QLabel("Ambient: 0.20");
+    m_ambientSlider = new QSlider(Qt::Horizontal);
+    m_ambientSlider->setRange(0, 200); // 0.0 .. 2.0
+    m_ambientSlider->setValue(20);
+    connect(m_ambientSlider, &QSlider::valueChanged, this, [this](int v){
+        float a = v / 100.0f;
+        m_ambientLabel->setText(QString("Ambient: %1").arg(a, 0, 'f', 2));
+        if (m_meshViewer) m_meshViewer->setAmbient(a);
+    });
     
     m_zoomSlider = new QSlider(Qt::Horizontal);
     m_zoomSlider->setRange(5, 270); // 0.5 to 10.0
@@ -351,6 +371,7 @@ MainWindow::MainWindow()
     
     lightLayout->addRow("Azimuth:", m_lightAzimuthSlider);
     lightLayout->addRow("Elevation:", m_lightElevationSlider);
+    lightLayout->addRow(m_ambientLabel, m_ambientSlider);
     lightLayout->addRow("Zoom:", m_zoomSlider);
     
     tab3DLayout->addWidget(new QLabel("<b>Lighting & Camera:</b>"));
@@ -688,6 +709,14 @@ MainWindow::MainWindow()
     m_squeegeeWindow->setGenWidth(2.0f);
     m_squeegeeWindow->setGenPasses(1);
     m_squeegeeWindow->setGenSteps(600);
+    if (m_brushAlphaSlider) {
+        float a = m_brushAlphaSlider->value() / 100.0f;
+        m_squeegeeWindow->setBrushAlpha(a);
+    }
+    if (m_ambientSlider) {
+        float a = m_ambientSlider->value() / 100.0f;
+        if (m_meshViewer) m_meshViewer->setAmbient(a);
+    }
     onNoiseModeChanged(m_noiseModeCombo->currentIndex());
     onNoiseScaleChanged(m_noiseScaleSlider->value());
     onNoiseStrengthChanged(m_noiseStrengthSlider->value());

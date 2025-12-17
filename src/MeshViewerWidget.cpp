@@ -195,6 +195,8 @@ void MeshViewerWidget::paintGL()
     
     int locLight = m_program.uniformLocation("u_lightDir");
     if (locLight != -1) glUniform3fv(locLight, 1, glm::value_ptr(m_lightDir));
+    int locAmbient = m_program.uniformLocation("u_ambient");
+    if (locAmbient != -1) glUniform1f(locAmbient, m_ambient);
     
     int locCam = m_program.uniformLocation("u_cameraPos");
     if (locCam != -1) glUniform3f(locCam, 0.0f, 0.0f, m_cameraDistance);
@@ -924,8 +926,7 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
 
     auto lambert = [&](const glm::vec3 &normalWorld) -> float {
         float ndl = std::max(0.0f, glm::dot(glm::normalize(normalWorld), glm::normalize(m_lightDir)));
-        // Match mesh.frag: ambient 0.2 + diffuse
-        return std::clamp(0.2f + ndl, 0.0f, 1.0f);
+        return std::clamp(m_ambient + ndl, 0.0f, 2.0f);
     };
 
     for (const auto &agent : m_agentSystem.agents()) {

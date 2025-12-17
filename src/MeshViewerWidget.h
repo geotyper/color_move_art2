@@ -87,6 +87,7 @@ public:
     int getPaletteIndex() const { return m_paletteIndex; }
     void setPalettes(const QVector<QVector<QVector3D>>* palettes) { m_externalPalettes = palettes; }
     void setAgentBaseSpeed(float s) { m_agentBaseSpeed = s; }
+    void setAmbient(float a) { m_ambient = std::clamp(a, 0.0f, 2.0f); update(); }
     float cameraDistance() const { return m_cameraDistance; }
     
     // Check intersection and return hit info
@@ -149,6 +150,7 @@ private:
     QTimer *m_timer = nullptr; // Modified initialization (removed nullptr from instruction, but keeping it for consistency with original)
     bool m_showWireframe = false;
     glm::vec3 m_lightDir = glm::normalize(glm::vec3(0.3f, 0.7f, 0.4f));
+    float m_ambient = 0.2f;
     float m_cameraDistance = 5.0f; // Modified value
     
     SurfaceMesh m_mesh; // New member

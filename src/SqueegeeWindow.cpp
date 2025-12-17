@@ -683,7 +683,7 @@ void SqueegeeWindow::drawShapeIntoBuffer(std::vector<float>& buffer, int w, int 
                             buffer[idx + 0] = 0.0f;
                             buffer[idx + 1] = 0.0f;
                             buffer[idx + 2] = 0.0f;
-                            buffer[idx + 3] = 1.0f;
+                            buffer[idx + 3] = 1.0f * m_brushAlpha;
                         }
                     }
                 }
@@ -699,7 +699,7 @@ void SqueegeeWindow::drawShapeIntoBuffer(std::vector<float>& buffer, int w, int 
                         buffer[idx + 0] = col.x();
                         buffer[idx + 1] = col.y();
                         buffer[idx + 2] = col.z();
-                        buffer[idx + 3] = 0.8f;
+                        buffer[idx + 3] = 0.8f * m_brushAlpha;
                     }
                 }
             }
@@ -715,7 +715,7 @@ void SqueegeeWindow::drawShapeIntoBuffer(std::vector<float>& buffer, int w, int 
                         buffer[idx + 0] = 0.0f;
                         buffer[idx + 1] = 0.0f;
                         buffer[idx + 2] = 0.0f;
-                        buffer[idx + 3] = 1.0f;
+                        buffer[idx + 3] = 1.0f * m_brushAlpha;
                     }
                 }
             }
@@ -728,7 +728,7 @@ void SqueegeeWindow::drawShapeIntoBuffer(std::vector<float>& buffer, int w, int 
                     buffer[idx + 0] = col.x();
                     buffer[idx + 1] = col.y();
                     buffer[idx + 2] = col.z();
-                    buffer[idx + 3] = 0.8f;
+                    buffer[idx + 3] = 0.8f * m_brushAlpha;
                 }
             }
         }
@@ -795,6 +795,7 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
         wrapper.fill(Qt::transparent);
         QPainter p(&wrapper);
         p.setRenderHint(QPainter::Antialiasing);
+        p.setOpacity(m_brushAlpha);
         
         for(const auto& path : paths) {
             if (!path.useQtPainter || path.points.size() < 2) continue;
@@ -897,7 +898,7 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                 if (c.alpha() > 0) {
                     int idx = (0 * w * h + (h - 1 - y) * w + x) * 4; // Flip Y back for GL texture (0 at bottom)
                     // Blend (Straight RGB Output calculation)
-                    float srcA = c.alphaF();
+                float srcA = c.alphaF() * m_brushAlpha;
                     float srcR = c.redF();
                     float srcG = c.greenF();
                     float srcB = c.blueF();

@@ -4,6 +4,7 @@ in vec3 vColor;
 out vec4 fragColor;
 
 uniform vec3 u_lightDir;
+uniform float u_ambient;
 uniform bool u_wireframe;
 
 void main() {
@@ -16,12 +17,9 @@ void main() {
         // Simple Diffuse
         float diff = max(dot(N, L), 0.0);
         
-        // Ambient
-        float ambient = 0.2;
-        
         vec3 baseColor = vColor;
         
-        vec3 finalColor = baseColor * (diff + ambient);
+        vec3 finalColor = baseColor * (diff + u_ambient);
         fragColor = vec4(finalColor, 1.0);
     }
 }

@@ -161,6 +161,7 @@ public:
     void setBrushSegments(int segments) { m_brushSegments = std::max(1, segments); }
     void setSegmentVisibility(float visibility) { m_segmentVisibility = std::clamp(visibility, 0.0f, 1.0f); }
     void setMinSizeRatio(float ratio) { m_minSizeRatio = std::clamp(ratio, 0.1f, 0.9f); }
+    void setBrushAlpha(float a) { m_brushAlpha = std::clamp(a, 0.0f, 1.0f); }
     const QVector<QVector3D>& getPalettes() const { return m_palettes[m_currentPaletteIdx]; }
     const QVector<QVector<QVector3D>>& allPalettes() const { return m_palettes; }
     
@@ -197,6 +198,7 @@ private:
     void drawShapeIntoBuffer(std::vector<float>& buffer, int w, int h, int d, int cx, int cy, int cz, int r, QVector3D col);
 
     QColor m_backgroundColor = Qt::white;
+    float m_brushAlpha = 0.8f;
     float m_trailBrightnessScale = 1.0f;
 
     struct BrushNoiseResult {

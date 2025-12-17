@@ -114,6 +114,10 @@ private:
     QLabel *m_lineWidthLabel;
     QSlider *m_trailBrightnessSlider;
     QLabel *m_trailBrightnessLabel;
+    QSlider *m_brushAlphaSlider;
+    QLabel *m_brushAlphaLabel;
+    QSlider *m_ambientSlider;
+    QLabel *m_ambientLabel;
 
     void saveSettings();
     void loadSettings();
