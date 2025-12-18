@@ -121,6 +121,8 @@ private:
     QLabel *m_ambientLabel;
     QCheckBox *m_bristleJitterBox;
     bool m_bristleJitterEnabled = false;
+    QCheckBox *m_squeegeeLiteBox;
+    bool m_squeegeeLiteEnabled = false;
 
     void saveSettings();
     void loadSettings();

@@ -784,6 +784,59 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
     glBindTexture(GL_TEXTURE_3D, m_texture3DA);
     glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, data.data());
 
+    auto applySqueegeeLite = [&](int cz, const QVector<QVector2D>& pts, float widthPx) {
+        if (!m_squeegeeLiteEnabled) return;
+        if (pts.size() < 2) return;
+        if (cz < 0 || cz >= d) return;
+        float strength = 0.35f;
+        float step = std::max(1.0f, widthPx * 0.75f);
+        int r = std::max(1, (int)std::round(widthPx));
+        int pullDist = std::max(1, (int)std::round(widthPx * 0.18f));
+
+        auto inBounds = [&](int x, int y) { return x >= 0 && x < w && y >= 0 && y < h; };
+        auto idx4 = [&](int x, int y) { return (cz * w * h + y * w + x) * 4; };
+
+        for (int i = 1; i < pts.size(); ++i) {
+            QVector2D a = pts[i - 1];
+            QVector2D b = pts[i];
+            QVector2D dir = b - a;
+            float len = dir.length();
+            if (len < 0.001f) continue;
+            dir /= len;
+
+            int samples = std::max(1, (int)std::ceil(len / step));
+            for (int s = 0; s <= samples; ++s) {
+                float t = (float)s / (float)samples;
+                QVector2D p = a + dir * (len * t);
+                int cx = (int)std::round(p.x());
+                int cy = (int)std::round(p.y());
+
+                for (int y = cy - r; y <= cy + r; ++y) {
+                    for (int x = cx - r; x <= cx + r; ++x) {
+                        if (!inBounds(x, y)) continue;
+                        float dx = (float)(x - cx);
+                        float dy = (float)(y - cy);
+                        if (dx * dx + dy * dy > (float)(r * r)) continue;
+
+                        int pullX = (int)std::round(x - dir.x() * pullDist);
+                        int pullY = (int)std::round(y - dir.y() * pullDist);
+                        if (!inBounds(pullX, pullY)) continue;
+
+                        int id = idx4(x, y);
+                        float dstA = data[id + 3];
+                        if (dstA <= 1e-4f) continue;
+
+                        int ip = idx4(pullX, pullY);
+                        float wgt = std::clamp(strength * dstA, 0.0f, 1.0f);
+                        data[id + 0] = data[id + 0] * (1.0f - wgt) + data[ip + 0] * wgt;
+                        data[id + 1] = data[id + 1] * (1.0f - wgt) + data[ip + 1] * wgt;
+                        data[id + 2] = data[id + 2] * (1.0f - wgt) + data[ip + 2] * wgt;
+                    }
+                }
+            }
+        }
+    };
+
 
     
     // Check if we have any paths requesting Qt Painter
@@ -791,13 +844,28 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
     for(const auto& p : paths) if(p.useQtPainter) { useQt = true; break; }
     
     if (useQt) {
-        QImage wrapper(w, h, QImage::Format_ARGB32_Premultiplied);
-        wrapper.fill(Qt::transparent);
-        QPainter p(&wrapper);
-        p.setRenderHint(QPainter::Antialiasing);
-        
-        for(const auto& path : paths) {
+        // Qt painter paths must be blended per texture layer; otherwise only layer 0 gets the result.
+        // That also caused Squeegee-lite to affect only a subset of strokes.
+        std::unordered_map<int, std::vector<const PathInfo*>> byLayer;
+        byLayer.reserve(16);
+        for (const auto& path : paths) {
             if (!path.useQtPainter || path.points.size() < 2) continue;
+            int cz = (path.layer >= 0) ? (path.layer % d) : 0;
+            byLayer[cz].push_back(&path);
+        }
+
+        for (const auto& kv : byLayer) {
+            int cz = kv.first;
+            const auto& vec = kv.second;
+            if (vec.empty()) continue;
+
+            QImage wrapper(w, h, QImage::Format_ARGB32_Premultiplied);
+            wrapper.fill(Qt::transparent);
+            QPainter p(&wrapper);
+            p.setRenderHint(QPainter::Antialiasing);
+
+            for (const PathInfo* pPath : vec) {
+                const auto& path = *pPath;
             
             auto sampleBrightness = [&](int idx) -> float {
                 if (idx >= 0 && idx < path.brightnessPerPoint.size())
@@ -880,25 +948,16 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                 // paintPaths expects GL Y (Bottom-Up), QPainter uses Top-Down; flip Y here.
                 p.drawLine(QPointF(prev.x(), h - prev.y()), QPointF(curr.x(), h - curr.y()));
             }
-        }
-        p.end();
+            }
+            p.end();
         
-        // Blend wrapper into texture
-        // We need to upload this image to a texture and run a compute shader ideally, 
-        // OR just read back the texture, blend on CPU, and upload. 
-        // CPU blending is easiest given we already have 'data' read back.
-        
-        const uchar* bits = wrapper.constBits();
-        // wrapper is ARGB32_Premultiplied (B G R A in memory usually, or ordering depends on endian)
-        // QImage::Format_ARGB32_Premultiplied: 0xAARRGGBB
-        
-        for(int y=0; y<h; ++y) {
-            for(int x=0; x<w; ++x) {
-                QColor c = wrapper.pixelColor(x, y);
-                if (c.alpha() > 0) {
-                    int idx = (0 * w * h + (h - 1 - y) * w + x) * 4; // Flip Y back for GL texture (0 at bottom)
-                    // Blend (Straight RGB Output calculation)
-                float srcA = c.alphaF();
+            // Blend wrapper into the correct layer slice
+            for(int y=0; y<h; ++y) {
+                for(int x=0; x<w; ++x) {
+                    QColor c = wrapper.pixelColor(x, y);
+                    if (c.alpha() <= 0) continue;
+                    int idx = (cz * w * h + (h - 1 - y) * w + x) * 4; // Flip Y back for GL texture (0 at bottom)
+                    float srcA = c.alphaF();
                     float srcR = c.redF();
                     float srcG = c.greenF();
                     float srcB = c.blueF();
@@ -908,9 +967,7 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                     float dstB = data[idx+2];
                     float dstA = data[idx+3];
                     
-                    // Composite: src OVER dst
                     float outA = srcA + dstA * (1.0f - srcA);
-                    
                     if (outA > 0.001f) {
                         float outR = (srcR * srcA + dstR * dstA * (1.0f - srcA)) / outA;
                         float outG = (srcG * srcA + dstG * dstA * (1.0f - srcA)) / outA;
@@ -921,11 +978,18 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                         data[idx+2] = outB;
                         data[idx+3] = outA;
                     } else {
-                         data[idx+3] = 0.0f;
+                        data[idx+3] = 0.0f;
                     }
                 }
             }
-        }
+
+            if (m_squeegeeLiteEnabled) {
+                for (const PathInfo* pPath : vec) {
+                    const auto& path = *pPath;
+                    applySqueegeeLite(cz, path.points, std::max(0.1f, path.size));
+                }
+            }
+        } // per layer
     }
     
     // Original GPU-loop-like CPU logic for non-qt paths
@@ -962,6 +1026,8 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                 drawShapeIntoBuffer(data, w, h, d, (int)p.x(), (int)p.y(), cz, (int)std::round(widthPx), col);
             }
         }
+
+        applySqueegeeLite(cz, path.points, widthPx);
     }
 
     glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, w, h, d, GL_RGBA, GL_FLOAT, data.data());

@@ -48,6 +48,7 @@ public:
 
     void setBackgroundColor(const QColor &color);
     void setTrailBrightnessScale(float s) { m_trailBrightnessScale = std::clamp(s, 0.0f, 2.0f); update(); }
+    void setSqueegeeLiteEnabled(bool on) { m_squeegeeLiteEnabled = on; }
 
 protected:
     void initializeGL() override;
@@ -200,6 +201,7 @@ private:
     QColor m_backgroundColor = Qt::white;
     float m_brushAlpha = 0.8f;
     float m_trailBrightnessScale = 1.0f;
+    bool m_squeegeeLiteEnabled = false;
 
     struct BrushNoiseResult {
         float size = 0.0f;

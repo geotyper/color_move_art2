@@ -329,6 +329,14 @@ MainWindow::MainWindow()
     });
     renderLayout->addRow(m_bristleJitterBox);
 
+    m_squeegeeLiteBox = new QCheckBox("Squeegee-lite drag (smudge)");
+    m_squeegeeLiteBox->setChecked(false);
+    connect(m_squeegeeLiteBox, &QCheckBox::toggled, this, [this](bool on){
+        m_squeegeeLiteEnabled = on;
+        if (m_squeegeeWindow) m_squeegeeWindow->setSqueegeeLiteEnabled(on);
+    });
+    renderLayout->addRow(m_squeegeeLiteBox);
+
     m_noisePreviewLabel = new QLabel();
     m_noisePreviewLabel->setFixedSize(180, 90);
     m_noisePreviewLabel->setFrameStyle(QFrame::Box | QFrame::Plain);
@@ -733,6 +741,9 @@ MainWindow::MainWindow()
     if (m_brushAlphaSlider) {
         float a = m_brushAlphaSlider->value() / 100.0f;
         m_squeegeeWindow->setBrushAlpha(a);
+    }
+    if (m_squeegeeLiteBox) {
+        m_squeegeeWindow->setSqueegeeLiteEnabled(m_squeegeeLiteBox->isChecked());
     }
     if (m_ambientSlider) {
         float a = m_ambientSlider->value() / 100.0f;
