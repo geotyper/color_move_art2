@@ -34,6 +34,8 @@ namespace bgi = boost::geometry::index;
 typedef bg::model::point<float, 3, bg::cs::cartesian> BoostPoint;
 // Define a box (AABB)
 typedef bg::model::box<BoostPoint> BoostBox;
+// Segment for precise rtree queries (vs AABB of segment)
+typedef bg::model::segment<BoostPoint> BoostSegment;
 // Value stored in R-tree: pair(Box, FaceHandle index)
 // We store int index because FaceHandle is not trivially movable/copyable across all versions or simpler to just debug with int
 typedef std::pair<BoostBox, int> BoostValue;

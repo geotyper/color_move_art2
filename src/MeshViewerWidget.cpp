@@ -420,17 +420,14 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     
     glm::vec3 rayOrigWorld = glm::vec3(nearPoint);
     glm::vec3 rayDirWorld = glm::normalize(glm::vec3(farPoint - nearPoint));
-    
-    float minX = std::min(rayOrigWorld.x, rayOrigWorld.x + rayDirWorld.x * 100.0f);
-    float minY = std::min(rayOrigWorld.y, rayOrigWorld.y + rayDirWorld.y * 100.0f);
-    float minZ = std::min(rayOrigWorld.z, rayOrigWorld.z + rayDirWorld.z * 100.0f);
-    float maxX = std::max(rayOrigWorld.x, rayOrigWorld.x + rayDirWorld.x * 100.0f);
-    float maxY = std::max(rayOrigWorld.y, rayOrigWorld.y + rayDirWorld.y * 100.0f);
-    float maxZ = std::max(rayOrigWorld.z, rayOrigWorld.z + rayDirWorld.z * 100.0f);
-    
-    BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
+
+    glm::vec3 rayEndWorld = rayOrigWorld + rayDirWorld * 100.0f;
+    BoostSegment querySeg(
+        BoostPoint(rayOrigWorld.x, rayOrigWorld.y, rayOrigWorld.z),
+        BoostPoint(rayEndWorld.x, rayEndWorld.y, rayEndWorld.z)
+    );
     std::vector<BoostValue> result;
-    m_rtree.query(bgi::intersects(queryBox), std::back_inserter(result));
+    m_rtree.query(bgi::intersects(querySeg), std::back_inserter(result));
     
     bool hit = false;
     float minT = 1e30f;
@@ -532,17 +529,13 @@ void MeshViewerWidget::updateAgents() {
         glm::vec3 dir = glm::normalize(worldPos - cameraPosModel);
         float targetT = glm::length(worldPos - cameraPosModel);
         if (targetT < 1e-5f) return 0.0f;
-
-        float minX = std::min(cameraPosModel.x, worldPos.x);
-        float minY = std::min(cameraPosModel.y, worldPos.y);
-        float minZ = std::min(cameraPosModel.z, worldPos.z);
-        float maxX = std::max(cameraPosModel.x, worldPos.x);
-        float maxY = std::max(cameraPosModel.y, worldPos.y);
-        float maxZ = std::max(cameraPosModel.z, worldPos.z);
-        BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
+        BoostSegment querySeg(
+            BoostPoint(cameraPosModel.x, cameraPosModel.y, cameraPosModel.z),
+            BoostPoint(worldPos.x, worldPos.y, worldPos.z)
+        );
 
         std::vector<BoostValue> result;
-        m_rtree.query(bgi::intersects(queryBox), std::back_inserter(result));
+        m_rtree.query(bgi::intersects(querySeg), std::back_inserter(result));
 
         float bestT = std::numeric_limits<float>::max();
         for (const auto &val : result) {
@@ -580,17 +573,14 @@ void MeshViewerWidget::updateAgents() {
             farPoint  /= farPoint.w;
             glm::vec3 rayOrigWorld = glm::vec3(nearPoint);
             glm::vec3 rayDirWorld  = glm::normalize(glm::vec3(farPoint - nearPoint));
-
-            float minX = std::min(rayOrigWorld.x, rayOrigWorld.x + rayDirWorld.x * 100.0f);
-            float minY = std::min(rayOrigWorld.y, rayOrigWorld.y + rayDirWorld.y * 100.0f);
-            float minZ = std::min(rayOrigWorld.z, rayOrigWorld.z + rayDirWorld.z * 100.0f);
-            float maxX = std::max(rayOrigWorld.x, rayOrigWorld.x + rayDirWorld.x * 100.0f);
-            float maxY = std::max(rayOrigWorld.y, rayOrigWorld.y + rayDirWorld.y * 100.0f);
-            float maxZ = std::max(rayOrigWorld.z, rayOrigWorld.z + rayDirWorld.z * 100.0f);
-            BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
+            glm::vec3 rayEndWorld = rayOrigWorld + rayDirWorld * 100.0f;
+            BoostSegment querySeg(
+                BoostPoint(rayOrigWorld.x, rayOrigWorld.y, rayOrigWorld.z),
+                BoostPoint(rayEndWorld.x, rayEndWorld.y, rayEndWorld.z)
+            );
 
             std::vector<BoostValue> result;
-            m_rtree.query(bgi::intersects(queryBox), std::back_inserter(result));
+            m_rtree.query(bgi::intersects(querySeg), std::back_inserter(result));
 
             float bestT = std::numeric_limits<float>::max();
             FaceIndex bestFace = SurfaceMesh::null_face();
@@ -864,17 +854,13 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         glm::vec3 dir = glm::normalize(worldPos - cameraPosModel);
         float targetT = glm::length(worldPos - cameraPosModel);
         if (targetT < 1e-5f) return 0.0f;
-
-        float minX = std::min(cameraPosModel.x, worldPos.x);
-        float minY = std::min(cameraPosModel.y, worldPos.y);
-        float minZ = std::min(cameraPosModel.z, worldPos.z);
-        float maxX = std::max(cameraPosModel.x, worldPos.x);
-        float maxY = std::max(cameraPosModel.y, worldPos.y);
-        float maxZ = std::max(cameraPosModel.z, worldPos.z);
-        BoostBox queryBox(BoostPoint(minX, minY, minZ), BoostPoint(maxX, maxY, maxZ));
+        BoostSegment querySeg(
+            BoostPoint(cameraPosModel.x, cameraPosModel.y, cameraPosModel.z),
+            BoostPoint(worldPos.x, worldPos.y, worldPos.z)
+        );
 
         std::vector<BoostValue> result;
-        m_rtree.query(bgi::intersects(queryBox), std::back_inserter(result));
+        m_rtree.query(bgi::intersects(querySeg), std::back_inserter(result));
 
         float bestT = std::numeric_limits<float>::max();
         for (const auto &val : result) {
@@ -943,39 +929,51 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         info.layer = agent.layer;
         info.headBrightness = lambert(normalWorld);
         
-        std::vector<QVector2D> currentSegment;
-        std::vector<float> currentBright;
-        for (const auto &sample : agent.trail) {
-             const auto& p = sample.pos;
-             if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) {
-                 if (!currentSegment.empty()) {
-                     info.trailSegments.push_back(currentSegment);
-                     info.trailBrightness.push_back(currentBright);
-                     currentSegment.clear();
-                     currentBright.clear();
-                 }
-                 continue;
-             }
-            glm::vec3 nWorld = sample.normal;
-            if (!std::isfinite(nWorld.x) || !std::isfinite(nWorld.y) || !std::isfinite(nWorld.z) || glm::dot(nWorld, nWorld) < 1e-8f) {
-                nWorld = computeNormal(agent, p);
-            }
+        // Trails: projection-only (frustum check), no occlusion test per point (too expensive).
+        // Also downsample long trail segments to keep UI responsive.
+        constexpr int kMaxTrailPointsPerSegment = 256;
+        auto isFinite3 = [](const glm::vec3& p) {
+            return std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z);
+        };
 
-            if (isVisible(p)) {
-                currentSegment.push_back(project(p));
-                currentBright.push_back(lambert(nWorld));
+        std::vector<std::pair<int,int>> ranges;
+        ranges.reserve(16);
+        int start = -1;
+        for (int i = 0; i < (int)agent.trail.size(); ++i) {
+            if (isFinite3(agent.trail[i].pos)) {
+                if (start < 0) start = i;
             } else {
-                 if (!currentSegment.empty()) {
-                     info.trailSegments.push_back(currentSegment);
-                     info.trailBrightness.push_back(currentBright);
-                     currentSegment.clear();
-                     currentBright.clear();
-                 }
-             }
+                if (start >= 0) ranges.push_back({start, i});
+                start = -1;
+            }
         }
-        if (!currentSegment.empty()) {
-            info.trailSegments.push_back(currentSegment);
-            info.trailBrightness.push_back(currentBright);
+        if (start >= 0) ranges.push_back({start, (int)agent.trail.size()});
+
+        for (const auto& r : ranges) {
+            int count = r.second - r.first;
+            if (count < 2) continue;
+            int stride = std::max(1, (count + kMaxTrailPointsPerSegment - 1) / kMaxTrailPointsPerSegment);
+
+            std::vector<QVector2D> seg2d;
+            std::vector<float> segBright;
+            seg2d.reserve((count + stride - 1) / stride);
+            segBright.reserve((count + stride - 1) / stride);
+
+            for (int i = r.first; i < r.second; i += stride) {
+                const auto& sample = agent.trail[i];
+                const glm::vec3& p = sample.pos;
+                if (!isClipVisible(p)) continue;
+                glm::vec3 nWorld = sample.normal;
+                if (!std::isfinite(nWorld.x) || !std::isfinite(nWorld.y) || !std::isfinite(nWorld.z) || glm::dot(nWorld, nWorld) < 1e-8f) {
+                    nWorld = computeNormal(agent, p);
+                }
+                seg2d.push_back(project(p));
+                segBright.push_back(lambert(nWorld));
+            }
+            if (seg2d.size() > 1) {
+                info.trailSegments.push_back(std::move(seg2d));
+                info.trailBrightness.push_back(std::move(segBright));
+            }
         }
         
         projected.push_back(info);
