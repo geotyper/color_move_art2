@@ -123,6 +123,8 @@ private:
     bool m_bristleJitterEnabled = false;
     QCheckBox *m_squeegeeLiteBox;
     bool m_squeegeeLiteEnabled = false;
+    QCheckBox *m_surfaceBrushBox;
+    bool m_surfaceBrushEnabled = true;
 
     void saveSettings();
     void loadSettings();

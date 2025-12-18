@@ -887,6 +887,8 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         return QVector2D(p.x, p.y);
     };
 
+    const float eps = 0.02f; // small offset in model units for orientation estimation
+
     auto computeNormal = [&](const SurfaceAgent& agentRef, const glm::vec3& fallbackPos) -> glm::vec3 {
         glm::vec3 normal = glm::normalize(fallbackPos); // fallback
         if (agentRef.face != SurfaceMesh::null_face()) {
@@ -910,6 +912,28 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         return nWorld;
     };
 
+    auto computeNormalModel = [&](const SurfaceAgent& agentRef, const glm::vec3& fallbackPos) -> glm::vec3 {
+        glm::vec3 normal = glm::normalize(fallbackPos); // fallback
+        if (agentRef.face != SurfaceMesh::null_face()) {
+            FaceData fd;
+            if (getFaceData(agentRef.face, fd)) {
+                glm::vec3 nv0 = m_vertexNormals[fd.verts[0].idx()];
+                glm::vec3 nv1 = m_vertexNormals[fd.verts[1].idx()];
+                glm::vec3 nv2 = m_vertexNormals[fd.verts[2].idx()];
+                glm::vec3 bary = agentRef.bary;
+                normal = nv0 * bary.x + nv1 * bary.y + nv2 * bary.z;
+                if (!std::isfinite(normal.x) || !std::isfinite(normal.y) || !std::isfinite(normal.z) || glm::dot(normal, normal) < 1e-10f) {
+                    normal = glm::normalize(fallbackPos);
+                }
+            }
+        }
+        normal = glm::normalize(normal);
+        if (!std::isfinite(normal.x) || !std::isfinite(normal.y) || !std::isfinite(normal.z) || glm::dot(normal, normal) < 1e-10f) {
+            normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+        return normal;
+    };
+
     auto lambert = [&](const glm::vec3 &normalWorld) -> float {
         float ndl = std::max(0.0f, glm::dot(glm::normalize(normalWorld), glm::normalize(m_lightDir)));
         return std::clamp(m_ambient + ndl, 0.0f, 2.0f);
@@ -928,6 +952,13 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         
         info.layer = agent.layer;
         info.headBrightness = lambert(normalWorld);
+        // Foreshorten factor for brush footprint: 1 face-on, ~0 edge-on.
+        {
+            glm::vec3 nModel = computeNormalModel(agent, pos);
+            glm::vec3 vDir = glm::normalize(cameraPosModel - pos);
+            float cosNV = std::abs(glm::dot(nModel, vDir));
+            info.headForeshorten = std::clamp(cosNV, 0.05f, 1.0f);
+        }
         
         // Trails: projection-only (frustum check), no occlusion test per point (too expensive).
         // Also downsample long trail segments to keep UI responsive.
@@ -956,8 +987,12 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
 
             std::vector<QVector2D> seg2d;
             std::vector<float> segBright;
+            std::vector<float> segForesh;
+            std::vector<QVector2D> segWidthDir;
             seg2d.reserve((count + stride - 1) / stride);
             segBright.reserve((count + stride - 1) / stride);
+            segForesh.reserve((count + stride - 1) / stride);
+            segWidthDir.reserve((count + stride - 1) / stride);
 
             for (int i = r.first; i < r.second; i += stride) {
                 const auto& sample = agent.trail[i];
@@ -969,10 +1004,45 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
                 }
                 seg2d.push_back(project(p));
                 segBright.push_back(lambert(nWorld));
+                glm::vec3 nModel = computeNormalModel(agent, p);
+                glm::vec3 vDir = glm::normalize(cameraPosModel - p);
+                float cosNV = std::abs(glm::dot(nModel, vDir));
+                segForesh.push_back(std::clamp(cosNV, 0.05f, 1.0f));
+
+                // Compute oriented "across" direction for brush footprint based on surface tangent plane.
+                int prevIdx = std::max(r.first, i - stride);
+                int nextIdx = std::min(r.second - 1, i + stride);
+                glm::vec3 tangentModel = agent.trail[nextIdx].pos - agent.trail[prevIdx].pos;
+                float tLen2 = glm::dot(tangentModel, tangentModel);
+                if (tLen2 < 1e-10f || !std::isfinite(tangentModel.x)) {
+                    // fallback: pick any tangent
+                    tangentModel = glm::cross(nModel, glm::vec3(0.0f, 0.0f, 1.0f));
+                    if (glm::dot(tangentModel, tangentModel) < 1e-10f)
+                        tangentModel = glm::cross(nModel, glm::vec3(0.0f, 1.0f, 0.0f));
+                }
+                tangentModel = glm::normalize(tangentModel - glm::dot(tangentModel, nModel) * nModel);
+                if (glm::dot(tangentModel, tangentModel) < 1e-10f) tangentModel = glm::vec3(1.0f, 0.0f, 0.0f);
+                glm::vec3 bitangentModel = glm::normalize(glm::cross(nModel, tangentModel));
+                if (!std::isfinite(bitangentModel.x) || glm::dot(bitangentModel, bitangentModel) < 1e-10f) {
+                    bitangentModel = glm::normalize(glm::cross(nModel, glm::vec3(1.0f, 0.0f, 0.0f)));
+                }
+                QVector2D pPlus = project(p + bitangentModel * eps);
+                QVector2D pMinus = project(p - bitangentModel * eps);
+                QVector2D wdir = pPlus - pMinus;
+                if (wdir.lengthSquared() < 1e-6f) {
+                    // fallback to screen-space perpendicular of projected tangent
+                    QVector2D pt = project(p + tangentModel * eps) - project(p - tangentModel * eps);
+                    if (pt.lengthSquared() < 1e-6f) pt = QVector2D(1.0f, 0.0f);
+                    wdir = QVector2D(-pt.y(), pt.x());
+                }
+                wdir.normalize();
+                segWidthDir.push_back(wdir);
             }
             if (seg2d.size() > 1) {
                 info.trailSegments.push_back(std::move(seg2d));
                 info.trailBrightness.push_back(std::move(segBright));
+                info.trailForeshorten.push_back(std::move(segForesh));
+                info.trailWidthDirs.push_back(std::move(segWidthDir));
             }
         }
         

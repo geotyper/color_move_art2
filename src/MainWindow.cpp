@@ -337,6 +337,13 @@ MainWindow::MainWindow()
     });
     renderLayout->addRow(m_squeegeeLiteBox);
 
+    m_surfaceBrushBox = new QCheckBox("Surface brush orientation (mesh-aware)");
+    m_surfaceBrushBox->setChecked(true);
+    connect(m_surfaceBrushBox, &QCheckBox::toggled, this, [this](bool on){
+        m_surfaceBrushEnabled = on;
+    });
+    renderLayout->addRow(m_surfaceBrushBox);
+
     m_noisePreviewLabel = new QLabel();
     m_noisePreviewLabel->setFixedSize(180, 90);
     m_noisePreviewLabel->setFrameStyle(QFrame::Box | QFrame::Plain);
@@ -744,6 +751,9 @@ MainWindow::MainWindow()
     }
     if (m_squeegeeLiteBox) {
         m_squeegeeWindow->setSqueegeeLiteEnabled(m_squeegeeLiteBox->isChecked());
+    }
+    if (m_surfaceBrushBox) {
+        m_surfaceBrushEnabled = m_surfaceBrushBox->isChecked();
     }
     if (m_ambientSlider) {
         float a = m_ambientSlider->value() / 100.0f;
@@ -1283,7 +1293,7 @@ void MainWindow::onProjectAgents()
             // spawnDrops (CPU) expects Raw GL Y.
             info.pos = QVector2D(px, py);
             info.color = a.color;
-            info.size = dropSize;
+            info.size = dropSize * (m_surfaceBrushEnabled ? std::clamp(a.headForeshorten, 0.05f, 1.0f) : 1.0f);
             info.layer = a.layer;
             drops.append(info);
         }
@@ -1338,9 +1348,23 @@ void MainWindow::onPaintTrails()
         for (int si = 0; si < a.trailSegments.size(); ++si) {
              const auto& seg = a.trailSegments[si];
              if (seg.size() < 2) continue;
+             const std::vector<float>* foreshPtr = (si < a.trailForeshorten.size()) ? &a.trailForeshorten[si] : nullptr;
+             const std::vector<QVector2D>* widthDirPtr = (si < a.trailWidthDirs.size()) ? &a.trailWidthDirs[si] : nullptr;
+             float foreshAvg = 1.0f;
+             if (foreshPtr && !foreshPtr->empty()) {
+                 float acc = 0.0f;
+                 for (float v : *foreshPtr) acc += v;
+                 foreshAvg = std::clamp(acc / (float)foreshPtr->size(), 0.05f, 1.0f);
+             }
              float lw = std::max(0.1f, m_lineWidthSlider->value() / 10.0f);
              float perSegmentWidth = std::max(0.1f, lw / (float)segCount);
-             auto perps = buildPerp(seg);
+             // Prefer projected surface width directions if enabled; fallback to 2D perpendiculars.
+             std::vector<QVector2D> perps;
+             if (m_surfaceBrushEnabled && widthDirPtr && widthDirPtr->size() == seg.size()) {
+                 perps.assign(widthDirPtr->begin(), widthDirPtr->end());
+             } else {
+                 perps = buildPerp(seg);
+             }
 
              auto applyOffsetAndAppend = [&](const QColor& baseColor, const std::vector<float>* brightnessSrc) {
                  auto bandCenter = [&](int k) {
@@ -1402,8 +1426,11 @@ void MainWindow::onPaintTrails()
                      for (int k = 0; k < segCount; ++k) {
                          if (!activeBands[k]) continue;
                          float bc = bandCenter(k);
-                         QVector2D p0 = seg[pi - 1] + perps[pi - 1] * bc;
-                         QVector2D p1 = seg[pi]     + perps[pi]     * bc;
+                         float f0 = foreshPtr && (pi - 1) < (int)foreshPtr->size() ? (*foreshPtr)[pi - 1] : foreshAvg;
+                         float f1 = foreshPtr && pi < (int)foreshPtr->size() ? (*foreshPtr)[pi] : foreshAvg;
+                         // Brush footprint: if surface mode is on, perps[] is mesh-aware orientation; otherwise it's screen-perp.
+                         QVector2D p0 = seg[pi - 1] + perps[pi - 1] * (bc * (m_surfaceBrushEnabled ? f0 : 1.0f));
+                         QVector2D p1 = seg[pi]     + perps[pi]     * (bc * (m_surfaceBrushEnabled ? f1 : 1.0f));
                          if (m_bristleJitterEnabled) {
                              p0 += jitterPts[k][pi - 1];
                              p1 += jitterPts[k][pi];
@@ -1426,7 +1453,8 @@ void MainWindow::onPaintTrails()
                              QColor c = baseColor;
                              if (m_bristleJitterEnabled) c.setAlphaF(std::clamp(alphaMul[k], 0.0f, 1.0f));
                              st.path.color = c;
-                             st.path.size = perSegmentWidth * (m_bristleJitterEnabled ? widthMul[k] : 1.0f);
+                             float widthScale = m_surfaceBrushEnabled ? foreshAvg : 1.0f;
+                             st.path.size = perSegmentWidth * widthScale * (m_bristleJitterEnabled ? widthMul[k] : 1.0f);
                              st.path.useQtPainter = true;
                              st.path.layer = a.layer;
                              st.path.points.append(QVector2D(px0, py0));

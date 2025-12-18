@@ -107,6 +107,11 @@ public:
         std::vector<std::vector<QVector2D>> trailSegments;
         float headBrightness = 1.0f;
         std::vector<std::vector<float>> trailBrightness;
+        float headForeshorten = 1.0f; // 0..1, based on normal·viewDir in model space
+        std::vector<std::vector<float>> trailForeshorten;
+        // 2D direction (in the same coords as screenPos/trailSegments) representing the projected
+        // "across stroke" axis on the surface (brush footprint orientation).
+        std::vector<std::vector<QVector2D>> trailWidthDirs;
     };
     std::vector<AgentRenderInfo> getProjectedAgents(float viewWidth, float viewHeight);
     
