@@ -406,7 +406,8 @@ bool rayTriangleIntersect(const glm::vec3 &orig, const glm::vec3 &dir,
     glm::vec3 pvec = glm::cross(dir, v0v2);
     float det = glm::dot(v0v1, pvec);
     
-    if (det < 1e-8) return false;
+    // Double-sided intersection (no backface culling). We handle face orientation separately.
+    if (std::abs(det) < 1e-8f) return false;
     
     float invDet = 1.0f / det;
     glm::vec3 tvec = orig - v0;
@@ -460,18 +461,12 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     m_rtree.query(bgi::intersects(querySeg), std::back_inserter(result));
     
     bool hit = false;
-    float minTFront = 1e30f;
-    float minTAny = 1e30f;
-    bool hitFront = false;
+    float minT = 1e30f;
     
     SurfaceAgent newAgent;
-    FaceIndex bestFaceFront = SurfaceMesh::null_face();
-    glm::vec3 bestBaryFront(0.0f);
-    glm::vec3 bestNFront(0.0f);
-
-    FaceIndex bestFaceAny = SurfaceMesh::null_face();
-    glm::vec3 bestBaryAny(0.0f);
-    glm::vec3 bestNAny(0.0f);
+    FaceIndex bestFace = SurfaceMesh::null_face();
+    glm::vec3 bestBary(0.0f);
+    glm::vec3 bestN(0.0f);
     
     for (const auto &val : result) {
         int f_idx = val.second;
@@ -485,39 +480,35 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
         float t, u, v;
         if (rayTriangleIntersect(rayOrigWorld, rayDirWorld, v0, v1, v2, t, u, v)) {
             if (t <= 0.0f) continue;
+            if (t < minT) {
+                minT = t;
+                bestFace = f;
+                bestBary = glm::vec3(1.0f - u - v, u, v);
 
-            glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-            glm::vec3 pHit = rayOrigWorld + rayDirWorld * t;
-            glm::vec3 vDir = glm::normalize(cameraPosModel - pHit);
-            bool frontFacing = glm::dot(n, vDir) > 0.0f;
-
-            if (t < minTAny) {
-                minTAny = t;
-                bestFaceAny = f;
-                bestBaryAny = glm::vec3(1.0f - u - v, u, v);
-                bestNAny = n;
-            }
-            if (frontFacing && t < minTFront) {
-                minTFront = t;
-                bestFaceFront = f;
-                bestBaryFront = glm::vec3(1.0f - u - v, u, v);
-                bestNFront = n;
-                hitFront = true;
+                // Prefer smooth (vertex) normals if available; it matches lighting orientation fixes.
+                FaceData fd;
+                if (getFaceData(f, fd)) {
+                    glm::vec3 nv0 = m_vertexNormals[fd.verts[0].idx()];
+                    glm::vec3 nv1 = m_vertexNormals[fd.verts[1].idx()];
+                    glm::vec3 nv2 = m_vertexNormals[fd.verts[2].idx()];
+                    glm::vec3 n = nv0 * bestBary.x + nv1 * bestBary.y + nv2 * bestBary.z;
+                    if (!std::isfinite(n.x) || !std::isfinite(n.y) || !std::isfinite(n.z) || glm::dot(n, n) < 1e-10f) {
+                        n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+                    }
+                    bestN = glm::normalize(n);
+                } else {
+                    bestN = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+                }
             }
         }
     }
 
-    FaceIndex useFace = hitFront ? bestFaceFront : bestFaceAny;
-    glm::vec3 useBary = hitFront ? bestBaryFront : bestBaryAny;
-    glm::vec3 useN = hitFront ? bestNFront : bestNAny;
-    float useT = hitFront ? minTFront : minTAny;
-
-    if (useFace != SurfaceMesh::null_face()) {
+    if (bestFace != SurfaceMesh::null_face()) {
         hit = true;
-        newAgent.face = useFace;
-        newAgent.bary = useBary;
+        newAgent.face = bestFace;
+        newAgent.bary = bestBary;
 
-        glm::vec3 tangent = randomTangentAroundNormal(useN);
+        glm::vec3 tangent = randomTangentAroundNormal(bestN);
         newAgent.speed = m_agentBaseSpeed; // configurable speed
         newAgent.worldVelocity = tangent * newAgent.speed;
         // Color from active palette (cycling if more agents than colors)
@@ -533,7 +524,7 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
 
     if (hit) {
         m_agentSystem.add(newAgent);
-        hitPos = rayOrigWorld + rayDirWorld * useT;
+        hitPos = rayOrigWorld + rayDirWorld * minT;
         return true;
     }
     return false;
@@ -669,13 +660,10 @@ void MeshViewerWidget::updateAgents() {
             std::vector<BoostValue> result;
             m_rtree.query(bgi::intersects(querySeg), std::back_inserter(result));
 
-            float bestTFront = std::numeric_limits<float>::max();
-            FaceIndex bestFaceFront = SurfaceMesh::null_face();
-            glm::vec3 bestBaryFront(0.0f);
-
-            float bestTAny = std::numeric_limits<float>::max();
-            FaceIndex bestFaceAny = SurfaceMesh::null_face();
-            glm::vec3 bestBaryAny(0.0f);
+            float bestT = std::numeric_limits<float>::max();
+            FaceIndex bestFace = SurfaceMesh::null_face();
+            glm::vec3 bestBary(0.0f);
+            glm::vec3 bestN(0.0f);
 
             for (const auto &val : result) {
                 FaceIndex f(val.second);
@@ -687,26 +675,23 @@ void MeshViewerWidget::updateAgents() {
                 float t,u,v;
                 if (rayTriangleIntersect(rayOrigWorld, rayDirWorld, v0, v1, v2, t, u, v)) {
                     if (t <= 0.0f) continue;
-                    glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-                    glm::vec3 pHit = rayOrigWorld + rayDirWorld * t;
-                    glm::vec3 vDir = glm::normalize(cameraPosModel - pHit);
-                    bool frontFacing = glm::dot(n, vDir) > 0.0f;
+                    if (t < bestT) {
+                        bestT = t;
+                        bestFace = f;
+                        bestBary = glm::vec3(1.0f - u - v, u, v);
 
-                    if (t < bestTAny) {
-                        bestTAny = t;
-                        bestFaceAny = f;
-                        bestBaryAny = glm::vec3(1.0f - u - v, u, v);
-                    }
-                    if (frontFacing && t < bestTFront) {
-                        bestTFront = t;
-                        bestFaceFront = f;
-                        bestBaryFront = glm::vec3(1.0f - u - v, u, v);
+                        glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+                        glm::vec3 nv0 = m_vertexNormals[fd.verts[0].idx()];
+                        glm::vec3 nv1 = m_vertexNormals[fd.verts[1].idx()];
+                        glm::vec3 nv2 = m_vertexNormals[fd.verts[2].idx()];
+                        glm::vec3 ns = nv0 * bestBary.x + nv1 * bestBary.y + nv2 * bestBary.z;
+                        if (std::isfinite(ns.x) && std::isfinite(ns.y) && std::isfinite(ns.z) && glm::dot(ns, ns) > 1e-10f) {
+                            n = glm::normalize(ns);
+                        }
+                        bestN = n;
                     }
                 }
             }
-
-            FaceIndex bestFace = (bestFaceFront != SurfaceMesh::null_face()) ? bestFaceFront : bestFaceAny;
-            glm::vec3 bestBary = (bestFaceFront != SurfaceMesh::null_face()) ? bestBaryFront : bestBaryAny;
 
             if (bestFace != SurfaceMesh::null_face()) {
                 agent.face = bestFace;
@@ -714,8 +699,7 @@ void MeshViewerWidget::updateAgents() {
 
                 FaceData fd;
                 if (!getFaceData(bestFace, fd)) continue;
-                glm::vec3 n = glm::normalize(glm::cross(fd.positions[1] - fd.positions[0], fd.positions[2] - fd.positions[0]));
-                glm::vec3 tangent = randomTangentAroundNormal(n);
+                glm::vec3 tangent = randomTangentAroundNormal(bestN);
                 agent.speed = m_agentBaseSpeed;
                 agent.worldVelocity = tangent * agent.speed;
                 agent.trail.clear();
