@@ -119,6 +119,8 @@ private:
     QLabel *m_brushAlphaLabel;
     QSlider *m_ambientSlider;
     QLabel *m_ambientLabel;
+    QCheckBox *m_bristleJitterBox;
+    bool m_bristleJitterEnabled = false;
 
     void saveSettings();
     void loadSettings();

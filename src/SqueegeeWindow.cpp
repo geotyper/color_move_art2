@@ -795,7 +795,6 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
         wrapper.fill(Qt::transparent);
         QPainter p(&wrapper);
         p.setRenderHint(QPainter::Antialiasing);
-        p.setOpacity(m_brushAlpha);
         
         for(const auto& path : paths) {
             if (!path.useQtPainter || path.points.size() < 2) continue;
@@ -875,6 +874,7 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                     std::clamp(path.color.greenF() * bAvg, 0.0f, 1.0f) * 255, 
                     std::clamp(path.color.blueF() * bAvg, 0.0f, 1.0f) * 255
                 );
+                c.setAlphaF(std::clamp(path.color.alphaF() * m_brushAlpha, 0.0f, 1.0f));
                 pen.setColor(c);
                 p.setPen(pen);
                 // paintPaths expects GL Y (Bottom-Up), QPainter uses Top-Down; flip Y here.
@@ -898,7 +898,7 @@ void SqueegeeWindow::paintPaths(const QVector<PathInfo>& paths)
                 if (c.alpha() > 0) {
                     int idx = (0 * w * h + (h - 1 - y) * w + x) * 4; // Flip Y back for GL texture (0 at bottom)
                     // Blend (Straight RGB Output calculation)
-                float srcA = c.alphaF() * m_brushAlpha;
+                float srcA = c.alphaF();
                     float srcR = c.redF();
                     float srcG = c.greenF();
                     float srcB = c.blueF();

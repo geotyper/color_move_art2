@@ -322,6 +322,13 @@ MainWindow::MainWindow()
     connect(m_segmentVisibilitySlider, &QSlider::valueChanged, this, &MainWindow::onSegmentVisibilityChanged);
     renderLayout->addRow(m_segmentVisibilityLabel, m_segmentVisibilitySlider);
 
+    m_bristleJitterBox = new QCheckBox("Bristle jitter (per strand)");
+    m_bristleJitterBox->setChecked(false);
+    connect(m_bristleJitterBox, &QCheckBox::toggled, this, [this](bool on){
+        m_bristleJitterEnabled = on;
+    });
+    renderLayout->addRow(m_bristleJitterBox);
+
     m_noisePreviewLabel = new QLabel();
     m_noisePreviewLabel->setFixedSize(180, 90);
     m_noisePreviewLabel->setFrameStyle(QFrame::Box | QFrame::Plain);
@@ -1324,10 +1331,48 @@ void MainWindow::onPaintTrails()
              float perSegmentWidth = std::max(0.1f, lw / (float)segCount);
              auto perps = buildPerp(seg);
 
-             auto applyOffsetAndAppend = [&](const QColor& color, const std::vector<float>* brightnessSrc) {
+             auto applyOffsetAndAppend = [&](const QColor& baseColor, const std::vector<float>* brightnessSrc) {
                  auto bandCenter = [&](int k) {
                      return (-0.5f + (k + 0.5f) / (float)segCount) * lw;
                  };
+
+                 struct BandState {
+                     bool open = false;
+                     SqueegeeWindow::PathInfo path;
+                 };
+                 std::vector<BandState> bands(segCount);
+
+                 auto seedFor = [&](int k) -> quint32 {
+                     // Stable-ish seed per band/segment/layer so jitter doesn't change within one paint call.
+                     quint32 s = 2166136261u;
+                     s ^= (quint32)a.layer + 0x9e3779b9u + (s<<6) + (s>>2);
+                     s ^= (quint32)si      + 0x9e3779b9u + (s<<6) + (s>>2);
+                     s ^= (quint32)k       + 0x9e3779b9u + (s<<6) + (s>>2);
+                     return s;
+                 };
+
+                 std::vector<std::vector<QVector2D>> jitterPts;
+                 std::vector<float> widthMul(segCount, 1.0f);
+                 std::vector<float> alphaMul(segCount, 1.0f);
+                 if (m_bristleJitterEnabled) {
+                     jitterPts.resize(segCount);
+                     for (int k = 0; k < segCount; ++k) {
+                         QRandomGenerator gen(seedFor(k));
+                         widthMul[k] = 0.75f + 0.55f * (float)gen.generateDouble(); // 0.75..1.30
+                         alphaMul[k] = 0.35f + 0.55f * (float)gen.generateDouble(); // 0.35..0.90
+                         jitterPts[k].resize(seg.size(), QVector2D(0, 0));
+                         // jitter amplitude scales with line width
+                         float amp = std::max(0.3f, 0.18f * lw);
+                         float ampAlong = std::max(0.2f, 0.08f * lw);
+                         for (int pi = 0; pi < (int)seg.size(); ++pi) {
+                             float jn = (float)(gen.generateDouble() * 2.0 - 1.0);
+                             float jt = (float)(gen.generateDouble() * 2.0 - 1.0);
+                             QVector2D perp = perps[pi];
+                             QVector2D tan(-perp.y(), perp.x());
+                             jitterPts[k][pi] = perp * (jn * amp) + tan * (jt * ampAlong);
+                         }
+                     }
+                 }
 
                  for (int pi = 1; pi < (int)seg.size(); ++pi) {
                      // сэмпл активных полос на каждом шаге
@@ -1345,32 +1390,58 @@ void MainWindow::onPaintTrails()
 
                      for (int k = 0; k < segCount; ++k) {
                          if (!activeBands[k]) continue;
-                         SqueegeeWindow::PathInfo info;
-                         info.color = color;
-                         info.size = perSegmentWidth;
-                         info.useQtPainter = true;
-                         info.layer = a.layer;
                          float bc = bandCenter(k);
                          QVector2D p0 = seg[pi - 1] + perps[pi - 1] * bc;
                          QVector2D p1 = seg[pi]     + perps[pi]     * bc;
+                         if (m_bristleJitterEnabled) {
+                             p0 += jitterPts[k][pi - 1];
+                             p1 += jitterPts[k][pi];
+                         }
                          float px0 = p0.x() * scale + offsetX;
                          float py0 = p0.y() * scale + offsetY;
                          float px1 = p1.x() * scale + offsetX;
                          float py1 = p1.y() * scale + offsetY;
-                         if (!((px0 >= 0 && px0 < canvasW && py0 >= 0 && py0 < canvasH) ||
-                               (px1 >= 0 && px1 < canvasW && py1 >= 0 && py1 < canvasH))) {
-                             continue;
-                         }
-                         info.points.append(QVector2D(px0, py0));
-                         info.points.append(QVector2D(px1, py1));
                          float b0 = 1.0f;
                          float b1 = 1.0f;
                          if (brightnessSrc) {
                              if (pi - 1 < brightnessSrc->size()) b0 = (*brightnessSrc)[pi - 1];
                              if (pi < brightnessSrc->size())     b1 = (*brightnessSrc)[pi];
                          }
-                         info.brightness = 0.5f * (b0 + b1);
-                         paths.append(info);
+
+                         auto& st = bands[k];
+                         if (!st.open) {
+                             st.open = true;
+                             st.path = SqueegeeWindow::PathInfo{};
+                             QColor c = baseColor;
+                             if (m_bristleJitterEnabled) c.setAlphaF(std::clamp(alphaMul[k], 0.0f, 1.0f));
+                             st.path.color = c;
+                             st.path.size = perSegmentWidth * (m_bristleJitterEnabled ? widthMul[k] : 1.0f);
+                             st.path.useQtPainter = true;
+                             st.path.layer = a.layer;
+                             st.path.points.append(QVector2D(px0, py0));
+                             st.path.brightnessPerPoint.append(b0);
+                         }
+                         st.path.points.append(QVector2D(px1, py1));
+                         st.path.brightnessPerPoint.append(b1);
+                     }
+
+                     // Close any bands that were not active at this step (so gaps appear).
+                     for (int k = 0; k < segCount; ++k) {
+                         if (activeBands[k]) continue;
+                         auto& st = bands[k];
+                         if (st.open) {
+                             if (st.path.points.size() >= 2) paths.append(st.path);
+                             st.open = false;
+                         }
+                     }
+                 }
+
+                 // Flush open bands.
+                 for (int k = 0; k < segCount; ++k) {
+                     auto& st = bands[k];
+                     if (st.open) {
+                         if (st.path.points.size() >= 2) paths.append(st.path);
+                         st.open = false;
                      }
                  }
              };
