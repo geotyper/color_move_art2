@@ -79,6 +79,7 @@ private slots:
     void onAgentSpeedChanged(int value);
     void onRandomTrailColorsToggled(bool checked);
     void onAddPlaneBehindSphere();
+    void onClearAllMeshes();
 
 private:
     SqueegeeWindow *m_squeegeeWindow;
@@ -184,6 +185,7 @@ protected:
     QSlider *m_primParam3Slider;
     QLabel *m_primParam3Label;
     QPushButton *m_generateMeshBtn;
+    QPushButton *m_clearMeshesBtn;
     QSlider *m_cubeQuadSlider;
     QLabel  *m_cubeQuadLabel;
     QPushButton *m_addPlaneBtn;

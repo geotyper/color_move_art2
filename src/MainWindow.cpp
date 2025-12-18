@@ -502,6 +502,8 @@ MainWindow::MainWindow()
     
     m_generateMeshBtn = new QPushButton("Generate Mesh");
     connect(m_generateMeshBtn, &QPushButton::clicked, this, &MainWindow::onGenerateMesh);
+    m_clearMeshesBtn = new QPushButton("Delete All Meshes");
+    connect(m_clearMeshesBtn, &QPushButton::clicked, this, &MainWindow::onClearAllMeshes);
     m_addPlaneBtn = new QPushButton("Add Backdrop Plane");
     connect(m_addPlaneBtn, &QPushButton::clicked, this, &MainWindow::onAddPlaneBehindSphere);
 
@@ -579,6 +581,7 @@ MainWindow::MainWindow()
     tabGenLayout->addWidget(new QLabel("<b>Mesh Generation:</b>"));
     tabGenLayout->addLayout(genForm);
     tabGenLayout->addWidget(m_generateMeshBtn);
+    tabGenLayout->addWidget(m_clearMeshesBtn);
     tabGenLayout->addWidget(m_planeSizeLabel);
     tabGenLayout->addWidget(m_planeSizeSlider);
     tabGenLayout->addWidget(m_planeSubdivXLabel);
@@ -1518,6 +1521,18 @@ void MainWindow::onGenerateMesh()
     m_lastVertices = vertices;
     m_lastIndices = indices;
     m_meshViewer->updateMesh(vertices, indices);
+}
+
+void MainWindow::onClearAllMeshes()
+{
+    m_meshRepo.clear();
+    m_activeMeshIndex = -1;
+    m_lastVertices.clear();
+    m_lastIndices.clear();
+    if (m_meshViewer) {
+        m_meshViewer->clearAgents();
+        m_meshViewer->updateMesh(m_lastVertices, m_lastIndices);
+    }
 }
 
 void MainWindow::onAddPlaneBehindSphere()
