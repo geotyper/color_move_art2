@@ -326,8 +326,22 @@ MainWindow::MainWindow()
     m_bristleJitterBox->setChecked(false);
     connect(m_bristleJitterBox, &QCheckBox::toggled, this, [this](bool on){
         m_bristleJitterEnabled = on;
+        if (m_bristleJitterSlider) m_bristleJitterSlider->setEnabled(on);
+        if (m_bristleJitterLabel) m_bristleJitterLabel->setEnabled(on);
     });
     renderLayout->addRow(m_bristleJitterBox);
+
+    m_bristleJitterLabel = new QLabel("Bristle jitter strength: 0.35");
+    m_bristleJitterSlider = new QSlider(Qt::Horizontal);
+    m_bristleJitterSlider->setRange(0, 100);
+    m_bristleJitterSlider->setValue(35);
+    m_bristleJitterSlider->setEnabled(false);
+    m_bristleJitterLabel->setEnabled(false);
+    connect(m_bristleJitterSlider, &QSlider::valueChanged, this, [this](int v){
+        m_bristleJitterStrength = std::clamp(v / 100.0f, 0.0f, 1.0f);
+        if (m_bristleJitterLabel) m_bristleJitterLabel->setText(QString("Bristle jitter strength: %1").arg(m_bristleJitterStrength, 0, 'f', 2));
+    });
+    renderLayout->addRow(m_bristleJitterLabel, m_bristleJitterSlider);
 
     m_squeegeeLiteBox = new QCheckBox("Squeegee-lite drag (smudge)");
     m_squeegeeLiteBox->setChecked(false);
@@ -341,8 +355,20 @@ MainWindow::MainWindow()
     m_surfaceBrushBox->setChecked(true);
     connect(m_surfaceBrushBox, &QCheckBox::toggled, this, [this](bool on){
         m_surfaceBrushEnabled = on;
+        if (m_surfaceForeshSlider) m_surfaceForeshSlider->setEnabled(on);
+        if (m_surfaceForeshLabel) m_surfaceForeshLabel->setEnabled(on);
     });
     renderLayout->addRow(m_surfaceBrushBox);
+
+    m_surfaceForeshLabel = new QLabel("Surface foreshorten: 1.00");
+    m_surfaceForeshSlider = new QSlider(Qt::Horizontal);
+    m_surfaceForeshSlider->setRange(0, 100); // 0..1
+    m_surfaceForeshSlider->setValue(100);
+    connect(m_surfaceForeshSlider, &QSlider::valueChanged, this, [this](int v){
+        m_surfaceForeshStrength = std::clamp(v / 100.0f, 0.0f, 1.0f);
+        if (m_surfaceForeshLabel) m_surfaceForeshLabel->setText(QString("Surface foreshorten: %1").arg(m_surfaceForeshStrength, 0, 'f', 2));
+    });
+    renderLayout->addRow(m_surfaceForeshLabel, m_surfaceForeshSlider);
 
     m_noisePreviewLabel = new QLabel();
     m_noisePreviewLabel->setFixedSize(180, 90);
@@ -377,6 +403,12 @@ MainWindow::MainWindow()
     m_lightElevationSlider->setRange(-90, 90);
     m_lightElevationSlider->setValue(30);
     connect(m_lightElevationSlider, &QSlider::valueChanged, this, &MainWindow::onLightChanged);
+
+    m_debugNormalsBox = new QCheckBox("Debug normals");
+    m_debugNormalsBox->setChecked(false);
+    connect(m_debugNormalsBox, &QCheckBox::toggled, this, [this](bool on){
+        if (m_meshViewer) m_meshViewer->setDebugNormals(on);
+    });
     m_ambientLabel = new QLabel("Ambient: 0.20");
     m_ambientSlider = new QSlider(Qt::Horizontal);
     m_ambientSlider->setRange(0, 200); // 0.0 .. 2.0
@@ -395,6 +427,7 @@ MainWindow::MainWindow()
     lightLayout->addRow("Azimuth:", m_lightAzimuthSlider);
     lightLayout->addRow("Elevation:", m_lightElevationSlider);
     lightLayout->addRow(m_ambientLabel, m_ambientSlider);
+    lightLayout->addRow(m_debugNormalsBox);
     lightLayout->addRow("Zoom:", m_zoomSlider);
     
     tab3DLayout->addWidget(new QLabel("<b>Lighting & Camera:</b>"));
@@ -755,9 +788,24 @@ MainWindow::MainWindow()
     if (m_surfaceBrushBox) {
         m_surfaceBrushEnabled = m_surfaceBrushBox->isChecked();
     }
+    if (m_surfaceForeshSlider) {
+        m_surfaceForeshStrength = std::clamp(m_surfaceForeshSlider->value() / 100.0f, 0.0f, 1.0f);
+        if (m_surfaceForeshLabel) m_surfaceForeshLabel->setText(QString("Surface foreshorten: %1").arg(m_surfaceForeshStrength, 0, 'f', 2));
+        m_surfaceForeshSlider->setEnabled(m_surfaceBrushEnabled);
+        if (m_surfaceForeshLabel) m_surfaceForeshLabel->setEnabled(m_surfaceBrushEnabled);
+    }
+    if (m_bristleJitterSlider) {
+        m_bristleJitterStrength = std::clamp(m_bristleJitterSlider->value() / 100.0f, 0.0f, 1.0f);
+        if (m_bristleJitterLabel) m_bristleJitterLabel->setText(QString("Bristle jitter strength: %1").arg(m_bristleJitterStrength, 0, 'f', 2));
+        m_bristleJitterSlider->setEnabled(m_bristleJitterEnabled);
+        if (m_bristleJitterLabel) m_bristleJitterLabel->setEnabled(m_bristleJitterEnabled);
+    }
     if (m_ambientSlider) {
         float a = m_ambientSlider->value() / 100.0f;
         if (m_meshViewer) m_meshViewer->setAmbient(a);
+    }
+    if (m_debugNormalsBox && m_meshViewer) {
+        m_meshViewer->setDebugNormals(m_debugNormalsBox->isChecked());
     }
     onPrimitiveChanged(m_primitiveCombo->currentIndex());
     onNoiseModeChanged(m_noiseModeCombo->currentIndex());
@@ -1293,7 +1341,9 @@ void MainWindow::onProjectAgents()
             // spawnDrops (CPU) expects Raw GL Y.
             info.pos = QVector2D(px, py);
             info.color = a.color;
-            info.size = dropSize * (m_surfaceBrushEnabled ? std::clamp(a.headForeshorten, 0.05f, 1.0f) : 1.0f);
+            float f = std::clamp(a.headForeshorten, 0.05f, 1.0f);
+            float fUsed = m_surfaceBrushEnabled ? ((1.0f - m_surfaceForeshStrength) + m_surfaceForeshStrength * f) : 1.0f;
+            info.size = dropSize * fUsed;
             info.layer = a.layer;
             drops.append(info);
         }
@@ -1341,7 +1391,8 @@ void MainWindow::onPaintTrails()
     int segCount = std::max(1, m_segmentCountSlider ? m_segmentCountSlider->value() : 1);
     float fillProb = m_segmentVisibilitySlider ? (m_segmentVisibilitySlider->value() / 100.0f) : 1.0f;
 
-    for (const auto& a : agents) {
+    for (int ai = 0; ai < agents.size(); ++ai) {
+        const auto& a = agents[ai];
         // Keep trails even if the current head is occluded; visibility was already checked per-point when segments were built.
         if (a.trailSegments.empty()) continue;
             
@@ -1380,6 +1431,7 @@ void MainWindow::onPaintTrails()
                  auto seedFor = [&](int k) -> quint32 {
                      // Stable-ish seed per band/segment/layer so jitter doesn't change within one paint call.
                      quint32 s = 2166136261u;
+                     s ^= (quint32)ai     + 0x9e3779b9u + (s<<6) + (s>>2);
                      s ^= (quint32)a.layer + 0x9e3779b9u + (s<<6) + (s>>2);
                      s ^= (quint32)si      + 0x9e3779b9u + (s<<6) + (s>>2);
                      s ^= (quint32)k       + 0x9e3779b9u + (s<<6) + (s>>2);
@@ -1389,22 +1441,33 @@ void MainWindow::onPaintTrails()
                  std::vector<std::vector<QVector2D>> jitterPts;
                  std::vector<float> widthMul(segCount, 1.0f);
                  std::vector<float> alphaMul(segCount, 1.0f);
-                 if (m_bristleJitterEnabled) {
+                 if (m_bristleJitterEnabled && m_bristleJitterStrength > 0.0f) {
                      jitterPts.resize(segCount);
                      for (int k = 0; k < segCount; ++k) {
                          QRandomGenerator gen(seedFor(k));
-                         widthMul[k] = 0.75f + 0.55f * (float)gen.generateDouble(); // 0.75..1.30
-                         alphaMul[k] = 0.35f + 0.55f * (float)gen.generateDouble(); // 0.35..0.90
+                         float wRand = 0.75f + 0.55f * (float)gen.generateDouble(); // 0.75..1.30
+                         float aRand = 0.35f + 0.55f * (float)gen.generateDouble(); // 0.35..0.90
+                         widthMul[k] = (1.0f - m_bristleJitterStrength) + m_bristleJitterStrength * wRand;
+                         alphaMul[k] = (1.0f - m_bristleJitterStrength) + m_bristleJitterStrength * aRand;
                          jitterPts[k].resize(seg.size(), QVector2D(0, 0));
-                         // jitter amplitude scales with line width
-                         float amp = std::max(0.3f, 0.18f * lw);
-                         float ampAlong = std::max(0.2f, 0.08f * lw);
+                         // Jitter amplitude scales with line width, but keep it low-frequency along the stroke
+                         // so it reads like "bristles" instead of noisy zig-zag.
+                         float amp = (0.12f * lw) * m_bristleJitterStrength;
+                         float ampAlong = (0.03f * lw) * m_bristleJitterStrength;
+                         float smooth = std::clamp(0.04f + 0.10f * m_bristleJitterStrength, 0.02f, 0.20f);
+                         int stride = std::max(1, (int)std::lround(3.0f + 6.0f * (1.0f - m_bristleJitterStrength)));
+                         QVector2D accum(0, 0);
+                         QVector2D target(0, 0);
                          for (int pi = 0; pi < (int)seg.size(); ++pi) {
-                             float jn = (float)(gen.generateDouble() * 2.0 - 1.0);
-                             float jt = (float)(gen.generateDouble() * 2.0 - 1.0);
-                             QVector2D perp = perps[pi];
-                             QVector2D tan(-perp.y(), perp.x());
-                             jitterPts[k][pi] = perp * (jn * amp) + tan * (jt * ampAlong);
+                             if (pi % stride == 0) {
+                                 float jn = (float)(gen.generateDouble() * 2.0 - 1.0);
+                                 float jt = (float)(gen.generateDouble() * 2.0 - 1.0);
+                                 QVector2D perp = perps[pi];
+                                 QVector2D tan(-perp.y(), perp.x());
+                                 target = perp * (jn * amp) + tan * (jt * ampAlong);
+                             }
+                             accum = accum * (1.0f - smooth) + target * smooth;
+                             jitterPts[k][pi] = accum;
                          }
                      }
                  }
@@ -1428,6 +1491,13 @@ void MainWindow::onPaintTrails()
                          float bc = bandCenter(k);
                          float f0 = foreshPtr && (pi - 1) < (int)foreshPtr->size() ? (*foreshPtr)[pi - 1] : foreshAvg;
                          float f1 = foreshPtr && pi < (int)foreshPtr->size() ? (*foreshPtr)[pi] : foreshAvg;
+                         if (m_surfaceBrushEnabled) {
+                             f0 = (1.0f - m_surfaceForeshStrength) + m_surfaceForeshStrength * f0;
+                             f1 = (1.0f - m_surfaceForeshStrength) + m_surfaceForeshStrength * f1;
+                         } else {
+                             f0 = 1.0f;
+                             f1 = 1.0f;
+                         }
                          // Brush footprint: if surface mode is on, perps[] is mesh-aware orientation; otherwise it's screen-perp.
                          QVector2D p0 = seg[pi - 1] + perps[pi - 1] * (bc * (m_surfaceBrushEnabled ? f0 : 1.0f));
                          QVector2D p1 = seg[pi]     + perps[pi]     * (bc * (m_surfaceBrushEnabled ? f1 : 1.0f));
@@ -1453,7 +1523,10 @@ void MainWindow::onPaintTrails()
                              QColor c = baseColor;
                              if (m_bristleJitterEnabled) c.setAlphaF(std::clamp(alphaMul[k], 0.0f, 1.0f));
                              st.path.color = c;
-                             float widthScale = m_surfaceBrushEnabled ? foreshAvg : 1.0f;
+                             float widthScale = 1.0f;
+                             if (m_surfaceBrushEnabled) {
+                                 widthScale = (1.0f - m_surfaceForeshStrength) + m_surfaceForeshStrength * foreshAvg;
+                             }
                              st.path.size = perSegmentWidth * widthScale * (m_bristleJitterEnabled ? widthMul[k] : 1.0f);
                              st.path.useQtPainter = true;
                              st.path.layer = a.layer;

@@ -197,6 +197,8 @@ void MeshViewerWidget::paintGL()
     if (locLight != -1) glUniform3fv(locLight, 1, glm::value_ptr(m_lightDir));
     int locAmbient = m_program.uniformLocation("u_ambient");
     if (locAmbient != -1) glUniform1f(locAmbient, m_ambient);
+    int locDbg = m_program.uniformLocation("u_debugNormals");
+    if (locDbg != -1) glUniform1i(locDbg, m_debugNormals ? 1 : 0);
     
     int locCam = m_program.uniformLocation("u_cameraPos");
     if (locCam != -1) glUniform3f(locCam, 0.0f, 0.0f, m_cameraDistance);
@@ -284,6 +286,24 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
     m_vertices.reserve(m_mesh.number_of_faces() * 3);
     m_faceNormals.assign(m_mesh.number_of_faces(), glm::vec3(0.0f));
     m_vertexNormals.assign(m_mesh.number_of_vertices(), glm::vec3(0.0f));
+
+    // Determine whether the mesh is closed. For open meshes we keep the provided winding.
+    bool hasBoundary = false;
+    for (auto he : m_mesh.halfedges()) {
+        if (m_mesh.face(he) == SurfaceMesh::null_face() || m_mesh.face(m_mesh.opposite(he)) == SurfaceMesh::null_face()) {
+            hasBoundary = true;
+            break;
+        }
+    }
+
+    // Approximate mesh center in model space (used to orient normals outward for closed meshes).
+    glm::vec3 meshCenter(0.0f);
+    if (m_mesh.number_of_vertices() > 0) {
+        for (auto v : m_mesh.vertices()) {
+            meshCenter += toGlm(m_mesh.point(v));
+        }
+        meshCenter /= static_cast<float>(m_mesh.number_of_vertices());
+    }
     
     for (auto f : m_mesh.faces()) {
         if (m_mesh.is_removed(f)) continue;
@@ -294,8 +314,14 @@ void MeshViewerWidget::updateMesh(const std::vector<Vertex>& vertices, const std
         glm::vec3 v1 = fd.positions[1];
         glm::vec3 v2 = fd.positions[2];
         
-        glm::vec3 n = -glm::normalize(glm::cross(v1 - v0, v2 - v0)); // Flip normal to face outward
+        glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
         if (!std::isfinite(n.x) || !std::isfinite(n.y) || !std::isfinite(n.z)) continue;
+
+        // For closed meshes, flip normals to be outward-facing relative to the mesh center.
+        if (!hasBoundary) {
+            glm::vec3 c = (v0 + v1 + v2) * (1.0f / 3.0f);
+            if (glm::dot(n, c - meshCenter) < 0.0f) n = -n;
+        }
         
         m_faceNormals[f.idx()] = n;
         m_vertexNormals[fd.verts[0].idx()] += n;
@@ -408,6 +434,10 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
     
     glm::mat4 invMVP = glm::inverse(proj * view * model);
+    glm::mat4 invModel = glm::inverse(model);
+    // Work in mesh/model space (same frame as the R-tree). Use camera as ray origin so we don't
+    // accidentally start inside the mesh when zoomed in (near plane can clip through geometry).
+    glm::vec3 cameraPosModel = glm::vec3(invModel * glm::vec4(0.0f, 0.0f, m_cameraDistance, 1.0f));
     
     float ndcX = (2.0f * x) / viewWidth - 1.0f;
     float ndcY = 1.0f - (2.0f * y) / viewHeight;
@@ -418,8 +448,8 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     nearPoint /= nearPoint.w;
     farPoint /= farPoint.w;
     
-    glm::vec3 rayOrigWorld = glm::vec3(nearPoint);
-    glm::vec3 rayDirWorld = glm::normalize(glm::vec3(farPoint - nearPoint));
+    glm::vec3 rayOrigWorld = cameraPosModel;
+    glm::vec3 rayDirWorld = glm::normalize(glm::vec3(farPoint) - cameraPosModel);
 
     glm::vec3 rayEndWorld = rayOrigWorld + rayDirWorld * 100.0f;
     BoostSegment querySeg(
@@ -430,9 +460,18 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     m_rtree.query(bgi::intersects(querySeg), std::back_inserter(result));
     
     bool hit = false;
-    float minT = 1e30f;
+    float minTFront = 1e30f;
+    float minTAny = 1e30f;
+    bool hitFront = false;
     
     SurfaceAgent newAgent;
+    FaceIndex bestFaceFront = SurfaceMesh::null_face();
+    glm::vec3 bestBaryFront(0.0f);
+    glm::vec3 bestNFront(0.0f);
+
+    FaceIndex bestFaceAny = SurfaceMesh::null_face();
+    glm::vec3 bestBaryAny(0.0f);
+    glm::vec3 bestNAny(0.0f);
     
     for (const auto &val : result) {
         int f_idx = val.second;
@@ -445,32 +484,56 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
         
         float t, u, v;
         if (rayTriangleIntersect(rayOrigWorld, rayDirWorld, v0, v1, v2, t, u, v)) {
-            if (t > 0 && t < minT) {
-                glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-                minT = t;
-                hit = true;
-                newAgent.face = f;
-                newAgent.bary = glm::vec3(1.0f - u - v, u, v);
-                
-                glm::vec3 tangent = randomTangentAroundNormal(n);
-                newAgent.speed = m_agentBaseSpeed; // configurable speed
-                newAgent.worldVelocity = tangent * newAgent.speed;
-                // Color from active palette (cycling if more agents than colors)
-                const QVector<QVector<QVector3D>>* palettesPtr = m_externalPalettes ? m_externalPalettes : &m_palettes;
-                const QVector<QVector3D>& palette = (*palettesPtr)[m_paletteIndex % palettesPtr->size()];
-                int colorIdx = (int)m_agentSystem.count() % palette.size();
-                const QVector3D& pal = palette[colorIdx];
-                newAgent.color = QColor::fromRgbF(pal.x(), pal.y(), pal.z());
-                newAgent.maxAge = m_agentLifetime;
-                newAgent.age = 0;
-                newAgent.layer = QRandomGenerator::global()->bounded(32); // stick to a fixed texture slice
+            if (t <= 0.0f) continue;
+
+            glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+            glm::vec3 pHit = rayOrigWorld + rayDirWorld * t;
+            glm::vec3 vDir = glm::normalize(cameraPosModel - pHit);
+            bool frontFacing = glm::dot(n, vDir) > 0.0f;
+
+            if (t < minTAny) {
+                minTAny = t;
+                bestFaceAny = f;
+                bestBaryAny = glm::vec3(1.0f - u - v, u, v);
+                bestNAny = n;
+            }
+            if (frontFacing && t < minTFront) {
+                minTFront = t;
+                bestFaceFront = f;
+                bestBaryFront = glm::vec3(1.0f - u - v, u, v);
+                bestNFront = n;
+                hitFront = true;
             }
         }
     }
-    
+
+    FaceIndex useFace = hitFront ? bestFaceFront : bestFaceAny;
+    glm::vec3 useBary = hitFront ? bestBaryFront : bestBaryAny;
+    glm::vec3 useN = hitFront ? bestNFront : bestNAny;
+    float useT = hitFront ? minTFront : minTAny;
+
+    if (useFace != SurfaceMesh::null_face()) {
+        hit = true;
+        newAgent.face = useFace;
+        newAgent.bary = useBary;
+
+        glm::vec3 tangent = randomTangentAroundNormal(useN);
+        newAgent.speed = m_agentBaseSpeed; // configurable speed
+        newAgent.worldVelocity = tangent * newAgent.speed;
+        // Color from active palette (cycling if more agents than colors)
+        const QVector<QVector<QVector3D>>* palettesPtr = m_externalPalettes ? m_externalPalettes : &m_palettes;
+        const QVector<QVector3D>& palette = (*palettesPtr)[m_paletteIndex % palettesPtr->size()];
+        int colorIdx = (int)m_agentSystem.count() % palette.size();
+        const QVector3D& pal = palette[colorIdx];
+        newAgent.color = QColor::fromRgbF(pal.x(), pal.y(), pal.z());
+        newAgent.maxAge = m_agentLifetime;
+        newAgent.age = 0;
+        newAgent.layer = QRandomGenerator::global()->bounded(32); // stick to a fixed texture slice
+    }
+
     if (hit) {
         m_agentSystem.add(newAgent);
-        hitPos = rayOrigWorld + rayDirWorld * minT;
+        hitPos = rayOrigWorld + rayDirWorld * useT;
         return true;
     }
     return false;
@@ -558,6 +621,28 @@ void MeshViewerWidget::updateAgents() {
         return hitT == std::numeric_limits<float>::max() || targetT <= hitT + 1e-3f;
     };
 
+    auto computeNormalModel = [&](const SurfaceAgent& agentRef, const glm::vec3& fallbackPos) -> glm::vec3 {
+        glm::vec3 normal = glm::normalize(fallbackPos); // fallback
+        if (agentRef.face != SurfaceMesh::null_face()) {
+            FaceData fd;
+            if (getFaceData(agentRef.face, fd)) {
+                glm::vec3 nv0 = m_vertexNormals[fd.verts[0].idx()];
+                glm::vec3 nv1 = m_vertexNormals[fd.verts[1].idx()];
+                glm::vec3 nv2 = m_vertexNormals[fd.verts[2].idx()];
+                glm::vec3 bary = agentRef.bary;
+                normal = nv0 * bary.x + nv1 * bary.y + nv2 * bary.z;
+                if (!std::isfinite(normal.x) || !std::isfinite(normal.y) || !std::isfinite(normal.z) || glm::dot(normal, normal) < 1e-10f) {
+                    normal = glm::normalize(fallbackPos);
+                }
+            }
+        }
+        normal = glm::normalize(normal);
+        if (!std::isfinite(normal.x) || !std::isfinite(normal.y) || !std::isfinite(normal.z) || glm::dot(normal, normal) < 1e-10f) {
+            normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+        return normal;
+    };
+
     auto respawnAgent = [&](SurfaceAgent& agent) {
         bool placed = false;
         for (int attempt = 0; attempt < 32 && !placed; ++attempt) {
@@ -571,8 +656,10 @@ void MeshViewerWidget::updateAgents() {
             glm::vec4 farPoint  = invMVP * glm::vec4(ndcX, ndcY,  1.0f, 1.0f);
             nearPoint /= nearPoint.w;
             farPoint  /= farPoint.w;
-            glm::vec3 rayOrigWorld = glm::vec3(nearPoint);
-            glm::vec3 rayDirWorld  = glm::normalize(glm::vec3(farPoint - nearPoint));
+            // Use camera origin in mesh/model space so we always pick the true front-most hit
+            // from the current view, even if the near plane clips into geometry.
+            glm::vec3 rayOrigWorld = cameraPosModel;
+            glm::vec3 rayDirWorld  = glm::normalize(glm::vec3(farPoint) - cameraPosModel);
             glm::vec3 rayEndWorld = rayOrigWorld + rayDirWorld * 100.0f;
             BoostSegment querySeg(
                 BoostPoint(rayOrigWorld.x, rayOrigWorld.y, rayOrigWorld.z),
@@ -582,9 +669,13 @@ void MeshViewerWidget::updateAgents() {
             std::vector<BoostValue> result;
             m_rtree.query(bgi::intersects(querySeg), std::back_inserter(result));
 
-            float bestT = std::numeric_limits<float>::max();
-            FaceIndex bestFace = SurfaceMesh::null_face();
-            glm::vec3 bestBary(0.0f);
+            float bestTFront = std::numeric_limits<float>::max();
+            FaceIndex bestFaceFront = SurfaceMesh::null_face();
+            glm::vec3 bestBaryFront(0.0f);
+
+            float bestTAny = std::numeric_limits<float>::max();
+            FaceIndex bestFaceAny = SurfaceMesh::null_face();
+            glm::vec3 bestBaryAny(0.0f);
 
             for (const auto &val : result) {
                 FaceIndex f(val.second);
@@ -595,13 +686,27 @@ void MeshViewerWidget::updateAgents() {
                 glm::vec3 v2 = fd.positions[2];
                 float t,u,v;
                 if (rayTriangleIntersect(rayOrigWorld, rayDirWorld, v0, v1, v2, t, u, v)) {
-                    if (t > 0.0f && t < bestT) {
-                        bestT = t;
-                        bestFace = f;
-                        bestBary = glm::vec3(1.0f - u - v, u, v);
+                    if (t <= 0.0f) continue;
+                    glm::vec3 n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+                    glm::vec3 pHit = rayOrigWorld + rayDirWorld * t;
+                    glm::vec3 vDir = glm::normalize(cameraPosModel - pHit);
+                    bool frontFacing = glm::dot(n, vDir) > 0.0f;
+
+                    if (t < bestTAny) {
+                        bestTAny = t;
+                        bestFaceAny = f;
+                        bestBaryAny = glm::vec3(1.0f - u - v, u, v);
+                    }
+                    if (frontFacing && t < bestTFront) {
+                        bestTFront = t;
+                        bestFaceFront = f;
+                        bestBaryFront = glm::vec3(1.0f - u - v, u, v);
                     }
                 }
             }
+
+            FaceIndex bestFace = (bestFaceFront != SurfaceMesh::null_face()) ? bestFaceFront : bestFaceAny;
+            glm::vec3 bestBary = (bestFaceFront != SurfaceMesh::null_face()) ? bestBaryFront : bestBaryAny;
 
             if (bestFace != SurfaceMesh::null_face()) {
                 agent.face = bestFace;
@@ -786,7 +891,10 @@ void MeshViewerWidget::updateAgents() {
 
         // Visibility-driven behaviors: break trail and respawn if off-screen too long.
         glm::vec3 headPos = getAgentWorldPos(agent);
-        bool headVisible = isVisible(agent, headPos);
+        glm::vec3 nModelHead = computeNormalModel(agent, headPos);
+        glm::vec3 vDirHead = glm::normalize(cameraPosModel - headPos);
+        bool headFrontFacing = glm::dot(nModelHead, vDirHead) > 0.0f;
+        bool headVisible = headFrontFacing && isVisible(agent, headPos);
         if (!headVisible) {
             agent.invisibleTicks++;
             // Break trail (mark stop) so запись возобновится только после появления
@@ -798,7 +906,10 @@ void MeshViewerWidget::updateAgents() {
             if (agent.invisibleTicks > 50) {
                 respawnAgent(agent);
                 headPos = getAgentWorldPos(agent);
-                headVisible = isVisible(agent, headPos);
+                nModelHead = computeNormalModel(agent, headPos);
+                vDirHead = glm::normalize(cameraPosModel - headPos);
+                headFrontFacing = glm::dot(nModelHead, vDirHead) > 0.0f;
+                headVisible = headFrontFacing && isVisible(agent, headPos);
             }
         } else {
             agent.invisibleTicks = 0;
@@ -948,15 +1059,17 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         info.color = agent.color;
         info.viewDepth = viewPos4.z; // more negative = farther
         glm::vec3 normalWorld = computeNormal(agent, pos);
-        info.isVisible = isVisible(pos);
+        // Heads: occlusion + front-facing to avoid drawing agents on back side.
+        glm::vec3 nModelHead = computeNormalModel(agent, pos);
+        glm::vec3 vDirHead = glm::normalize(cameraPosModel - pos);
+        bool headFrontFacing = glm::dot(nModelHead, vDirHead) > 0.0f;
+        info.isVisible = headFrontFacing && isVisible(pos);
         
         info.layer = agent.layer;
         info.headBrightness = lambert(normalWorld);
         // Foreshorten factor for brush footprint: 1 face-on, ~0 edge-on.
         {
-            glm::vec3 nModel = computeNormalModel(agent, pos);
-            glm::vec3 vDir = glm::normalize(cameraPosModel - pos);
-            float cosNV = std::abs(glm::dot(nModel, vDir));
+            float cosNV = std::abs(glm::dot(nModelHead, vDirHead));
             info.headForeshorten = std::clamp(cosNV, 0.05f, 1.0f);
         }
         
@@ -985,37 +1098,57 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
             if (count < 2) continue;
             int stride = std::max(1, (count + kMaxTrailPointsPerSegment - 1) / kMaxTrailPointsPerSegment);
 
-            std::vector<QVector2D> seg2d;
-            std::vector<float> segBright;
-            std::vector<float> segForesh;
-            std::vector<QVector2D> segWidthDir;
-            seg2d.reserve((count + stride - 1) / stride);
-            segBright.reserve((count + stride - 1) / stride);
-            segForesh.reserve((count + stride - 1) / stride);
-            segWidthDir.reserve((count + stride - 1) / stride);
+            std::vector<QVector2D> current2d;
+            std::vector<float> currentBright;
+            std::vector<float> currentForesh;
+            std::vector<QVector2D> currentWidthDir;
+            current2d.reserve((count + stride - 1) / stride);
+            currentBright.reserve((count + stride - 1) / stride);
+            currentForesh.reserve((count + stride - 1) / stride);
+            currentWidthDir.reserve((count + stride - 1) / stride);
+
+            auto flush = [&]() {
+                if (current2d.size() > 1) {
+                    info.trailSegments.push_back(current2d);
+                    info.trailBrightness.push_back(currentBright);
+                    info.trailForeshorten.push_back(currentForesh);
+                    info.trailWidthDirs.push_back(currentWidthDir);
+                }
+                current2d.clear();
+                currentBright.clear();
+                currentForesh.clear();
+                currentWidthDir.clear();
+            };
 
             for (int i = r.first; i < r.second; i += stride) {
                 const auto& sample = agent.trail[i];
                 const glm::vec3& p = sample.pos;
-                if (!isClipVisible(p)) continue;
+
+                glm::vec3 nModel = computeNormalModel(agent, p);
+                glm::vec3 vDir = glm::normalize(cameraPosModel - p);
+                float ndv = glm::dot(nModel, vDir);
+                bool frontFacing = ndv > 0.0f;
+                if (!frontFacing || !isClipVisible(p)) {
+                    flush();
+                    continue;
+                }
+
                 glm::vec3 nWorld = sample.normal;
                 if (!std::isfinite(nWorld.x) || !std::isfinite(nWorld.y) || !std::isfinite(nWorld.z) || glm::dot(nWorld, nWorld) < 1e-8f) {
                     nWorld = computeNormal(agent, p);
                 }
-                seg2d.push_back(project(p));
-                segBright.push_back(lambert(nWorld));
-                glm::vec3 nModel = computeNormalModel(agent, p);
-                glm::vec3 vDir = glm::normalize(cameraPosModel - p);
-                float cosNV = std::abs(glm::dot(nModel, vDir));
-                segForesh.push_back(std::clamp(cosNV, 0.05f, 1.0f));
+
+                current2d.push_back(project(p));
+                currentBright.push_back(lambert(nWorld));
+                float cosNV = std::abs(ndv);
+                currentForesh.push_back(std::clamp(cosNV, 0.05f, 1.0f));
 
                 // Compute oriented "across" direction for brush footprint based on surface tangent plane.
                 int prevIdx = std::max(r.first, i - stride);
                 int nextIdx = std::min(r.second - 1, i + stride);
                 glm::vec3 tangentModel = agent.trail[nextIdx].pos - agent.trail[prevIdx].pos;
                 float tLen2 = glm::dot(tangentModel, tangentModel);
-                if (tLen2 < 1e-10f || !std::isfinite(tangentModel.x)) {
-                    // fallback: pick any tangent
+                if (tLen2 < 1e-10f || !std::isfinite(tangentModel.x) || !std::isfinite(tangentModel.y) || !std::isfinite(tangentModel.z)) {
                     tangentModel = glm::cross(nModel, glm::vec3(0.0f, 0.0f, 1.0f));
                     if (glm::dot(tangentModel, tangentModel) < 1e-10f)
                         tangentModel = glm::cross(nModel, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1023,27 +1156,21 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
                 tangentModel = glm::normalize(tangentModel - glm::dot(tangentModel, nModel) * nModel);
                 if (glm::dot(tangentModel, tangentModel) < 1e-10f) tangentModel = glm::vec3(1.0f, 0.0f, 0.0f);
                 glm::vec3 bitangentModel = glm::normalize(glm::cross(nModel, tangentModel));
-                if (!std::isfinite(bitangentModel.x) || glm::dot(bitangentModel, bitangentModel) < 1e-10f) {
+                if (!std::isfinite(bitangentModel.x) || !std::isfinite(bitangentModel.y) || !std::isfinite(bitangentModel.z) || glm::dot(bitangentModel, bitangentModel) < 1e-10f) {
                     bitangentModel = glm::normalize(glm::cross(nModel, glm::vec3(1.0f, 0.0f, 0.0f)));
                 }
                 QVector2D pPlus = project(p + bitangentModel * eps);
                 QVector2D pMinus = project(p - bitangentModel * eps);
                 QVector2D wdir = pPlus - pMinus;
                 if (wdir.lengthSquared() < 1e-6f) {
-                    // fallback to screen-space perpendicular of projected tangent
                     QVector2D pt = project(p + tangentModel * eps) - project(p - tangentModel * eps);
                     if (pt.lengthSquared() < 1e-6f) pt = QVector2D(1.0f, 0.0f);
                     wdir = QVector2D(-pt.y(), pt.x());
                 }
                 wdir.normalize();
-                segWidthDir.push_back(wdir);
+                currentWidthDir.push_back(wdir);
             }
-            if (seg2d.size() > 1) {
-                info.trailSegments.push_back(std::move(seg2d));
-                info.trailBrightness.push_back(std::move(segBright));
-                info.trailForeshorten.push_back(std::move(segForesh));
-                info.trailWidthDirs.push_back(std::move(segWidthDir));
-            }
+            flush();
         }
         
         projected.push_back(info);

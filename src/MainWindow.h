@@ -90,6 +90,7 @@ private:
     QSlider *m_lightAzimuthSlider;
     QSlider *m_lightElevationSlider;
     QSlider *m_zoomSlider;
+    QCheckBox *m_debugNormalsBox;
     
     class AgentProjectionWindow *m_agentWindow;
     void onToggleAgents();
@@ -121,10 +122,16 @@ private:
     QLabel *m_ambientLabel;
     QCheckBox *m_bristleJitterBox;
     bool m_bristleJitterEnabled = false;
+    QSlider *m_bristleJitterSlider;
+    QLabel *m_bristleJitterLabel;
+    float m_bristleJitterStrength = 0.35f;
     QCheckBox *m_squeegeeLiteBox;
     bool m_squeegeeLiteEnabled = false;
     QCheckBox *m_surfaceBrushBox;
     bool m_surfaceBrushEnabled = true;
+    QSlider *m_surfaceForeshSlider;
+    QLabel *m_surfaceForeshLabel;
+    float m_surfaceForeshStrength = 1.0f;
 
     void saveSettings();
     void loadSettings();
