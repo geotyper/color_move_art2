@@ -249,7 +249,8 @@ MainWindow::MainWindow()
     m_lineWidthSlider->setRange(1, 1000); // 0.1 to 100.0
     m_lineWidthSlider->setValue(10);
     connect(m_lineWidthSlider, &QSlider::valueChanged, this, &MainWindow::onLineWidthChanged);
-    renderLayout->addRow(m_lineWidthLabel, m_lineWidthSlider);
+    renderLayout->addRow(m_lineWidthLabel);
+    renderLayout->addRow(m_lineWidthSlider);
 
     m_brushAlphaLabel = new QLabel("Brush Opacity: 0.80");
     m_brushAlphaSlider = new QSlider(Qt::Horizontal);
@@ -260,7 +261,8 @@ MainWindow::MainWindow()
         m_brushAlphaLabel->setText(QString("Brush Opacity: %1").arg(a, 0, 'f', 2));
         if (m_squeegeeWindow) m_squeegeeWindow->setBrushAlpha(a);
     });
-    renderLayout->addRow(m_brushAlphaLabel, m_brushAlphaSlider);
+    renderLayout->addRow(m_brushAlphaLabel);
+    renderLayout->addRow(m_brushAlphaSlider);
 
     m_trailBrightnessLabel = new QLabel("Trail lightness: 1.00");
     m_trailBrightnessSlider = new QSlider(Qt::Horizontal);
@@ -271,7 +273,8 @@ MainWindow::MainWindow()
         m_trailBrightnessLabel->setText(QString("Trail lightness: %1").arg(scale, 0, 'f', 2));
         if (m_squeegeeWindow) m_squeegeeWindow->setTrailBrightnessScale(scale);
     });
-    renderLayout->addRow(m_trailBrightnessLabel, m_trailBrightnessSlider);
+    renderLayout->addRow(m_trailBrightnessLabel);
+    renderLayout->addRow(m_trailBrightnessSlider);
 
     m_paletteCombo = new QComboBox();
     m_paletteCombo->addItem("Modern Art (Original Calm)");
@@ -313,14 +316,45 @@ MainWindow::MainWindow()
     m_segmentCountSlider->setValue(1);
     m_segmentCountLabel = new QLabel("Segments: 1");
     connect(m_segmentCountSlider, &QSlider::valueChanged, this, &MainWindow::onSegmentCountChanged);
-    renderLayout->addRow(m_segmentCountLabel, m_segmentCountSlider);
+    renderLayout->addRow(m_segmentCountLabel);
+    renderLayout->addRow(m_segmentCountSlider);
 
     m_segmentVisibilitySlider = new QSlider(Qt::Horizontal);
     m_segmentVisibilitySlider->setRange(0, 100);
     m_segmentVisibilitySlider->setValue(100);
     m_segmentVisibilityLabel = new QLabel("Segment fill: 1.00");
     connect(m_segmentVisibilitySlider, &QSlider::valueChanged, this, &MainWindow::onSegmentVisibilityChanged);
-    renderLayout->addRow(m_segmentVisibilityLabel, m_segmentVisibilitySlider);
+    renderLayout->addRow(m_segmentVisibilityLabel);
+    renderLayout->addRow(m_segmentVisibilitySlider);
+
+    m_segLengthLabel = new QLabel("Segment length mul: 1.00");
+    m_segLengthSlider = new QSlider(Qt::Horizontal);
+    m_segLengthSlider->setRange(0, 700); // 0 .. 7
+    m_segLengthSlider->setValue(100);
+    connect(m_segLengthSlider, &QSlider::valueChanged, this, [this](int v){
+        m_segLengthMultiplier = std::clamp(v / 100.0f, 0.0f, 7.0f);
+        if (m_segLengthLabel) m_segLengthLabel->setText(QString("Segment length mul: %1").arg(m_segLengthMultiplier, 0, 'f', 2));
+    });
+    renderLayout->addRow(m_segLengthLabel);
+    renderLayout->addRow(m_segLengthSlider);
+
+    m_segOffsetLabel = new QLabel("Segment offset (w): 0.00");
+    m_segOffsetSlider = new QSlider(Qt::Horizontal);
+    m_segOffsetSlider->setRange(0, 300); // 0 .. 3 * width
+    m_segOffsetSlider->setValue(0);
+    connect(m_segOffsetSlider, &QSlider::valueChanged, this, [this](int v){
+        m_segOffsetFactor = std::clamp(v / 100.0f, 0.0f, 3.0f);
+        if (m_segOffsetLabel) m_segOffsetLabel->setText(QString("Segment offset (w): %1").arg(m_segOffsetFactor, 0, 'f', 2));
+    });
+    renderLayout->addRow(m_segOffsetLabel);
+    renderLayout->addRow(m_segOffsetSlider);
+
+    m_curvedHairBox = new QCheckBox("Curve strand segments");
+    m_curvedHairBox->setChecked(false);
+    connect(m_curvedHairBox, &QCheckBox::toggled, this, [this](bool on){
+        m_curvedHairEnabled = on;
+    });
+    renderLayout->addRow(m_curvedHairBox);
 
     m_bristleJitterBox = new QCheckBox("Bristle jitter (per strand)");
     m_bristleJitterBox->setChecked(false);
@@ -328,6 +362,10 @@ MainWindow::MainWindow()
         m_bristleJitterEnabled = on;
         if (m_bristleJitterSlider) m_bristleJitterSlider->setEnabled(on);
         if (m_bristleJitterLabel) m_bristleJitterLabel->setEnabled(on);
+        bool superOn = m_superBristleJitterEnabled;
+        if (m_superBristleJitterSlider) m_superBristleJitterSlider->setEnabled(superOn);
+        if (m_superBristleJitterLabel) m_superBristleJitterLabel->setEnabled(superOn);
+        if (m_superBristleAffectsOffsetBox) m_superBristleAffectsOffsetBox->setEnabled(superOn);
     });
     renderLayout->addRow(m_bristleJitterBox);
 
@@ -341,7 +379,71 @@ MainWindow::MainWindow()
         m_bristleJitterStrength = std::clamp(v / 100.0f, 0.0f, 1.0f);
         if (m_bristleJitterLabel) m_bristleJitterLabel->setText(QString("Bristle jitter strength: %1").arg(m_bristleJitterStrength, 0, 'f', 2));
     });
-    renderLayout->addRow(m_bristleJitterLabel, m_bristleJitterSlider);
+    renderLayout->addRow(m_bristleJitterLabel);
+    renderLayout->addRow(m_bristleJitterSlider);
+
+    m_superBristleJitterBox = new QCheckBox("Super bristle jitter (rotate strands)");
+    m_superBristleJitterBox->setChecked(false);
+    m_superBristleJitterBox->setEnabled(true);
+    connect(m_superBristleJitterBox, &QCheckBox::toggled, this, [this](bool on){
+        m_superBristleJitterEnabled = on;
+        bool enable = on;
+        if (m_superBristleJitterSlider) m_superBristleJitterSlider->setEnabled(enable);
+        if (m_superBristleJitterLabel) m_superBristleJitterLabel->setEnabled(enable);
+        if (m_superBristleAffectsOffsetBox) m_superBristleAffectsOffsetBox->setEnabled(enable);
+        if (m_superBristleMaxAngleSlider) m_superBristleMaxAngleSlider->setEnabled(enable);
+        if (m_superBristleMaxAngleLabel) m_superBristleMaxAngleLabel->setEnabled(enable);
+        if (m_superBristlePeakChanceSlider) m_superBristlePeakChanceSlider->setEnabled(enable);
+        if (m_superBristlePeakChanceLabel) m_superBristlePeakChanceLabel->setEnabled(enable);
+    });
+    renderLayout->addRow(m_superBristleJitterBox);
+
+    m_superBristleJitterLabel = new QLabel("Super bristle jitter strength: 0.00");
+    m_superBristleJitterSlider = new QSlider(Qt::Horizontal);
+    m_superBristleJitterSlider->setRange(0, 100);
+    m_superBristleJitterSlider->setValue(0);
+    m_superBristleJitterSlider->setEnabled(false);
+    m_superBristleJitterLabel->setEnabled(false);
+    connect(m_superBristleJitterSlider, &QSlider::valueChanged, this, [this](int v){
+        m_superBristleJitterStrength = std::clamp(v / 100.0f, 0.0f, 1.0f);
+        if (m_superBristleJitterLabel) m_superBristleJitterLabel->setText(QString("Super bristle jitter strength: %1").arg(m_superBristleJitterStrength, 0, 'f', 2));
+    });
+    renderLayout->addRow(m_superBristleJitterLabel);
+    renderLayout->addRow(m_superBristleJitterSlider);
+
+    m_superBristleMaxAngleLabel = new QLabel("Super jitter max angle: 180°");
+    m_superBristleMaxAngleSlider = new QSlider(Qt::Horizontal);
+    m_superBristleMaxAngleSlider->setRange(0, 180);
+    m_superBristleMaxAngleSlider->setValue(180);
+    m_superBristleMaxAngleSlider->setEnabled(false);
+    m_superBristleMaxAngleLabel->setEnabled(false);
+    connect(m_superBristleMaxAngleSlider, &QSlider::valueChanged, this, [this](int v){
+        m_superBristleMaxAngleDeg = std::clamp((float)v, 0.0f, 180.0f);
+        if (m_superBristleMaxAngleLabel) m_superBristleMaxAngleLabel->setText(QString("Super jitter max angle: %1°").arg(m_superBristleMaxAngleDeg, 0, 'f', 0));
+    });
+    renderLayout->addRow(m_superBristleMaxAngleLabel);
+    renderLayout->addRow(m_superBristleMaxAngleSlider);
+
+    m_superBristlePeakChanceLabel = new QLabel("Super jitter peak chance: 0.35");
+    m_superBristlePeakChanceSlider = new QSlider(Qt::Horizontal);
+    m_superBristlePeakChanceSlider->setRange(0, 100);
+    m_superBristlePeakChanceSlider->setValue(35);
+    m_superBristlePeakChanceSlider->setEnabled(false);
+    m_superBristlePeakChanceLabel->setEnabled(false);
+    connect(m_superBristlePeakChanceSlider, &QSlider::valueChanged, this, [this](int v){
+        m_superBristlePeakChance = std::clamp(v / 100.0f, 0.0f, 1.0f);
+        if (m_superBristlePeakChanceLabel) m_superBristlePeakChanceLabel->setText(QString("Super jitter peak chance: %1").arg(m_superBristlePeakChance, 0, 'f', 2));
+    });
+    renderLayout->addRow(m_superBristlePeakChanceLabel);
+    renderLayout->addRow(m_superBristlePeakChanceSlider);
+
+    m_superBristleAffectsOffsetBox = new QCheckBox("Super jitter affects band offset");
+    m_superBristleAffectsOffsetBox->setChecked(true);
+    m_superBristleAffectsOffsetBox->setEnabled(false);
+    connect(m_superBristleAffectsOffsetBox, &QCheckBox::toggled, this, [this](bool on){
+        m_superBristleAffectsOffset = on;
+    });
+    renderLayout->addRow(m_superBristleAffectsOffsetBox);
 
     m_squeegeeLiteBox = new QCheckBox("Squeegee-lite drag (smudge)");
     m_squeegeeLiteBox->setChecked(false);
@@ -368,7 +470,8 @@ MainWindow::MainWindow()
         m_surfaceForeshStrength = std::clamp(v / 100.0f, 0.0f, 1.0f);
         if (m_surfaceForeshLabel) m_surfaceForeshLabel->setText(QString("Surface foreshorten: %1").arg(m_surfaceForeshStrength, 0, 'f', 2));
     });
-    renderLayout->addRow(m_surfaceForeshLabel, m_surfaceForeshSlider);
+    renderLayout->addRow(m_surfaceForeshLabel);
+    renderLayout->addRow(m_surfaceForeshSlider);
 
     m_noisePreviewLabel = new QLabel();
     m_noisePreviewLabel->setFixedSize(180, 90);
@@ -381,7 +484,8 @@ MainWindow::MainWindow()
     m_sharpenSlider->setRange(0, 200); // 0.0 - 2.0
     m_sharpenSlider->setValue(0);
     connect(m_sharpenSlider, &QSlider::valueChanged, this, &MainWindow::onSharpenChanged);
-    renderLayout->addRow("Sharpen:", m_sharpenSlider);
+    renderLayout->addRow(new QLabel("Sharpen:"));
+    renderLayout->addRow(m_sharpenSlider);
 
     QPushButton *bgColorBtn = new QPushButton("Background Color");
     connect(bgColorBtn, &QPushButton::clicked, this, &MainWindow::onBackgroundColorClicked);
@@ -565,8 +669,8 @@ MainWindow::MainWindow()
     // Plane controls
     m_planeSizeSlider = new QSlider(Qt::Horizontal);
     m_planeSizeSlider->setRange(50, 2000); // 5.0 .. 200.0 units
-    m_planeSizeSlider->setValue(400);      // 40.0 default
-    m_planeSizeLabel = new QLabel("Plane size: 40.0");
+    m_planeSizeSlider->setValue(330);      // 33.0 default
+    m_planeSizeLabel = new QLabel("Plane size: 33.0");
     connect(m_planeSizeSlider, &QSlider::valueChanged, this, [this](int v){
         m_planeSizeLabel->setText(QString("Plane size: %1").arg(v / 10.0, 0, 'f', 1));
     });
@@ -800,6 +904,19 @@ MainWindow::MainWindow()
         m_bristleJitterSlider->setEnabled(m_bristleJitterEnabled);
         if (m_bristleJitterLabel) m_bristleJitterLabel->setEnabled(m_bristleJitterEnabled);
     }
+    if (m_superBristleJitterSlider) {
+        m_superBristleJitterStrength = std::clamp(m_superBristleJitterSlider->value() / 100.0f, 0.0f, 1.0f);
+        if (m_superBristleJitterLabel) m_superBristleJitterLabel->setText(QString("Super bristle jitter strength: %1").arg(m_superBristleJitterStrength, 0, 'f', 2));
+        if (m_superBristleJitterBox) m_superBristleJitterBox->setEnabled(true);
+        bool superOn = m_superBristleJitterEnabled;
+        m_superBristleJitterSlider->setEnabled(superOn);
+        if (m_superBristleJitterLabel) m_superBristleJitterLabel->setEnabled(superOn);
+        if (m_superBristleAffectsOffsetBox) m_superBristleAffectsOffsetBox->setEnabled(superOn);
+        if (m_superBristleMaxAngleSlider) m_superBristleMaxAngleSlider->setEnabled(superOn);
+        if (m_superBristleMaxAngleLabel) m_superBristleMaxAngleLabel->setEnabled(superOn);
+        if (m_superBristlePeakChanceSlider) m_superBristlePeakChanceSlider->setEnabled(superOn);
+        if (m_superBristlePeakChanceLabel) m_superBristlePeakChanceLabel->setEnabled(superOn);
+    }
     if (m_ambientSlider) {
         float a = m_ambientSlider->value() / 100.0f;
         if (m_meshViewer) m_meshViewer->setAmbient(a);
@@ -813,6 +930,14 @@ MainWindow::MainWindow()
     onNoiseStrengthChanged(m_noiseStrengthSlider->value());
     onSegmentCountChanged(m_segmentCountSlider->value());
     onSegmentVisibilityChanged(m_segmentVisibilitySlider->value());
+    if (m_segLengthSlider) {
+        m_segLengthMultiplier = std::clamp(m_segLengthSlider->value() / 100.0f, 0.0f, 7.0f);
+        if (m_segLengthLabel) m_segLengthLabel->setText(QString("Segment length mul: %1").arg(m_segLengthMultiplier, 0, 'f', 2));
+    }
+    if (m_segOffsetSlider) {
+        m_segOffsetFactor = std::clamp(m_segOffsetSlider->value() / 100.0f, 0.0f, 3.0f);
+        if (m_segOffsetLabel) m_segOffsetLabel->setText(QString("Segment offset (w): %1").arg(m_segOffsetFactor, 0, 'f', 2));
+    }
     updateNoisePreview();
 
     loadSettings();
@@ -1422,11 +1547,10 @@ void MainWindow::onPaintTrails()
                      return (-0.5f + (k + 0.5f) / (float)segCount) * lw;
                  };
 
-                 struct BandState {
-                     bool open = false;
-                     SqueegeeWindow::PathInfo path;
-                 };
-                 std::vector<BandState> bands(segCount);
+                struct BandState {
+                    SqueegeeWindow::PathInfo path;
+                };
+                std::vector<BandState> bands(segCount);
 
                  auto seedFor = [&](int k) -> quint32 {
                      // Stable-ish seed per band/segment/layer so jitter doesn't change within one paint call.
@@ -1441,6 +1565,24 @@ void MainWindow::onPaintTrails()
                  std::vector<std::vector<QVector2D>> jitterPts;
                  std::vector<float> widthMul(segCount, 1.0f);
                  std::vector<float> alphaMul(segCount, 1.0f);
+                 std::vector<float> strandCos(segCount, 1.0f);
+                 std::vector<float> strandSin(segCount, 0.0f);
+                 bool superRot = m_superBristleJitterEnabled && m_superBristleJitterStrength > 0.0f;
+                 if (superRot) {
+                     float maxDeg = std::clamp(m_superBristleMaxAngleDeg, 0.0f, 180.0f);
+                     float maxRad = glm::radians(maxDeg);
+                     float peakProb = std::clamp(m_superBristlePeakChance, 0.0f, 1.0f);
+                     for (int k = 0; k < segCount; ++k) {
+                         QRandomGenerator gen(seedFor(k) ^ 0x9e3779b9u);
+                         double r01 = gen.generateDouble();
+                         double sign = (gen.generateDouble() < 0.5) ? -1.0 : 1.0;
+                         double angMag = (r01 < peakProb) ? maxRad : maxRad * r01;
+                         float angle = (float)(sign * angMag * m_superBristleJitterStrength);
+                         strandCos[k] = std::cos(angle);
+                         strandSin[k] = std::sin(angle);
+                     }
+                 }
+
                  if (m_bristleJitterEnabled && m_bristleJitterStrength > 0.0f) {
                      jitterPts.resize(segCount);
                      for (int k = 0; k < segCount; ++k) {
@@ -1464,7 +1606,15 @@ void MainWindow::onPaintTrails()
                                  float jt = (float)(gen.generateDouble() * 2.0 - 1.0);
                                  QVector2D perp = perps[pi];
                                  QVector2D tan(-perp.y(), perp.x());
-                                 target = perp * (jn * amp) + tan * (jt * ampAlong);
+                                 if (superRot) {
+                                     float c = strandCos[k];
+                                     float s = strandSin[k];
+                                     QVector2D perpR = perp * c + tan * s;
+                                     QVector2D tanR = tan * c - perp * s;
+                                     target = perpR * (jn * amp) + tanR * (jt * ampAlong);
+                                 } else {
+                                     target = perp * (jn * amp) + tan * (jt * ampAlong);
+                                 }
                              }
                              accum = accum * (1.0f - smooth) + target * smooth;
                              jitterPts[k][pi] = accum;
@@ -1472,11 +1622,11 @@ void MainWindow::onPaintTrails()
                      }
                  }
 
-                 for (int pi = 1; pi < (int)seg.size(); ++pi) {
-                     // сэмпл активных полос на каждом шаге
-                     std::vector<int> activeBands(segCount, 1);
-                     if (fillProb < 0.999f) {
-                         for (int k = 0; k < segCount; ++k) {
+                for (int pi = 1; pi < (int)seg.size(); ++pi) {
+                    // сэмпл активных полос на каждом шаге
+                    std::vector<int> activeBands(segCount, 1);
+                    if (fillProb < 0.999f) {
+                        for (int k = 0; k < segCount; ++k) {
                              double r = QRandomGenerator::global()->generateDouble();
                              activeBands[k] = (r <= fillProb) ? 1 : 0;
                          }
@@ -1487,8 +1637,8 @@ void MainWindow::onPaintTrails()
                      }
 
                      for (int k = 0; k < segCount; ++k) {
-                         if (!activeBands[k]) continue;
-                         float bc = bandCenter(k);
+                        if (!activeBands[k]) continue;
+                        float bc = bandCenter(k);
                          float f0 = foreshPtr && (pi - 1) < (int)foreshPtr->size() ? (*foreshPtr)[pi - 1] : foreshAvg;
                          float f1 = foreshPtr && pi < (int)foreshPtr->size() ? (*foreshPtr)[pi] : foreshAvg;
                          if (m_surfaceBrushEnabled) {
@@ -1499,12 +1649,64 @@ void MainWindow::onPaintTrails()
                              f1 = 1.0f;
                          }
                          // Brush footprint: if surface mode is on, perps[] is mesh-aware orientation; otherwise it's screen-perp.
-                         QVector2D p0 = seg[pi - 1] + perps[pi - 1] * (bc * (m_surfaceBrushEnabled ? f0 : 1.0f));
-                         QVector2D p1 = seg[pi]     + perps[pi]     * (bc * (m_surfaceBrushEnabled ? f1 : 1.0f));
+                         QVector2D perp0 = perps[pi - 1];
+                         QVector2D perp1 = perps[pi];
+                         QVector2D p0 = seg[pi - 1] + perp0 * (bc * (m_surfaceBrushEnabled ? f0 : 1.0f));
+                         QVector2D p1 = seg[pi]     + perp1 * (bc * (m_surfaceBrushEnabled ? f1 : 1.0f));
                          if (m_bristleJitterEnabled) {
                              p0 += jitterPts[k][pi - 1];
                              p1 += jitterPts[k][pi];
                          }
+                         // Rotate the strand segment around its midpoint (super jitter).
+                         if (superRot) {
+                             float c = strandCos[k];
+                             float s = strandSin[k];
+                             QVector2D mid = 0.5f * (p0 + p1);
+                             auto rotMid = [&](QVector2D& pt) {
+                                 QVector2D d = pt - mid;
+                                 pt = mid + QVector2D(d.x() * c - d.y() * s, d.x() * s + d.y() * c);
+                             };
+                             rotMid(p0);
+                             rotMid(p1);
+                         }
+                         // Random offset of the whole segment perpendicular to its direction, scaled by brush width.
+                         if (m_segOffsetFactor > 1e-5f) {
+                             QRandomGenerator gen(seedFor(k) ^ (quint32)pi);
+                             QVector2D dir = p1 - p0;
+                             if (dir.lengthSquared() > 1e-8f) {
+                                 QVector2D ndir = dir.normalized();
+                                 QVector2D nperp(-ndir.y(), ndir.x());
+                                 float pathWidth = perSegmentWidth * ((m_surfaceBrushEnabled ? ((1.0f - m_surfaceForeshStrength) + m_surfaceForeshStrength * foreshAvg) : 1.0f)) * (m_bristleJitterEnabled ? widthMul[k] : 1.0f);
+                                 float off = (float)(gen.generateDouble() * 2.0 - 1.0) * m_segOffsetFactor * pathWidth;
+                                 QVector2D delta = nperp * off;
+                                 p0 += delta;
+                                 p1 += delta;
+                             }
+                         }
+                         // Length multiplier: extend/shorten relative to midpoint along the segment direction.
+                         if (m_segLengthMultiplier > 1e-5f) {
+                             QVector2D dir = p1 - p0;
+                             float len = dir.length();
+                             if (len > 1e-6f) {
+                                 QVector2D ndir = dir / len;
+                                 float newLen = len * m_segLengthMultiplier;
+                                 QVector2D mid = 0.5f * (p0 + p1);
+                                 p0 = mid - ndir * (newLen * 0.5f);
+                                 p1 = mid + ndir * (newLen * 0.5f);
+                             }
+                         }
+                        // Rotate the strand segment around its midpoint so the swing is clearly visible.
+                        if (superRot) {
+                            float c = strandCos[k];
+                            float s = strandSin[k];
+                            QVector2D mid = 0.5f * (p0 + p1);
+                            auto rotMid = [&](QVector2D& pt) {
+                                QVector2D d = pt - mid;
+                                pt = mid + QVector2D(d.x() * c - d.y() * s, d.x() * s + d.y() * c);
+                            };
+                            rotMid(p0);
+                            rotMid(p1);
+                        }
                          float px0 = p0.x() * scale + offsetX;
                          float py0 = p0.y() * scale + offsetY;
                          float px1 = p1.x() * scale + offsetX;
@@ -1516,47 +1718,53 @@ void MainWindow::onPaintTrails()
                              if (pi < brightnessSrc->size())     b1 = (*brightnessSrc)[pi];
                          }
 
-                         auto& st = bands[k];
-                         if (!st.open) {
-                             st.open = true;
-                             st.path = SqueegeeWindow::PathInfo{};
-                             QColor c = baseColor;
-                             if (m_bristleJitterEnabled) c.setAlphaF(std::clamp(alphaMul[k], 0.0f, 1.0f));
-                             st.path.color = c;
-                             float widthScale = 1.0f;
-                             if (m_surfaceBrushEnabled) {
-                                 widthScale = (1.0f - m_surfaceForeshStrength) + m_surfaceForeshStrength * foreshAvg;
-                             }
-                             st.path.size = perSegmentWidth * widthScale * (m_bristleJitterEnabled ? widthMul[k] : 1.0f);
-                             st.path.useQtPainter = true;
-                             st.path.layer = a.layer;
-                             st.path.points.append(QVector2D(px0, py0));
-                             st.path.brightnessPerPoint.append(b0);
-                         }
-                         st.path.points.append(QVector2D(px1, py1));
-                         st.path.brightnessPerPoint.append(b1);
-                     }
-
-                     // Close any bands that were not active at this step (so gaps appear).
-                     for (int k = 0; k < segCount; ++k) {
-                         if (activeBands[k]) continue;
-                         auto& st = bands[k];
-                         if (st.open) {
-                             if (st.path.points.size() >= 2) paths.append(st.path);
-                             st.open = false;
-                         }
-                     }
-                 }
-
-                 // Flush open bands.
-                 for (int k = 0; k < segCount; ++k) {
-                     auto& st = bands[k];
-                     if (st.open) {
-                         if (st.path.points.size() >= 2) paths.append(st.path);
-                         st.open = false;
-                     }
-                 }
-             };
+                        // Каждый отрезок — отдельный PathInfo (рваная/волосатая фактура).
+                        SqueegeeWindow::PathInfo path;
+                        QColor c = baseColor;
+                        if (m_bristleJitterEnabled) c.setAlphaF(std::clamp(alphaMul[k], 0.0f, 1.0f));
+                        path.color = c;
+                        float widthScale = 1.0f;
+                        if (m_surfaceBrushEnabled) {
+                            widthScale = (1.0f - m_surfaceForeshStrength) + m_surfaceForeshStrength * foreshAvg;
+                        }
+                        path.size = perSegmentWidth * widthScale * (m_bristleJitterEnabled ? widthMul[k] : 1.0f);
+                        path.useQtPainter = true;
+                        path.layer = a.layer;
+                        if (m_curvedHairEnabled) {
+                            // Slight curve: insert midpoint offset perpendicular to segment direction.
+                            QVector2D dir = QVector2D(px1 - px0, py1 - py0);
+                            float len2 = dir.lengthSquared();
+                            if (len2 > 1e-8f) {
+                                QVector2D ndir = dir / std::sqrt(len2);
+                                QVector2D nperp(-ndir.y(), ndir.x());
+                                QRandomGenerator gen(seedFor(k) ^ (quint32)(pi * 7919));
+                                float jitter = (float)(gen.generateDouble() * 2.0 - 1.0f); // -1..1
+                                float curvature = 0.35f; // scale curvature amplitude
+                                float width = path.size;
+                                QVector2D mid(px0 + dir.x() * 0.5f, py0 + dir.y() * 0.5f);
+                                QVector2D midCurved = mid + nperp * (jitter * curvature * width);
+                                path.points.append(QVector2D(px0, py0));
+                                path.points.append(midCurved);
+                                path.points.append(QVector2D(px1, py1));
+                                path.brightnessPerPoint.append(b0);
+                                path.brightnessPerPoint.append((b0 + b1) * 0.5f);
+                                path.brightnessPerPoint.append(b1);
+                            } else {
+                                path.points.append(QVector2D(px0, py0));
+                                path.points.append(QVector2D(px1, py1));
+                                path.brightnessPerPoint.append(b0);
+                                path.brightnessPerPoint.append(b1);
+                            }
+                        } else {
+                            path.points.append(QVector2D(px0, py0));
+                            path.points.append(QVector2D(px1, py1));
+                            path.brightnessPerPoint.append(b0);
+                            path.brightnessPerPoint.append(b1);
+                        }
+                        paths.append(path);
+                    }
+                }
+            };
 
              const auto* bsegPtr = (si < a.trailBrightness.size()) ? &a.trailBrightness[si] : nullptr;
              QColor useColor = m_randomTrailStepColors ? randomColor() : a.color;
@@ -1760,7 +1968,8 @@ void MainWindow::onAddPlaneBehindSphere()
             auto v10 = idx(x + 1, y);
             auto v11 = idx(x + 1, y + 1);
             auto v01 = idx(x, y + 1);
-            std::vector<SM::Vertex_index> quad = {v00, v10, v11, v01};
+            // Winding so that normal points toward +Z (scene center).
+            std::vector<SM::Vertex_index> quad = {v00, v01, v11, v10};
             CGAL::Euler::add_face(quad, plane); // keep as quad; triangulated later for rendering
         }
     }

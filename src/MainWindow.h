@@ -125,6 +125,19 @@ private:
     QSlider *m_bristleJitterSlider;
     QLabel *m_bristleJitterLabel;
     float m_bristleJitterStrength = 0.35f;
+    QCheckBox *m_superBristleJitterBox;
+    bool m_superBristleJitterEnabled = false;
+    QSlider *m_superBristleJitterSlider;
+    QLabel *m_superBristleJitterLabel;
+    float m_superBristleJitterStrength = 0.0f;
+    QCheckBox *m_superBristleAffectsOffsetBox;
+    bool m_superBristleAffectsOffset = true;
+    QSlider *m_superBristleMaxAngleSlider;
+    QLabel *m_superBristleMaxAngleLabel;
+    float m_superBristleMaxAngleDeg = 180.0f;
+    QSlider *m_superBristlePeakChanceSlider;
+    QLabel *m_superBristlePeakChanceLabel;
+    float m_superBristlePeakChance = 0.35f;
     QCheckBox *m_squeegeeLiteBox;
     bool m_squeegeeLiteEnabled = false;
     QCheckBox *m_surfaceBrushBox;
@@ -132,6 +145,14 @@ private:
     QSlider *m_surfaceForeshSlider;
     QLabel *m_surfaceForeshLabel;
     float m_surfaceForeshStrength = 1.0f;
+    QSlider *m_segLengthSlider;
+    QLabel *m_segLengthLabel;
+    float m_segLengthMultiplier = 1.0f; // 0..7
+    QSlider *m_segOffsetSlider;
+    QLabel *m_segOffsetLabel;
+    float m_segOffsetFactor = 0.0f; // 0..3
+    QCheckBox *m_curvedHairBox;
+    bool m_curvedHairEnabled = false;
 
     void saveSettings();
     void loadSettings();

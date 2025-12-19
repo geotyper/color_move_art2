@@ -449,8 +449,9 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
     nearPoint /= nearPoint.w;
     farPoint /= farPoint.w;
     
-    glm::vec3 rayOrigWorld = cameraPosModel;
-    glm::vec3 rayDirWorld = glm::normalize(glm::vec3(farPoint) - cameraPosModel);
+    // Use the unprojected near point as origin to guarantee the ray starts in front of geometry (prevents starting inside).
+    glm::vec3 rayOrigWorld = glm::vec3(nearPoint);
+    glm::vec3 rayDirWorld = glm::normalize(glm::vec3(farPoint) - rayOrigWorld);
 
     glm::vec3 rayEndWorld = rayOrigWorld + rayDirWorld * 100.0f;
     BoostSegment querySeg(
@@ -647,10 +648,9 @@ void MeshViewerWidget::updateAgents() {
             glm::vec4 farPoint  = invMVP * glm::vec4(ndcX, ndcY,  1.0f, 1.0f);
             nearPoint /= nearPoint.w;
             farPoint  /= farPoint.w;
-            // Use camera origin in mesh/model space so we always pick the true front-most hit
-            // from the current view, even if the near plane clips into geometry.
+            // Cast from the camera position toward the unprojected far point; pick closest hit.
             glm::vec3 rayOrigWorld = cameraPosModel;
-            glm::vec3 rayDirWorld  = glm::normalize(glm::vec3(farPoint) - cameraPosModel);
+            glm::vec3 rayDirWorld  = glm::normalize(glm::vec3(farPoint) - rayOrigWorld);
             glm::vec3 rayEndWorld = rayOrigWorld + rayDirWorld * 100.0f;
             BoostSegment querySeg(
                 BoostPoint(rayOrigWorld.x, rayOrigWorld.y, rayOrigWorld.z),
@@ -875,10 +875,7 @@ void MeshViewerWidget::updateAgents() {
 
         // Visibility-driven behaviors: break trail and respawn if off-screen too long.
         glm::vec3 headPos = getAgentWorldPos(agent);
-        glm::vec3 nModelHead = computeNormalModel(agent, headPos);
-        glm::vec3 vDirHead = glm::normalize(cameraPosModel - headPos);
-        bool headFrontFacing = glm::dot(nModelHead, vDirHead) > 0.0f;
-        bool headVisible = headFrontFacing && isVisible(agent, headPos);
+        bool headVisible = isVisible(agent, headPos); // visibility based on occlusion/frustum only
         if (!headVisible) {
             agent.invisibleTicks++;
             // Break trail (mark stop) so запись возобновится только после появления
@@ -890,10 +887,7 @@ void MeshViewerWidget::updateAgents() {
             if (agent.invisibleTicks > 50) {
                 respawnAgent(agent);
                 headPos = getAgentWorldPos(agent);
-                nModelHead = computeNormalModel(agent, headPos);
-                vDirHead = glm::normalize(cameraPosModel - headPos);
-                headFrontFacing = glm::dot(nModelHead, vDirHead) > 0.0f;
-                headVisible = headFrontFacing && isVisible(agent, headPos);
+                headVisible = isVisible(agent, headPos);
             }
         } else {
             agent.invisibleTicks = 0;
