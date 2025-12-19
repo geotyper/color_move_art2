@@ -500,6 +500,11 @@ bool MeshViewerWidget::checkRayIntersection(float x, float y, float viewWidth, f
                 } else {
                     bestN = glm::normalize(glm::cross(v1 - v0, v2 - v0));
                 }
+                
+                // Force normal to point towards the incoming ray (camera)
+                if (glm::dot(rayDirWorld, bestN) > 0.0f) {
+                    bestN = -bestN;
+                }
             }
         }
     }
@@ -689,6 +694,10 @@ void MeshViewerWidget::updateAgents() {
                             n = glm::normalize(ns);
                         }
                         bestN = n;
+                        // Force normal to point towards the incoming ray (camera)
+                        if (glm::dot(rayDirWorld, bestN) > 0.0f) {
+                            bestN = -bestN;
+                        }
                     }
                 }
             }
@@ -776,6 +785,13 @@ void MeshViewerWidget::updateAgents() {
                      currentNormal = glm::normalize(faceNormal);
                  }
                  currentNormal = glm::normalize(glm::mat3(model) * currentNormal);
+                 
+                 // Force trail normal to face camera
+                 glm::vec3 worldPos = glm::vec3(model * glm::vec4(currentPos, 1.0f));
+                 glm::vec3 camDir = glm::vec3(0.0f, 0.0f, m_cameraDistance) - worldPos;
+                 if (glm::dot(currentNormal, camDir) < 0.0f) {
+                     currentNormal = -currentNormal;
+                 }
                  
                  bool shouldPush = false;
                  if (agent.trail.empty()) {
@@ -995,6 +1011,13 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
         }
         // Rotate normal with the same model transform as the 3D view.
         glm::vec3 nWorld = glm::normalize(glm::mat3(model) * glm::normalize(normal));
+        
+        // Force normal to point towards camera
+        glm::vec3 viewDir = glm::normalize(glm::vec3(0.0f, 0.0f, m_cameraDistance) - getAgentWorldPos(agentRef));
+        if (glm::dot(nWorld, viewDir) < 0.0f) {
+            nWorld = -nWorld;
+        }
+
         if (!std::isfinite(nWorld.x) || !std::isfinite(nWorld.y) || !std::isfinite(nWorld.z)) {
             nWorld = glm::vec3(0.0f, 1.0f, 0.0f);
         }
@@ -1017,6 +1040,13 @@ std::vector<MeshViewerWidget::AgentRenderInfo> MeshViewerWidget::getProjectedAge
             }
         }
         normal = glm::normalize(normal);
+        
+        // Force normal to point towards camera (in model space)
+        glm::vec3 viewDir = glm::normalize(cameraPosModel - fallbackPos);
+        if (glm::dot(normal, viewDir) < 0.0f) {
+            normal = -normal;
+        }
+
         if (!std::isfinite(normal.x) || !std::isfinite(normal.y) || !std::isfinite(normal.z) || glm::dot(normal, normal) < 1e-10f) {
             normal = glm::vec3(0.0f, 1.0f, 0.0f);
         }
